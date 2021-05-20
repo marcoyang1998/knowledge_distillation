@@ -1,14 +1,14 @@
 optim: adadelta
 init: xavier_uniform
-max_epoch: 30
+max_epoch: 250
 batch_type: folded
-batch_size: 30
+batch_size: 32
 optim_conf:
-    lr: 1.0
+    lr: 0.2
     rho: 0.95
     eps: 1.0e-08
-    weight_decay: 0
-patience: 4
+    weight_decay: 0.1
+patience: 8
 val_scheduler_criterion:
 - valid
 - loss
@@ -37,9 +37,9 @@ decoder_conf:
     rnn_type: lstm
     num_layers: 1
     hidden_size: 320
-    dropout: 0.0
+    dropout: 0.4
     att_conf:
         atype: location
         adim: 320
 model_conf:
-    ctc_weight: 1.0
+    ctc_weight: 0.1

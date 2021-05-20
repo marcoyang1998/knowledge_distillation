@@ -54,8 +54,8 @@ class FairSeqWav2Vec2Encoder(AbsEncoder):
                 )
                 raise e
 
-        self.w2v_model_path = download_w2v(w2v_url, w2v_dir_path)
-
+        #self.w2v_model_path = download_w2v(w2v_url, w2v_dir_path)
+        self.w2v_model_path = get_small_w2v()
         self._output_size = output_size
 
         models, _, _ = fairseq.checkpoint_utils.load_model_ensemble_and_task(
@@ -163,3 +163,16 @@ def download_w2v(model_url, dir_path):
             logging.info(f"Wav2Vec model {model_path} already exists.")
 
     return model_path
+
+def get_small_w2v():
+    model_path = '/home/marcoyang/asr_project/espnet2/egs2/an4/asr1/downloads/wav2vec_pretrained_models/wav2vec_small.pt'
+    return model_path
+
+
+if __name__ == '__main__':
+    w2v_url = 'https://dl.fbaipublicfiles.com/fairseq/wav2vec/xlsr_53_56k.pt'
+    w2v_dir_path = './downloads/wav2vec_pretrained_models'
+    model_path = download_w2v(w2v_url, w2v_dir_path)
+    w2v2_enc = FairSeqWav2Vec2Encoder(input_size=2048, w2v_url=w2v_url, w2v_dir_path=w2v_dir_path)
+    x = torch.ones(1,208, 2048)
+    w2v2_enc.forward(x,[208])

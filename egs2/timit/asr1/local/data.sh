@@ -27,7 +27,7 @@ fi
 . ./db.sh
 
 echo $TIMIT
-
+TIMIT="/home/marcoyang/Downloads/timit/data"
 # general configuration
 if [ -z "${TIMIT}" ]; then
     log "Fill the value of 'TIMIT' of db.sh"

@@ -1,5 +1,7 @@
 import logging
 import six
+import contextlib
+import copy
 
 import numpy as np
 import torch
@@ -236,6 +238,78 @@ class VGG2L(torch.nn.Module):
         )
         return xs_pad, ilens, None  # no state in this layer
 
+class Wav2VecEncoder(torch.nn.Module):
+    def __init__(self,
+                 model_dir,
+                 output_size=256,
+                 normalize_before=False,
+                 freeze_finetune_updates=0
+                 ):
+        self.w2v_model_path = model_dir
+        super().__init__()
+        import fairseq
+        #from fairseq.models.wav2vec.wav2vec2 import Wav2Vec2Model
+        models, _, _ = fairseq.checkpoint_utils.load_model_ensemble_and_task(
+            [self.w2v_model_path],
+            arg_overrides={"data": model_dir},
+        )
+        model = models[0]
+        self.encoders = model
+        self.pretrained_params = copy.deepcopy(model.state_dict())
+        self.normalize_before = normalize_before
+        self._output_size = output_size
+        if model.cfg.encoder_embed_dim != output_size:
+            self.output_layer = torch.nn.Sequential(
+                torch.nn.Linear(model.cfg.encoder_embed_dim, output_size),
+            )
+        else:
+            self.output_layer = None
+        self.freeze_finetune_updates = freeze_finetune_updates
+        self.register_buffer("num_updates", torch.LongTensor([0]))
+
+    def forward(self, xs_pad, ilens, prev_states=None):
+        """Forward FairSeqWav2Vec2 Encoder.
+
+                Args:
+                    xs_pad: input tensor (B, L, D)
+                    ilens: input length (B)
+                    prev_states: Not to be used now.
+                Returns:
+                    position embedded tensor and mask
+                """
+        masks = make_pad_mask(ilens).to(xs_pad.device)
+
+        ft = self.freeze_finetune_updates <= self.num_updates
+        if self.num_updates <= self.freeze_finetune_updates:
+            self.num_updates += 1
+        elif ft and self.num_updates == self.freeze_finetune_updates + 1:
+            self.num_updates += 1
+            logging.info("Start fine-tuning wav2vec parameters!")
+
+        with torch.no_grad() if not ft else contextlib.nullcontext():
+            enc_outputs = self.encoders(
+                xs_pad,
+                masks,
+                features_only=True,
+            )
+
+        xs_pad = enc_outputs["x"]  # (B,T,C),
+        masks = enc_outputs["padding_mask"]  # (B, T)
+
+        olens = (~masks).sum(dim=1)
+
+        if self.output_layer is not None:
+            xs_pad = self.output_layer(xs_pad)
+
+        if self.normalize_before:
+            xs_pad = self.after_norm(xs_pad)
+
+        return xs_pad, olens, None
+
+    def reload_pretrained_parameters(self):
+        self.encoders.load_state_dict(self.pretrained_params)
+        logging.info("Pretrained Wav2Vec model parameters reloaded!")
+
 
 class Encoder(torch.nn.Module):
     """Encoder module
@@ -340,6 +414,9 @@ def encoder_for(args, idim, subsample):
     :rtype torch.nn.Module
     :return: The encoder module
     """
+    if args.etype == 'wav2vec':
+        model_path = '/home/marcoyang/Downloads/wav2vec_pretrained_models/wav2vec_small.pt'
+        return Wav2VecEncoder(model_path, args.eunits)
     num_encs = getattr(args, "num_encs", 1)  # use getattr to keep compatibility
     if num_encs == 1:
         # compatible with single encoder asr mode

@@ -1,5 +1,5 @@
 batch_type: folded
-batch_size: 64
+batch_size: 4
 accum_grad: 2
 max_epoch: 200
 patience: none

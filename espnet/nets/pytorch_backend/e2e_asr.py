@@ -359,7 +359,10 @@ class E2E(ASRInterface, torch.nn.Module):
         ilens = [x.shape[0]]
 
         # subsample frame
-        x = x[:: self.subsample[0], :]
+        if len(x.shape) > 1:
+            x = x[:: self.subsample[0], :]
+        else:
+            x = x[:: self.subsample[0]]
         p = next(self.parameters())
         h = torch.as_tensor(x, device=p.device, dtype=p.dtype)
         # make a utt list (1) to use the same interface for encoder
@@ -413,9 +416,14 @@ class E2E(ASRInterface, torch.nn.Module):
         ilens = np.fromiter((xx.shape[0] for xx in xs), dtype=np.int64)
 
         # subsample frame
-        xs = [xx[:: self.subsample[0], :] for xx in xs]
-        xs = [to_device(self, to_torch_tensor(xx).float()) for xx in xs]
-        xs_pad = pad_list(xs, 0.0)
+        if len(xs[0].shape) > 1:
+            xs = [xx[:: self.subsample[0], :] for xx in xs]
+            xs = [to_device(self, to_torch_tensor(xx).float()) for xx in xs]
+            xs_pad = pad_list(xs, 0.0)
+        else:
+            xs = [xx[:: self.subsample[0]] for xx in xs]
+            xs = [to_device(self, to_torch_tensor(xx).float()) for xx in xs]
+            xs_pad = pad_list(xs, 0.0)
 
         # 0. Frontend
         if self.frontend is not None:

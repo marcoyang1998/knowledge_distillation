@@ -425,6 +425,7 @@ def get_parser(parser=None, required=True):
             "vggbgrup",
             "vgggru",
             "vggbgru",
+            "w2v2"
         ],
         help="Type of encoder network architecture "
         "of the mask estimator for WPE. "
@@ -641,4 +642,4 @@ def main(cmd_args):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+     main(sys.argv[1:])

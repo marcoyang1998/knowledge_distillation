@@ -2,7 +2,7 @@ optim: adadelta
 init: xavier_uniform
 max_epoch: 30
 batch_type: folded
-batch_size: 30
+batch_size: 1
 optim_conf:
     lr: 1.0
     rho: 0.95
@@ -23,15 +23,22 @@ scheduler_conf:
     mode: min
     factor: 0.5
     patience: 1
-encoder: rnn
+input_size: 2048
+encoder: wav2vec2
+# w2v_url: https://dl.fbaipublicfiles.com/fairseq/wav2vec/xlsr_53_56k.pt
+# w2v_url: https://dl.fbaipublicfiles.com/fairseq/wav2vec/wav2vec2_vox_960h_new.pt
+# w2v_url: https://dl.fbaipublicfiles.com/fairseq/wav2vec/wav2vec_vox_new.pt
+
 encoder_conf:
-    rnn_type: lstm
-    bidirectional: true
-    use_projection: true
-    num_layers: 4
-    hidden_size: 320
-    output_size: 320
-    dropout: 0.0
+    output_size: 256
+    normalize_before: true
+#    freeze_w2v: false
+    freeze_finetune_updates: 1000
+    w2v_url: https://dl.fbaipublicfiles.com/fairseq/wav2vec/wav2vec2_vox_960h_new.pt
+    w2v_dir_path: ./downloads/wav2vec_pretrained_models
+#    finetune_last_n_layers: 0
+
+
 decoder: rnn
 decoder_conf:
     rnn_type: lstm

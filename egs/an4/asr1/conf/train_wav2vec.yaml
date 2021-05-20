@@ -1,6 +1,6 @@
 # minibatch related
-batch-size: 30
-maxlen-in: 800  # if input length  > maxlen_in, batchsize is automatically reduced
+batch-size: 2
+maxlen-in: 100000000  # if input length  > maxlen_in, batchsize is automatically reduced
 maxlen-out: 150 # if output length > maxlen_out, batchsize is automatically reduced
 # optimization related
 sortagrad: 0 # Feed samples from shortest to longest ; -1: enabled for all epochs, 0: disabled, other: enabled for 'other' epochs
@@ -9,10 +9,11 @@ epochs: 30
 patience: 3
 
 # scheduled sampling option
-sampling-probability: 0.0
+sampling-probability: 0.1
 
 # encoder related
-etype: blstmp     # encoder architecture type
+etype: wav2vec     # encoder architecture type
+model_path: /home/marcoyang/asr_project/espnet2/egs2/an4/asr1/downloads/wav2vec_pretrained_models
 elayers: 4
 eunits: 320
 eprojs: 320

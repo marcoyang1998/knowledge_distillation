@@ -7,6 +7,7 @@ import h5py
 import kaldiio
 import numpy as np
 import soundfile
+import librosa
 
 from espnet.transform.transformation import Transformation
 
@@ -543,6 +544,9 @@ class LoadInputsAndTargets(object):
             if filepath not in self._loaders:
                 self._loaders[filepath] = kaldiio.load_mat(filepath)
             return self._loaders[filepath]
+        elif filetype == "sph":
+            # custom loader to load raw audio input
+            return librosa.load(filepath)[0]
         elif filetype == "scp":
             # e.g.
             #    {"input": [{"feat": "some/path.scp:F01_050C0101_PED_REAL",

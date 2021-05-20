@@ -8,7 +8,7 @@ def add_arguments_rnn_encoder_common(group):
     """Define common arguments for RNN encoder."""
     group.add_argument(
         "--etype",
-        default="blstmp",
+        default="wav2vec",
         type=str,
         choices=[
             "lstm",
@@ -27,6 +27,7 @@ def add_arguments_rnn_encoder_common(group):
             "vggbgrup",
             "vgggru",
             "vggbgru",
+            "wav2vec"
         ],
         help="Type of encoder network architecture",
     )
@@ -39,7 +40,7 @@ def add_arguments_rnn_encoder_common(group):
     group.add_argument(
         "--eunits",
         "-u",
-        default=300,
+        default=320,
         type=int,
         help="Number of encoder hidden units",
     )
@@ -53,6 +54,9 @@ def add_arguments_rnn_encoder_common(group):
         help="Subsample input frames x_y_z means "
         "subsample every x frame at 1st layer, "
         "every y frame at 2nd layer etc.",
+    )
+    group.add_argument(
+        "--model_path", default="", type=str, help="Model path to the w2v2 model"
     )
     return group
 

@@ -1,0 +1,3384 @@
+{
+    "utts": {
+        "fcaw-an406-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fcaw/an406-fcaw-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        398,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        25,
+                        30
+                    ],
+                    "text": "RUBOUT G M E F THREE NINE",
+                    "token": "R U B O U T <space> G <space> M <space> E <space> F <space> T H R E E <space> N I N E",
+                    "tokenid": "20 23 4 17 23 22 2 9 2 15 2 7 2 8 2 22 10 20 7 7 2 16 11 16 7"
+                }
+            ],
+            "utt2spk": "fcaw"
+        },
+        "fcaw-an407-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fcaw/an407-fcaw-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        408,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        19,
+                        30
+                    ],
+                    "text": "ERASE C Q Q F SEVEN",
+                    "token": "E R A S E <space> C <space> Q <space> Q <space> F <space> S E V E N",
+                    "tokenid": "7 20 3 21 7 2 5 2 19 2 19 2 8 2 21 7 24 7 16"
+                }
+            ],
+            "utt2spk": "fcaw"
+        },
+        "fcaw-an408-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fcaw/an408-fcaw-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        328,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        18,
+                        30
+                    ],
+                    "text": "B A O Z FIVE THREE",
+                    "token": "B <space> A <space> O <space> Z <space> F I V E <space> T H R E E",
+                    "tokenid": "4 2 3 2 17 2 28 2 8 11 24 7 2 22 10 20 7 7"
+                }
+            ],
+            "utt2spk": "fcaw"
+        },
+        "fcaw-an409-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fcaw/an409-fcaw-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        78,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        2,
+                        30
+                    ],
+                    "text": "GO",
+                    "token": "G O",
+                    "tokenid": "9 17"
+                }
+            ],
+            "utt2spk": "fcaw"
+        },
+        "fcaw-an410-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fcaw/an410-fcaw-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        358,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        18,
+                        30
+                    ],
+                    "text": "RUBOUT N I M N ONE",
+                    "token": "R U B O U T <space> N <space> I <space> M <space> N <space> O N E",
+                    "tokenid": "20 23 4 17 23 22 2 16 2 11 2 15 2 16 2 17 16 7"
+                }
+            ],
+            "utt2spk": "fcaw"
+        },
+        "fcaw-cen1-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fcaw/cen1-fcaw-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        228,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        7,
+                        30
+                    ],
+                    "text": "W O O D",
+                    "token": "W <space> O <space> O <space> D",
+                    "tokenid": "25 2 17 2 17 2 6"
+                }
+            ],
+            "utt2spk": "fcaw"
+        },
+        "fcaw-cen2-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fcaw/cen2-fcaw-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        288,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        9,
+                        30
+                    ],
+                    "text": "C I N D Y",
+                    "token": "C <space> I <space> N <space> D <space> Y",
+                    "tokenid": "5 2 11 2 16 2 6 2 27"
+                }
+            ],
+            "utt2spk": "fcaw"
+        },
+        "fcaw-cen3-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fcaw/cen3-fcaw-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        188,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        15,
+                        30
+                    ],
+                    "text": "ONE THREE SEVEN",
+                    "token": "O N E <space> T H R E E <space> S E V E N",
+                    "tokenid": "17 16 7 2 22 10 20 7 7 2 21 7 24 7 16"
+                }
+            ],
+            "utt2spk": "fcaw"
+        },
+        "fcaw-cen4-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fcaw/cen4-fcaw-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        298,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        11,
+                        30
+                    ],
+                    "text": "M E L V I N",
+                    "token": "M <space> E <space> L <space> V <space> I <space> N",
+                    "tokenid": "15 2 7 2 14 2 24 2 11 2 16"
+                }
+            ],
+            "utt2spk": "fcaw"
+        },
+        "fcaw-cen5-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fcaw/cen5-fcaw-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        618,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        25,
+                        30
+                    ],
+                    "text": "P L E A S A N T H I L L S",
+                    "token": "P <space> L <space> E <space> A <space> S <space> A <space> N <space> T <space> H <space> I <space> L <space> L <space> S",
+                    "tokenid": "18 2 14 2 7 2 3 2 21 2 3 2 16 2 22 2 10 2 11 2 14 2 14 2 21"
+                }
+            ],
+            "utt2spk": "fcaw"
+        },
+        "fcaw-cen6-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fcaw/cen6-fcaw-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        288,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        22,
+                        30
+                    ],
+                    "text": "ONE FIVE TWO THREE SIX",
+                    "token": "O N E <space> F I V E <space> T W O <space> T H R E E <space> S I X",
+                    "tokenid": "17 16 7 2 8 11 24 7 2 22 25 17 2 22 10 20 7 7 2 21 11 26"
+                }
+            ],
+            "utt2spk": "fcaw"
+        },
+        "fcaw-cen7-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fcaw/cen7-fcaw-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        368,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        35,
+                        30
+                    ],
+                    "text": "SIX FIVE FIVE EIGHT SEVEN FOUR ZERO",
+                    "token": "S I X <space> F I V E <space> F I V E <space> E I G H T <space> S E V E N <space> F O U R <space> Z E R O",
+                    "tokenid": "21 11 26 2 8 11 24 7 2 8 11 24 7 2 7 11 9 10 22 2 21 7 24 7 16 2 8 17 23 20 2 28 7 20 17"
+                }
+            ],
+            "utt2spk": "fcaw"
+        },
+        "fcaw-cen8-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fcaw/cen8-fcaw-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        288,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        31,
+                        30
+                    ],
+                    "text": "ELEVEN TWENTY SEVEN FIFTY SEVEN",
+                    "token": "E L E V E N <space> T W E N T Y <space> S E V E N <space> F I F T Y <space> S E V E N",
+                    "tokenid": "7 14 7 24 7 16 2 22 25 7 16 22 27 2 21 7 24 7 16 2 8 11 8 22 27 2 21 7 24 7 16"
+                }
+            ],
+            "utt2spk": "fcaw"
+        },
+        "fjlp-an416-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fjlp/an416-fjlp-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        78,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        2,
+                        30
+                    ],
+                    "text": "NO",
+                    "token": "N O",
+                    "tokenid": "16 17"
+                }
+            ],
+            "utt2spk": "fjlp"
+        },
+        "fjlp-an417-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fjlp/an417-fjlp-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        248,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        23,
+                        30
+                    ],
+                    "text": "ENTER NINE ONE SIX NINE",
+                    "token": "E N T E R <space> N I N E <space> O N E <space> S I X <space> N I N E",
+                    "tokenid": "7 16 22 7 20 2 16 11 16 7 2 17 16 7 2 21 11 26 2 16 11 16 7"
+                }
+            ],
+            "utt2spk": "fjlp"
+        },
+        "fjlp-an418-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fjlp/an418-fjlp-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        218,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        24,
+                        30
+                    ],
+                    "text": "ENTER EIGHT NINETY SEVEN",
+                    "token": "E N T E R <space> E I G H T <space> N I N E T Y <space> S E V E N",
+                    "tokenid": "7 16 22 7 20 2 7 11 9 10 22 2 16 11 16 7 22 27 2 21 7 24 7 16"
+                }
+            ],
+            "utt2spk": "fjlp"
+        },
+        "fjlp-an419-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fjlp/an419-fjlp-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        238,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        12,
+                        30
+                    ],
+                    "text": "J P E G FOUR",
+                    "token": "J <space> P <space> E <space> G <space> F O U R",
+                    "tokenid": "12 2 18 2 7 2 9 2 8 17 23 20"
+                }
+            ],
+            "utt2spk": "fjlp"
+        },
+        "fjlp-an420-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fjlp/an420-fjlp-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        428,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        31,
+                        30
+                    ],
+                    "text": "ERASE X A G N A SIX THIRTY FIVE",
+                    "token": "E R A S E <space> X <space> A <space> G <space> N <space> A <space> S I X <space> T H I R T Y <space> F I V E",
+                    "tokenid": "7 20 3 21 7 2 26 2 3 2 9 2 16 2 3 2 21 11 26 2 22 10 11 20 22 27 2 8 11 24 7"
+                }
+            ],
+            "utt2spk": "fjlp"
+        },
+        "fjlp-cen1-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fjlp/cen1-fjlp-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        278,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        17,
+                        30
+                    ],
+                    "text": "P A T T E R S O N",
+                    "token": "P <space> A <space> T <space> T <space> E <space> R <space> S <space> O <space> N",
+                    "tokenid": "18 2 3 2 22 2 22 2 7 2 20 2 21 2 17 2 16"
+                }
+            ],
+            "utt2spk": "fjlp"
+        },
+        "fjlp-cen2-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fjlp/cen2-fjlp-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        238,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        9,
+                        30
+                    ],
+                    "text": "J A N E T",
+                    "token": "J <space> A <space> N <space> E <space> T",
+                    "tokenid": "12 2 3 2 16 2 7 2 22"
+                }
+            ],
+            "utt2spk": "fjlp"
+        },
+        "fjlp-cen3-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fjlp/cen3-fjlp-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        128,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        9,
+                        30
+                    ],
+                    "text": "ONE FIFTY",
+                    "token": "O N E <space> F I F T Y",
+                    "tokenid": "17 16 7 2 8 11 8 22 27"
+                }
+            ],
+            "utt2spk": "fjlp"
+        },
+        "fjlp-cen4-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fjlp/cen4-fjlp-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        228,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        9,
+                        30
+                    ],
+                    "text": "S P E E R",
+                    "token": "S <space> P <space> E <space> E <space> R",
+                    "tokenid": "21 2 18 2 7 2 7 2 20"
+                }
+            ],
+            "utt2spk": "fjlp"
+        },
+        "fjlp-cen5-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fjlp/cen5-fjlp-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        498,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        21,
+                        30
+                    ],
+                    "text": "M C K E E S R O C K S",
+                    "token": "M <space> C <space> K <space> E <space> E <space> S <space> R <space> O <space> C <space> K <space> S",
+                    "tokenid": "15 2 5 2 13 2 7 2 7 2 21 2 20 2 17 2 5 2 13 2 21"
+                }
+            ],
+            "utt2spk": "fjlp"
+        },
+        "fjlp-cen6-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fjlp/cen6-fjlp-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        228,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        22,
+                        30
+                    ],
+                    "text": "ONE FIVE ONE THREE SIX",
+                    "token": "O N E <space> F I V E <space> O N E <space> T H R E E <space> S I X",
+                    "tokenid": "17 16 7 2 8 11 24 7 2 17 16 7 2 22 10 20 7 7 2 21 11 26"
+                }
+            ],
+            "utt2spk": "fjlp"
+        },
+        "fjlp-cen7-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fjlp/cen7-fjlp-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        328,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        34,
+                        30
+                    ],
+                    "text": "THREE THREE ONE OH ONE EIGHT EIGHT",
+                    "token": "T H R E E <space> T H R E E <space> O N E <space> O H <space> O N E <space> E I G H T <space> E I G H T",
+                    "tokenid": "22 10 20 7 7 2 22 10 20 7 7 2 17 16 7 2 17 10 2 17 16 7 2 7 11 9 10 22 2 7 11 9 10 22"
+                }
+            ],
+            "utt2spk": "fjlp"
+        },
+        "fjlp-cen8-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fjlp/cen8-fjlp-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        248,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        29,
+                        30
+                    ],
+                    "text": "TWELVE TWENTY NINE FIFTY NINE",
+                    "token": "T W E L V E <space> T W E N T Y <space> N I N E <space> F I F T Y <space> N I N E",
+                    "tokenid": "22 25 7 14 24 7 2 22 25 7 16 22 27 2 16 11 16 7 2 8 11 8 22 27 2 16 11 16 7"
+                }
+            ],
+            "utt2spk": "fjlp"
+        },
+        "fvap-an426-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fvap/an426-fvap-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        188,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        20,
+                        30
+                    ],
+                    "text": "ENTER NINE TWO EIGHT",
+                    "token": "E N T E R <space> N I N E <space> T W O <space> E I G H T",
+                    "tokenid": "7 16 22 7 20 2 16 11 16 7 2 22 25 17 2 7 11 9 10 22"
+                }
+            ],
+            "utt2spk": "fvap"
+        },
+        "fvap-an427-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fvap/an427-fvap-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        318,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        23,
+                        30
+                    ],
+                    "text": "ERASE E D Z E FIFTY SIX",
+                    "token": "E R A S E <space> E <space> D <space> Z <space> E <space> F I F T Y <space> S I X",
+                    "tokenid": "7 20 3 21 7 2 7 2 6 2 28 2 7 2 8 11 8 22 27 2 21 11 26"
+                }
+            ],
+            "utt2spk": "fvap"
+        },
+        "fvap-an428-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fvap/an428-fvap-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        178,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        20,
+                        30
+                    ],
+                    "text": "ENTER EIGHT THIRTEEN",
+                    "token": "E N T E R <space> E I G H T <space> T H I R T E E N",
+                    "tokenid": "7 16 22 7 20 2 7 11 9 10 22 2 22 10 11 20 22 7 7 16"
+                }
+            ],
+            "utt2spk": "fvap"
+        },
+        "fvap-an429-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fvap/an429-fvap-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        368,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        21,
+                        30
+                    ],
+                    "text": "RUBOUT E Y F C X FOUR",
+                    "token": "R U B O U T <space> E <space> Y <space> F <space> C <space> X <space> F O U R",
+                    "tokenid": "20 23 4 17 23 22 2 7 2 27 2 8 2 5 2 26 2 8 17 23 20"
+                }
+            ],
+            "utt2spk": "fvap"
+        },
+        "fvap-an430-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fvap/an430-fvap-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        308,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        33,
+                        30
+                    ],
+                    "text": "R H N G A FIFTY FOUR EIGHTY THREE",
+                    "token": "R <space> H <space> N <space> G <space> A <space> F I F T Y <space> F O U R <space> E I G H T Y <space> T H R E E",
+                    "tokenid": "20 2 10 2 16 2 9 2 3 2 8 11 8 22 27 2 8 17 23 20 2 7 11 9 10 22 27 2 22 10 20 7 7"
+                }
+            ],
+            "utt2spk": "fvap"
+        },
+        "fvap-cen1-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fvap/cen1-fvap-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        208,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        11,
+                        30
+                    ],
+                    "text": "P O W E L L",
+                    "token": "P <space> O <space> W <space> E <space> L <space> L",
+                    "tokenid": "18 2 17 2 25 2 7 2 14 2 14"
+                }
+            ],
+            "utt2spk": "fvap"
+        },
+        "fvap-cen2-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fvap/cen2-fvap-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        228,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        13,
+                        30
+                    ],
+                    "text": "V A N E S S A",
+                    "token": "V <space> A <space> N <space> E <space> S <space> S <space> A",
+                    "tokenid": "24 2 3 2 16 2 7 2 21 2 21 2 3"
+                }
+            ],
+            "utt2spk": "fvap"
+        },
+        "fvap-cen3-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fvap/cen3-fvap-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        148,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        18,
+                        30
+                    ],
+                    "text": "THREE ZERO TWO ONE",
+                    "token": "T H R E E <space> Z E R O <space> T W O <space> O N E",
+                    "tokenid": "22 10 20 7 7 2 28 7 20 17 2 22 25 17 2 17 16 7"
+                }
+            ],
+            "utt2spk": "fvap"
+        },
+        "fvap-cen4-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fvap/cen4-fvap-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        288,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        13,
+                        30
+                    ],
+                    "text": "W I L L E T T",
+                    "token": "W <space> I <space> L <space> L <space> E <space> T <space> T",
+                    "tokenid": "25 2 11 2 14 2 14 2 7 2 22 2 22"
+                }
+            ],
+            "utt2spk": "fvap"
+        },
+        "fvap-cen5-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fvap/cen5-fvap-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        308,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        17,
+                        30
+                    ],
+                    "text": "B R E N T W O O D",
+                    "token": "B <space> R <space> E <space> N <space> T <space> W <space> O <space> O <space> D",
+                    "tokenid": "4 2 20 2 7 2 16 2 22 2 25 2 17 2 17 2 6"
+                }
+            ],
+            "utt2spk": "fvap"
+        },
+        "fvap-cen6-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fvap/cen6-fvap-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        158,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        22,
+                        30
+                    ],
+                    "text": "ONE FIVE TWO TWO SEVEN",
+                    "token": "O N E <space> F I V E <space> T W O <space> T W O <space> S E V E N",
+                    "tokenid": "17 16 7 2 8 11 24 7 2 22 25 17 2 22 25 17 2 21 7 24 7 16"
+                }
+            ],
+            "utt2spk": "fvap"
+        },
+        "fvap-cen7-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fvap/cen7-fvap-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        218,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        37,
+                        30
+                    ],
+                    "text": "EIGHT EIGHT FOUR THREE SIX FOUR EIGHT",
+                    "token": "E I G H T <space> E I G H T <space> F O U R <space> T H R E E <space> S I X <space> F O U R <space> E I G H T",
+                    "tokenid": "7 11 9 10 22 2 7 11 9 10 22 2 8 17 23 20 2 22 10 20 7 7 2 21 11 26 2 8 17 23 20 2 7 11 9 10 22"
+                }
+            ],
+            "utt2spk": "fvap"
+        },
+        "fvap-cen8-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/fvap/cen8-fvap-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        218,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        26,
+                        30
+                    ],
+                    "text": "TEN TWENTY SEVEN SIXTY TWO",
+                    "token": "T E N <space> T W E N T Y <space> S E V E N <space> S I X T Y <space> T W O",
+                    "tokenid": "22 7 16 2 22 25 7 16 22 27 2 21 7 24 7 16 2 21 11 26 22 27 2 22 25 17"
+                }
+            ],
+            "utt2spk": "fvap"
+        },
+        "marh-an431-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/marh/an431-marh-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        368,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        31,
+                        30
+                    ],
+                    "text": "RUBOUT N S V H T SIX FORTY NINE",
+                    "token": "R U B O U T <space> N <space> S <space> V <space> H <space> T <space> S I X <space> F O R T Y <space> N I N E",
+                    "tokenid": "20 23 4 17 23 22 2 16 2 21 2 24 2 10 2 22 2 21 11 26 2 8 17 20 22 27 2 16 11 16 7"
+                }
+            ],
+            "utt2spk": "marh"
+        },
+        "marh-an432-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/marh/an432-marh-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        208,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        13,
+                        30
+                    ],
+                    "text": "X N K U EIGHT",
+                    "token": "X <space> N <space> K <space> U <space> E I G H T",
+                    "tokenid": "26 2 16 2 13 2 23 2 7 11 9 10 22"
+                }
+            ],
+            "utt2spk": "marh"
+        },
+        "marh-an433-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/marh/an433-marh-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        288,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        29,
+                        30
+                    ],
+                    "text": "ENTER FOUR FIVE EIGHT TWO ONE",
+                    "token": "E N T E R <space> F O U R <space> F I V E <space> E I G H T <space> T W O <space> O N E",
+                    "tokenid": "7 16 22 7 20 2 8 17 23 20 2 8 11 24 7 2 7 11 9 10 22 2 22 25 17 2 17 16 7"
+                }
+            ],
+            "utt2spk": "marh"
+        },
+        "marh-an434-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/marh/an434-marh-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        438,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        33,
+                        30
+                    ],
+                    "text": "ERASE P Q Y V T FIVE NINETY EIGHT",
+                    "token": "E R A S E <space> P <space> Q <space> Y <space> V <space> T <space> F I V E <space> N I N E T Y <space> E I G H T",
+                    "tokenid": "7 20 3 21 7 2 18 2 19 2 27 2 24 2 22 2 8 11 24 7 2 16 11 16 7 22 27 2 7 11 9 10 22"
+                }
+            ],
+            "utt2spk": "marh"
+        },
+        "marh-an435-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/marh/an435-marh-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        178,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        18,
+                        30
+                    ],
+                    "text": "ENTER TWO EIGHTEEN",
+                    "token": "E N T E R <space> T W O <space> E I G H T E E N",
+                    "tokenid": "7 16 22 7 20 2 22 25 17 2 7 11 9 10 22 7 7 16"
+                }
+            ],
+            "utt2spk": "marh"
+        },
+        "marh-cen1-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/marh/cen1-marh-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        218,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        11,
+                        30
+                    ],
+                    "text": "H O U S E R",
+                    "token": "H <space> O <space> U <space> S <space> E <space> R",
+                    "tokenid": "10 2 17 2 23 2 21 2 7 2 20"
+                }
+            ],
+            "utt2spk": "marh"
+        },
+        "marh-cen2-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/marh/cen2-marh-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        148,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        7,
+                        30
+                    ],
+                    "text": "A L A N",
+                    "token": "A <space> L <space> A <space> N",
+                    "tokenid": "3 2 14 2 3 2 16"
+                }
+            ],
+            "utt2spk": "marh"
+        },
+        "marh-cen3-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/marh/cen3-marh-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        158,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        18,
+                        30
+                    ],
+                    "text": "FIFTY TWO NINETEEN",
+                    "token": "F I F T Y <space> T W O <space> N I N E T E E N",
+                    "tokenid": "8 11 8 22 27 2 22 25 17 2 16 11 16 7 22 7 7 16"
+                }
+            ],
+            "utt2spk": "marh"
+        },
+        "marh-cen4-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/marh/cen4-marh-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        218,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        11,
+                        30
+                    ],
+                    "text": "C E N T R E",
+                    "token": "C <space> E <space> N <space> T <space> R <space> E",
+                    "tokenid": "5 2 7 2 16 2 22 2 20 2 7"
+                }
+            ],
+            "utt2spk": "marh"
+        },
+        "marh-cen5-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/marh/cen5-marh-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        348,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        19,
+                        30
+                    ],
+                    "text": "P I T T S B U R G H",
+                    "token": "P <space> I <space> T <space> T <space> S <space> B <space> U <space> R <space> G <space> H",
+                    "tokenid": "18 2 11 2 22 2 22 2 21 2 4 2 23 2 20 2 9 2 10"
+                }
+            ],
+            "utt2spk": "marh"
+        },
+        "marh-cen6-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/marh/cen6-marh-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        208,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        22,
+                        30
+                    ],
+                    "text": "ONE FIVE TWO THREE TWO",
+                    "token": "O N E <space> F I V E <space> T W O <space> T H R E E <space> T W O",
+                    "tokenid": "17 16 7 2 8 11 24 7 2 22 25 17 2 22 10 20 7 7 2 22 25 17"
+                }
+            ],
+            "utt2spk": "marh"
+        },
+        "marh-cen7-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/marh/cen7-marh-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        298,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        34,
+                        30
+                    ],
+                    "text": "SIX EIGHT THREE SIX ZERO TWO SEVEN",
+                    "token": "S I X <space> E I G H T <space> T H R E E <space> S I X <space> Z E R O <space> T W O <space> S E V E N",
+                    "tokenid": "21 11 26 2 7 11 9 10 22 2 22 10 20 7 7 2 21 11 26 2 28 7 20 17 2 22 25 17 2 21 7 24 7 16"
+                }
+            ],
+            "utt2spk": "marh"
+        },
+        "marh-cen8-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/marh/cen8-marh-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        238,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        30,
+                        30
+                    ],
+                    "text": "MAY SECOND NINETEEN SIXTY FIVE",
+                    "token": "M A Y <space> S E C O N D <space> N I N E T E E N <space> S I X T Y <space> F I V E",
+                    "tokenid": "15 3 27 2 21 7 5 17 16 6 2 16 11 16 7 22 7 7 16 2 21 11 26 22 27 2 8 11 24 7"
+                }
+            ],
+            "utt2spk": "marh"
+        },
+        "mdms2-an401-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mdms2/an401-mdms2-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        328,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        25,
+                        30
+                    ],
+                    "text": "ENTER SEVEN ONE FIVE FOUR",
+                    "token": "E N T E R <space> S E V E N <space> O N E <space> F I V E <space> F O U R",
+                    "tokenid": "7 16 22 7 20 2 21 7 24 7 16 2 17 16 7 2 8 11 24 7 2 8 17 23 20"
+                }
+            ],
+            "utt2spk": "mdms2"
+        },
+        "mdms2-an402-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mdms2/an402-mdms2-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        78,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        2,
+                        30
+                    ],
+                    "text": "NO",
+                    "token": "N O",
+                    "tokenid": "16 17"
+                }
+            ],
+            "utt2spk": "mdms2"
+        },
+        "mdms2-an403-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mdms2/an403-mdms2-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        388,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        27,
+                        30
+                    ],
+                    "text": "G F T U ONE THREE THREE TWO",
+                    "token": "G <space> F <space> T <space> U <space> O N E <space> T H R E E <space> T H R E E <space> T W O",
+                    "tokenid": "9 2 8 2 22 2 23 2 17 16 7 2 22 10 20 7 7 2 22 10 20 7 7 2 22 25 17"
+                }
+            ],
+            "utt2spk": "mdms2"
+        },
+        "mdms2-an404-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mdms2/an404-mdms2-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        298,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        20,
+                        30
+                    ],
+                    "text": "L K K N THIRTY EIGHT",
+                    "token": "L <space> K <space> K <space> N <space> T H I R T Y <space> E I G H T",
+                    "tokenid": "14 2 13 2 13 2 16 2 22 10 11 20 22 27 2 7 11 9 10 22"
+                }
+            ],
+            "utt2spk": "mdms2"
+        },
+        "mdms2-an405-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mdms2/an405-mdms2-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        538,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        33,
+                        30
+                    ],
+                    "text": "RUBOUT V Z J H P SEVEN THIRTY SIX",
+                    "token": "R U B O U T <space> V <space> Z <space> J <space> H <space> P <space> S E V E N <space> T H I R T Y <space> S I X",
+                    "tokenid": "20 23 4 17 23 22 2 24 2 28 2 12 2 10 2 18 2 21 7 24 7 16 2 22 10 11 20 22 27 2 21 11 26"
+                }
+            ],
+            "utt2spk": "mdms2"
+        },
+        "mdms2-cen1-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mdms2/cen1-mdms2-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        438,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        13,
+                        30
+                    ],
+                    "text": "S A N D L E R",
+                    "token": "S <space> A <space> N <space> D <space> L <space> E <space> R",
+                    "tokenid": "21 2 3 2 16 2 6 2 14 2 7 2 20"
+                }
+            ],
+            "utt2spk": "mdms2"
+        },
+        "mdms2-cen2-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mdms2/cen2-mdms2-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        308,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        9,
+                        30
+                    ],
+                    "text": "D A V I D",
+                    "token": "D <space> A <space> V <space> I <space> D",
+                    "tokenid": "6 2 3 2 24 2 11 2 6"
+                }
+            ],
+            "utt2spk": "mdms2"
+        },
+        "mdms2-cen3-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mdms2/cen3-mdms2-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        118,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        9,
+                        30
+                    ],
+                    "text": "TWO FORTY",
+                    "token": "T W O <space> F O R T Y",
+                    "tokenid": "22 25 17 2 8 17 20 22 27"
+                }
+            ],
+            "utt2spk": "mdms2"
+        },
+        "mdms2-cen4-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mdms2/cen4-mdms2-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        598,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        19,
+                        30
+                    ],
+                    "text": "W I L L O W B E N D",
+                    "token": "W <space> I <space> L <space> L <space> O <space> W <space> B <space> E <space> N <space> D",
+                    "tokenid": "25 2 11 2 14 2 14 2 17 2 25 2 4 2 7 2 16 2 6"
+                }
+            ],
+            "utt2spk": "mdms2"
+        },
+        "mdms2-cen5-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mdms2/cen5-mdms2-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        538,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        17,
+                        30
+                    ],
+                    "text": "R O C H E S T E R",
+                    "token": "R <space> O <space> C <space> H <space> E <space> S <space> T <space> E <space> R",
+                    "tokenid": "20 2 17 2 5 2 10 2 7 2 21 2 22 2 7 2 20"
+                }
+            ],
+            "utt2spk": "mdms2"
+        },
+        "mdms2-cen6-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mdms2/cen6-mdms2-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        318,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        22,
+                        30
+                    ],
+                    "text": "ONE FOUR SIX ONE EIGHT",
+                    "token": "O N E <space> F O U R <space> S I X <space> O N E <space> E I G H T",
+                    "tokenid": "17 16 7 2 8 17 23 20 2 21 11 26 2 17 16 7 2 7 11 9 10 22"
+                }
+            ],
+            "utt2spk": "mdms2"
+        },
+        "mdms2-cen7-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mdms2/cen7-mdms2-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        578,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        46,
+                        30
+                    ],
+                    "text": "SEVEN ONE SIX TWO FOUR FOUR SIX SEVEN ONE FOUR",
+                    "token": "S E V E N <space> O N E <space> S I X <space> T W O <space> F O U R <space> F O U R <space> S I X <space> S E V E N <space> O N E <space> F O U R",
+                    "tokenid": "21 7 24 7 16 2 17 16 7 2 21 11 26 2 22 25 17 2 8 17 23 20 2 8 17 23 20 2 21 11 26 2 21 7 24 7 16 2 17 16 7 2 8 17 23 20"
+                }
+            ],
+            "utt2spk": "mdms2"
+        },
+        "mdms2-cen8-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mdms2/cen8-mdms2-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        288,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        32,
+                        30
+                    ],
+                    "text": "MARCH SEVEN NINETEEN SIXTY SEVEN",
+                    "token": "M A R C H <space> S E V E N <space> N I N E T E E N <space> S I X T Y <space> S E V E N",
+                    "tokenid": "15 3 20 5 10 2 21 7 24 7 16 2 16 11 16 7 22 7 7 16 2 21 11 26 22 27 2 21 7 24 7 16"
+                }
+            ],
+            "utt2spk": "mdms2"
+        },
+        "menk-an421-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/menk/an421-menk-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        148,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        16,
+                        30
+                    ],
+                    "text": "ENTER TWENTY ONE",
+                    "token": "E N T E R <space> T W E N T Y <space> O N E",
+                    "tokenid": "7 16 22 7 20 2 22 25 7 16 22 27 2 17 16 7"
+                }
+            ],
+            "utt2spk": "menk"
+        },
+        "menk-an422-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/menk/an422-menk-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        138,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        12,
+                        30
+                    ],
+                    "text": "ENTER THIRTY",
+                    "token": "E N T E R <space> T H I R T Y",
+                    "tokenid": "7 16 22 7 20 2 22 10 11 20 22 27"
+                }
+            ],
+            "utt2spk": "menk"
+        },
+        "menk-an423-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/menk/an423-menk-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        358,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        20,
+                        30
+                    ],
+                    "text": "D A J N H NINETY SIX",
+                    "token": "D <space> A <space> J <space> N <space> H <space> N I N E T Y <space> S I X",
+                    "tokenid": "6 2 3 2 12 2 16 2 10 2 16 11 16 7 22 27 2 21 11 26"
+                }
+            ],
+            "utt2spk": "menk"
+        },
+        "menk-an424-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/menk/an424-menk-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        398,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        31,
+                        30
+                    ],
+                    "text": "S Y F C D NINE SIX OH ONE SEVEN",
+                    "token": "S <space> Y <space> F <space> C <space> D <space> N I N E <space> S I X <space> O H <space> O N E <space> S E V E N",
+                    "tokenid": "21 2 27 2 8 2 5 2 6 2 16 11 16 7 2 21 11 26 2 17 10 2 17 16 7 2 21 7 24 7 16"
+                }
+            ],
+            "utt2spk": "menk"
+        },
+        "menk-an425-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/menk/an425-menk-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        238,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        21,
+                        30
+                    ],
+                    "text": "ENTER ONE SEVENTY SIX",
+                    "token": "E N T E R <space> O N E <space> S E V E N T Y <space> S I X",
+                    "tokenid": "7 16 22 7 20 2 17 16 7 2 21 7 24 7 16 22 27 2 21 11 26"
+                }
+            ],
+            "utt2spk": "menk"
+        },
+        "menk-cen1-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/menk/cen1-menk-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        308,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        13,
+                        30
+                    ],
+                    "text": "K A U F M A N",
+                    "token": "K <space> A <space> U <space> F <space> M <space> A <space> N",
+                    "tokenid": "13 2 3 2 23 2 8 2 15 2 3 2 16"
+                }
+            ],
+            "utt2spk": "menk"
+        },
+        "menk-cen2-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/menk/cen2-menk-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        198,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        7,
+                        30
+                    ],
+                    "text": "E R I C",
+                    "token": "E <space> R <space> I <space> C",
+                    "tokenid": "7 2 20 2 11 2 5"
+                }
+            ],
+            "utt2spk": "menk"
+        },
+        "menk-cen3-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/menk/cen3-menk-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        218,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        22,
+                        30
+                    ],
+                    "text": "SIXTY SIX THIRTY THREE",
+                    "token": "S I X T Y <space> S I X <space> T H I R T Y <space> T H R E E",
+                    "tokenid": "21 11 26 22 27 2 21 11 26 2 22 10 11 20 22 27 2 22 10 20 7 7"
+                }
+            ],
+            "utt2spk": "menk"
+        },
+        "menk-cen4-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/menk/cen4-menk-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        388,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        17,
+                        30
+                    ],
+                    "text": "B I R C H W O O D",
+                    "token": "B <space> I <space> R <space> C <space> H <space> W <space> O <space> O <space> D",
+                    "tokenid": "4 2 11 2 20 2 5 2 10 2 25 2 17 2 17 2 6"
+                }
+            ],
+            "utt2spk": "menk"
+        },
+        "menk-cen5-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/menk/cen5-menk-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        428,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        19,
+                        30
+                    ],
+                    "text": "P I T T S B U R G H",
+                    "token": "P <space> I <space> T <space> T <space> S <space> B <space> U <space> R <space> G <space> H",
+                    "tokenid": "18 2 11 2 22 2 22 2 21 2 4 2 23 2 20 2 9 2 10"
+                }
+            ],
+            "utt2spk": "menk"
+        },
+        "menk-cen6-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/menk/cen6-menk-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        218,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        22,
+                        30
+                    ],
+                    "text": "ONE FIVE TWO ONE SEVEN",
+                    "token": "O N E <space> F I V E <space> T W O <space> O N E <space> S E V E N",
+                    "tokenid": "17 16 7 2 8 11 24 7 2 22 25 17 2 17 16 7 2 21 7 24 7 16"
+                }
+            ],
+            "utt2spk": "menk"
+        },
+        "menk-cen7-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/menk/cen7-menk-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        288,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        31,
+                        30
+                    ],
+                    "text": "FOUR TWO ONE EIGHT EIGHT SIX OH",
+                    "token": "F O U R <space> T W O <space> O N E <space> E I G H T <space> E I G H T <space> S I X <space> O H",
+                    "tokenid": "8 17 23 20 2 22 25 17 2 17 16 7 2 7 11 9 10 22 2 7 11 9 10 22 2 21 11 26 2 17 10"
+                }
+            ],
+            "utt2spk": "menk"
+        },
+        "menk-cen8-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/menk/cen8-menk-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        248,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        27,
+                        30
+                    ],
+                    "text": "FIVE TWENTY SEVEN SIXTY SIX",
+                    "token": "F I V E <space> T W E N T Y <space> S E V E N <space> S I X T Y <space> S I X",
+                    "tokenid": "8 11 24 7 2 22 25 7 16 22 27 2 21 7 24 7 16 2 21 11 26 22 27 2 21 11 26"
+                }
+            ],
+            "utt2spk": "menk"
+        },
+        "miry-an396-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/miry/an396-miry-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        398,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        27,
+                        30
+                    ],
+                    "text": "ERASE A B F N Q FIFTY SEVEN",
+                    "token": "E R A S E <space> A <space> B <space> F <space> N <space> Q <space> F I F T Y <space> S E V E N",
+                    "tokenid": "7 20 3 21 7 2 3 2 4 2 8 2 16 2 19 2 8 11 8 22 27 2 21 7 24 7 16"
+                }
+            ],
+            "utt2spk": "miry"
+        },
+        "miry-an397-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/miry/an397-miry-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        278,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        15,
+                        30
+                    ],
+                    "text": "T R T F I SEVEN",
+                    "token": "T <space> R <space> T <space> F <space> I <space> S E V E N",
+                    "tokenid": "22 2 20 2 22 2 8 2 11 2 21 7 24 7 16"
+                }
+            ],
+            "utt2spk": "miry"
+        },
+        "miry-an398-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/miry/an398-miry-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        378,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        21,
+                        30
+                    ],
+                    "text": "RUBOUT C B W X V FOUR",
+                    "token": "R U B O U T <space> C <space> B <space> W <space> X <space> V <space> F O U R",
+                    "tokenid": "20 23 4 17 23 22 2 5 2 4 2 25 2 26 2 24 2 8 17 23 20"
+                }
+            ],
+            "utt2spk": "miry"
+        },
+        "miry-an399-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/miry/an399-miry-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        458,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        37,
+                        30
+                    ],
+                    "text": "W Y A T U SEVENTY SEVEN SEVENTY SEVEN",
+                    "token": "W <space> Y <space> A <space> T <space> U <space> S E V E N T Y <space> S E V E N <space> S E V E N T Y <space> S E V E N",
+                    "tokenid": "25 2 27 2 3 2 22 2 23 2 21 7 24 7 16 22 27 2 21 7 24 7 16 2 21 7 24 7 16 22 27 2 21 7 24 7 16"
+                }
+            ],
+            "utt2spk": "miry"
+        },
+        "miry-an400-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/miry/an400-miry-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        138,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        11,
+                        30
+                    ],
+                    "text": "ENTER EIGHT",
+                    "token": "E N T E R <space> E I G H T",
+                    "tokenid": "7 16 22 7 20 2 7 11 9 10 22"
+                }
+            ],
+            "utt2spk": "miry"
+        },
+        "miry-cen1-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/miry/cen1-miry-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        308,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        13,
+                        30
+                    ],
+                    "text": "Y A N A S A K",
+                    "token": "Y <space> A <space> N <space> A <space> S <space> A <space> K",
+                    "tokenid": "27 2 3 2 16 2 3 2 21 2 3 2 13"
+                }
+            ],
+            "utt2spk": "miry"
+        },
+        "miry-cen2-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/miry/cen2-miry-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        198,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        7,
+                        30
+                    ],
+                    "text": "I V A N",
+                    "token": "I <space> V <space> A <space> N",
+                    "tokenid": "11 2 24 2 3 2 16"
+                }
+            ],
+            "utt2spk": "miry"
+        },
+        "miry-cen3-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/miry/cen3-miry-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        178,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        19,
+                        30
+                    ],
+                    "text": "TWELVE THIRTY THREE",
+                    "token": "T W E L V E <space> T H I R T Y <space> T H R E E",
+                    "tokenid": "22 25 7 14 24 7 2 22 10 11 20 22 27 2 22 10 20 7 7"
+                }
+            ],
+            "utt2spk": "miry"
+        },
+        "miry-cen4-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/miry/cen4-miry-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        388,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        15,
+                        30
+                    ],
+                    "text": "M O R E W O O D",
+                    "token": "M <space> O <space> R <space> E <space> W <space> O <space> O <space> D",
+                    "tokenid": "15 2 17 2 20 2 7 2 25 2 17 2 17 2 6"
+                }
+            ],
+            "utt2spk": "miry"
+        },
+        "miry-cen5-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/miry/cen5-miry-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        488,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        19,
+                        30
+                    ],
+                    "text": "P I T T S B U R G H",
+                    "token": "P <space> I <space> T <space> T <space> S <space> B <space> U <space> R <space> G <space> H",
+                    "tokenid": "18 2 11 2 22 2 22 2 21 2 4 2 23 2 20 2 9 2 10"
+                }
+            ],
+            "utt2spk": "miry"
+        },
+        "miry-cen6-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/miry/cen6-miry-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        258,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        22,
+                        30
+                    ],
+                    "text": "ONE FIVE TWO ONE THREE",
+                    "token": "O N E <space> F I V E <space> T W O <space> O N E <space> T H R E E",
+                    "tokenid": "17 16 7 2 8 11 24 7 2 22 25 17 2 17 16 7 2 22 10 20 7 7"
+                }
+            ],
+            "utt2spk": "miry"
+        },
+        "miry-cen7-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/miry/cen7-miry-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        348,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        32,
+                        30
+                    ],
+                    "text": "TWO SIX EIGHT FOUR SIX NINE FOUR",
+                    "token": "T W O <space> S I X <space> E I G H T <space> F O U R <space> S I X <space> N I N E <space> F O U R",
+                    "tokenid": "22 25 17 2 21 11 26 2 7 11 9 10 22 2 8 17 23 20 2 21 11 26 2 16 11 16 7 2 8 17 23 20"
+                }
+            ],
+            "utt2spk": "miry"
+        },
+        "miry-cen8-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/miry/cen8-miry-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        278,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        36,
+                        30
+                    ],
+                    "text": "JANUARY SEVENTH NINETEEN SIXTY SEVEN",
+                    "token": "J A N U A R Y <space> S E V E N T H <space> N I N E T E E N <space> S I X T Y <space> S E V E N",
+                    "tokenid": "12 3 16 23 3 20 27 2 21 7 24 7 16 22 10 2 16 11 16 7 22 7 7 16 2 21 11 26 22 27 2 21 7 24 7 16"
+                }
+            ],
+            "utt2spk": "miry"
+        },
+        "mjgm-an436-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mjgm/an436-mjgm-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        158,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        11,
+                        30
+                    ],
+                    "text": "ENTER SEVEN",
+                    "token": "E N T E R <space> S E V E N",
+                    "tokenid": "7 16 22 7 20 2 21 7 24 7 16"
+                }
+            ],
+            "utt2spk": "mjgm"
+        },
+        "mjgm-an437-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mjgm/an437-mjgm-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        228,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        19,
+                        30
+                    ],
+                    "text": "A B V J NINETY FOUR",
+                    "token": "A <space> B <space> V <space> J <space> N I N E T Y <space> F O U R",
+                    "tokenid": "3 2 4 2 24 2 12 2 16 11 16 7 22 27 2 8 17 23 20"
+                }
+            ],
+            "utt2spk": "mjgm"
+        },
+        "mjgm-an438-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mjgm/an438-mjgm-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        268,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        26,
+                        30
+                    ],
+                    "text": "RUBOUT G R A G EIGHTY FIVE",
+                    "token": "R U B O U T <space> G <space> R <space> A <space> G <space> E I G H T Y <space> F I V E",
+                    "tokenid": "20 23 4 17 23 22 2 9 2 20 2 3 2 9 2 7 11 9 10 22 27 2 8 11 24 7"
+                }
+            ],
+            "utt2spk": "mjgm"
+        },
+        "mjgm-an439-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mjgm/an439-mjgm-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        198,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        20,
+                        30
+                    ],
+                    "text": "ENTER FIVE SIX EIGHT",
+                    "token": "E N T E R <space> F I V E <space> S I X <space> E I G H T",
+                    "tokenid": "7 16 22 7 20 2 8 11 24 7 2 21 11 26 2 7 11 9 10 22"
+                }
+            ],
+            "utt2spk": "mjgm"
+        },
+        "mjgm-an440-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mjgm/an440-mjgm-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        78,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        4,
+                        30
+                    ],
+                    "text": "STOP",
+                    "token": "S T O P",
+                    "tokenid": "21 22 17 18"
+                }
+            ],
+            "utt2spk": "mjgm"
+        },
+        "mjgm-cen1-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mjgm/cen1-mjgm-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        178,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        9,
+                        30
+                    ],
+                    "text": "M Y E R S",
+                    "token": "M <space> Y <space> E <space> R <space> S",
+                    "tokenid": "15 2 27 2 7 2 20 2 21"
+                }
+            ],
+            "utt2spk": "mjgm"
+        },
+        "mjgm-cen2-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mjgm/cen2-mjgm-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        138,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        7,
+                        30
+                    ],
+                    "text": "J O H N",
+                    "token": "J <space> O <space> H <space> N",
+                    "tokenid": "12 2 17 2 10 2 16"
+                }
+            ],
+            "utt2spk": "mjgm"
+        },
+        "mjgm-cen3-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mjgm/cen3-mjgm-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        138,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        11,
+                        30
+                    ],
+                    "text": "TWO TWO SIX",
+                    "token": "T W O <space> T W O <space> S I X",
+                    "tokenid": "22 25 17 2 22 25 17 2 21 11 26"
+                }
+            ],
+            "utt2spk": "mjgm"
+        },
+        "mjgm-cen4-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mjgm/cen4-mjgm-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        278,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        19,
+                        30
+                    ],
+                    "text": "C E D A R V I L L E",
+                    "token": "C <space> E <space> D <space> A <space> R <space> V <space> I <space> L <space> L <space> E",
+                    "tokenid": "5 2 7 2 6 2 3 2 20 2 24 2 11 2 14 2 14 2 7"
+                }
+            ],
+            "utt2spk": "mjgm"
+        },
+        "mjgm-cen5-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mjgm/cen5-mjgm-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        348,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        19,
+                        30
+                    ],
+                    "text": "P I T T S B U R G H",
+                    "token": "P <space> I <space> T <space> T <space> S <space> B <space> U <space> R <space> G <space> H",
+                    "tokenid": "18 2 11 2 22 2 22 2 21 2 4 2 23 2 20 2 9 2 10"
+                }
+            ],
+            "utt2spk": "mjgm"
+        },
+        "mjgm-cen6-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mjgm/cen6-mjgm-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        228,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        21,
+                        30
+                    ],
+                    "text": "ONE FIVE TWO TWO FOUR",
+                    "token": "O N E <space> F I V E <space> T W O <space> T W O <space> F O U R",
+                    "tokenid": "17 16 7 2 8 11 24 7 2 22 25 17 2 22 25 17 2 8 17 23 20"
+                }
+            ],
+            "utt2spk": "mjgm"
+        },
+        "mjgm-cen7-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mjgm/cen7-mjgm-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        248,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        35,
+                        30
+                    ],
+                    "text": "SIX EIGHT THREE THREE OH SEVEN FIVE",
+                    "token": "S I X <space> E I G H T <space> T H R E E <space> T H R E E <space> O H <space> S E V E N <space> F I V E",
+                    "tokenid": "21 11 26 2 7 11 9 10 22 2 22 10 20 7 7 2 22 10 20 7 7 2 17 10 2 21 7 24 7 16 2 8 11 24 7"
+                }
+            ],
+            "utt2spk": "mjgm"
+        },
+        "mjgm-cen8-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mjgm/cen8-mjgm-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        178,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        25,
+                        30
+                    ],
+                    "text": "NOVEMBER NINTH SIXTY FIVE",
+                    "token": "N O V E M B E R <space> N I N T H <space> S I X T Y <space> F I V E",
+                    "tokenid": "16 17 24 7 15 4 7 20 2 16 11 16 22 10 2 21 11 26 22 27 2 8 11 24 7"
+                }
+            ],
+            "utt2spk": "mjgm"
+        },
+        "mjwl-an391-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mjwl/an391-mjwl-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        198,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        24,
+                        30
+                    ],
+                    "text": "ENTER TWO NINE EIGHT ONE",
+                    "token": "E N T E R <space> T W O <space> N I N E <space> E I G H T <space> O N E",
+                    "tokenid": "7 16 22 7 20 2 22 25 17 2 16 11 16 7 2 7 11 9 10 22 2 17 16 7"
+                }
+            ],
+            "utt2spk": "mjwl"
+        },
+        "mjwl-an392-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mjwl/an392-mjwl-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        78,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        6,
+                        30
+                    ],
+                    "text": "REPEAT",
+                    "token": "R E P E A T",
+                    "tokenid": "20 7 18 7 3 22"
+                }
+            ],
+            "utt2spk": "mjwl"
+        },
+        "mjwl-an393-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mjwl/an393-mjwl-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        248,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        18,
+                        30
+                    ],
+                    "text": "ERASE U D B E FIVE",
+                    "token": "E R A S E <space> U <space> D <space> B <space> E <space> F I V E",
+                    "tokenid": "7 20 3 21 7 2 23 2 6 2 4 2 7 2 8 11 24 7"
+                }
+            ],
+            "utt2spk": "mjwl"
+        },
+        "mjwl-an394-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mjwl/an394-mjwl-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        378,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        20,
+                        30
+                    ],
+                    "text": "RUBOUT U B U T R SIX",
+                    "token": "R U B O U T <space> U <space> B <space> U <space> T <space> R <space> S I X",
+                    "tokenid": "20 23 4 17 23 22 2 23 2 4 2 23 2 22 2 20 2 21 11 26"
+                }
+            ],
+            "utt2spk": "mjwl"
+        },
+        "mjwl-an395-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mjwl/an395-mjwl-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        188,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        17,
+                        30
+                    ],
+                    "text": "ENTER ONE OH FOUR",
+                    "token": "E N T E R <space> O N E <space> O H <space> F O U R",
+                    "tokenid": "7 16 22 7 20 2 17 16 7 2 17 10 2 8 17 23 20"
+                }
+            ],
+            "utt2spk": "mjwl"
+        },
+        "mjwl-cen1-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mjwl/cen1-mjwl-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        218,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        13,
+                        30
+                    ],
+                    "text": "L E V I S O N",
+                    "token": "L <space> E <space> V <space> I <space> S <space> O <space> N",
+                    "tokenid": "14 2 7 2 24 2 11 2 21 2 17 2 16"
+                }
+            ],
+            "utt2spk": "mjwl"
+        },
+        "mjwl-cen2-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mjwl/cen2-mjwl-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        218,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        13,
+                        30
+                    ],
+                    "text": "J E F F R E Y",
+                    "token": "J <space> E <space> F <space> F <space> R <space> E <space> Y",
+                    "tokenid": "12 2 7 2 8 2 8 2 20 2 7 2 27"
+                }
+            ],
+            "utt2spk": "mjwl"
+        },
+        "mjwl-cen3-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mjwl/cen3-mjwl-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        98,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        8,
+                        30
+                    ],
+                    "text": "NINETEEN",
+                    "token": "N I N E T E E N",
+                    "tokenid": "16 11 16 7 22 7 7 16"
+                }
+            ],
+            "utt2spk": "mjwl"
+        },
+        "mjwl-cen4-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mjwl/cen4-mjwl-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        248,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        13,
+                        30
+                    ],
+                    "text": "P H I N N E Y",
+                    "token": "P <space> H <space> I <space> N <space> N <space> E <space> Y",
+                    "tokenid": "18 2 10 2 11 2 16 2 16 2 7 2 27"
+                }
+            ],
+            "utt2spk": "mjwl"
+        },
+        "mjwl-cen5-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mjwl/cen5-mjwl-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        298,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        17,
+                        30
+                    ],
+                    "text": "L E X I N G T O N",
+                    "token": "L <space> E <space> X <space> I <space> N <space> G <space> T <space> O <space> N",
+                    "tokenid": "14 2 7 2 26 2 11 2 16 2 9 2 22 2 17 2 16"
+                }
+            ],
+            "utt2spk": "mjwl"
+        },
+        "mjwl-cen6-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mjwl/cen6-mjwl-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        188,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        22,
+                        30
+                    ],
+                    "text": "OH TWO ONE SEVEN THREE",
+                    "token": "O H <space> T W O <space> O N E <space> S E V E N <space> T H R E E",
+                    "tokenid": "17 10 2 22 25 17 2 17 16 7 2 21 7 24 7 16 2 22 10 20 7 7"
+                }
+            ],
+            "utt2spk": "mjwl"
+        },
+        "mjwl-cen7-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mjwl/cen7-mjwl-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        238,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        34,
+                        30
+                    ],
+                    "text": "EIGHT SIX TWO OH THREE EIGHT SEVEN",
+                    "token": "E I G H T <space> S I X <space> T W O <space> O H <space> T H R E E <space> E I G H T <space> S E V E N",
+                    "tokenid": "7 11 9 10 22 2 21 11 26 2 22 25 17 2 17 10 2 22 10 20 7 7 2 7 11 9 10 22 2 21 7 24 7 16"
+                }
+            ],
+            "utt2spk": "mjwl"
+        },
+        "mjwl-cen8-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mjwl/cen8-mjwl-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        228,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        36,
+                        30
+                    ],
+                    "text": "JUNE EIGHTEENTH NINETEEN SIXTY EIGHT",
+                    "token": "J U N E <space> E I G H T E E N T H <space> N I N E T E E N <space> S I X T Y <space> E I G H T",
+                    "tokenid": "12 23 16 7 2 7 11 9 10 22 7 7 16 22 10 2 16 11 16 7 22 7 7 16 2 21 11 26 22 27 2 7 11 9 10 22"
+                }
+            ],
+            "utt2spk": "mjwl"
+        },
+        "mmxg-an441-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mmxg/an441-mmxg-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        348,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        25,
+                        30
+                    ],
+                    "text": "X K I T B TWO SIX ONE ONE",
+                    "token": "X <space> K <space> I <space> T <space> B <space> T W O <space> S I X <space> O N E <space> O N E",
+                    "tokenid": "26 2 13 2 11 2 22 2 4 2 22 25 17 2 21 11 26 2 17 16 7 2 17 16 7"
+                }
+            ],
+            "utt2spk": "mmxg"
+        },
+        "mmxg-an442-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mmxg/an442-mmxg-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        88,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        3,
+                        30
+                    ],
+                    "text": "YES",
+                    "token": "Y E S",
+                    "tokenid": "27 7 21"
+                }
+            ],
+            "utt2spk": "mmxg"
+        },
+        "mmxg-an443-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mmxg/an443-mmxg-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        68,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        2,
+                        30
+                    ],
+                    "text": "NO",
+                    "token": "N O",
+                    "tokenid": "16 17"
+                }
+            ],
+            "utt2spk": "mmxg"
+        },
+        "mmxg-an444-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mmxg/an444-mmxg-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        418,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        27,
+                        30
+                    ],
+                    "text": "ERASE K M H N I SIX OH FIVE",
+                    "token": "E R A S E <space> K <space> M <space> H <space> N <space> I <space> S I X <space> O H <space> F I V E",
+                    "tokenid": "7 20 3 21 7 2 13 2 15 2 10 2 16 2 11 2 21 11 26 2 17 10 2 8 11 24 7"
+                }
+            ],
+            "utt2spk": "mmxg"
+        },
+        "mmxg-an445-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mmxg/an445-mmxg-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        288,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        19,
+                        30
+                    ],
+                    "text": "ERASE F O X K EIGHT",
+                    "token": "E R A S E <space> F <space> O <space> X <space> K <space> E I G H T",
+                    "tokenid": "7 20 3 21 7 2 8 2 17 2 26 2 13 2 7 11 9 10 22"
+                }
+            ],
+            "utt2spk": "mmxg"
+        },
+        "mmxg-cen1-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mmxg/cen1-mmxg-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        308,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        15,
+                        30
+                    ],
+                    "text": "G I N S B E R G",
+                    "token": "G <space> I <space> N <space> S <space> B <space> E <space> R <space> G",
+                    "tokenid": "9 2 11 2 16 2 21 2 4 2 7 2 20 2 9"
+                }
+            ],
+            "utt2spk": "mmxg"
+        },
+        "mmxg-cen2-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mmxg/cen2-mmxg-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        238,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        13,
+                        30
+                    ],
+                    "text": "M I C H A E L",
+                    "token": "M <space> I <space> C <space> H <space> A <space> E <space> L",
+                    "tokenid": "15 2 11 2 5 2 10 2 3 2 7 2 14"
+                }
+            ],
+            "utt2spk": "mmxg"
+        },
+        "mmxg-cen3-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mmxg/cen3-mmxg-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        138,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        7,
+                        30
+                    ],
+                    "text": "A SEVEN",
+                    "token": "A <space> S E V E N",
+                    "tokenid": "3 2 21 7 24 7 16"
+                }
+            ],
+            "utt2spk": "mmxg"
+        },
+        "mmxg-cen4-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mmxg/cen4-mmxg-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        478,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        31,
+                        30
+                    ],
+                    "text": "M A R G A R E T M O R R I S O N",
+                    "token": "M <space> A <space> R <space> G <space> A <space> R <space> E <space> T <space> M <space> O <space> R <space> R <space> I <space> S <space> O <space> N",
+                    "tokenid": "15 2 3 2 20 2 9 2 3 2 20 2 7 2 22 2 15 2 17 2 20 2 20 2 11 2 21 2 17 2 16"
+                }
+            ],
+            "utt2spk": "mmxg"
+        },
+        "mmxg-cen5-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mmxg/cen5-mmxg-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        308,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        19,
+                        30
+                    ],
+                    "text": "P I T T S B U R G H",
+                    "token": "P <space> I <space> T <space> T <space> S <space> B <space> U <space> R <space> G <space> H",
+                    "tokenid": "18 2 11 2 22 2 22 2 21 2 4 2 23 2 20 2 9 2 10"
+                }
+            ],
+            "utt2spk": "mmxg"
+        },
+        "mmxg-cen6-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mmxg/cen6-mmxg-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        208,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        22,
+                        30
+                    ],
+                    "text": "ONE FIVE TWO ONE THREE",
+                    "token": "O N E <space> F I V E <space> T W O <space> O N E <space> T H R E E",
+                    "tokenid": "17 16 7 2 8 11 24 7 2 22 25 17 2 17 16 7 2 22 10 20 7 7"
+                }
+            ],
+            "utt2spk": "mmxg"
+        },
+        "mmxg-cen7-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mmxg/cen7-mmxg-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        388,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        44,
+                        30
+                    ],
+                    "text": "FOUR ONE TWO TWO SIX EIGHT FOUR ONE FOUR TWO",
+                    "token": "F O U R <space> O N E <space> T W O <space> T W O <space> S I X <space> E I G H T <space> F O U R <space> O N E <space> F O U R <space> T W O",
+                    "tokenid": "8 17 23 20 2 17 16 7 2 22 25 17 2 22 25 17 2 21 11 26 2 7 11 9 10 22 2 8 17 23 20 2 17 16 7 2 8 17 23 20 2 22 25 17"
+                }
+            ],
+            "utt2spk": "mmxg"
+        },
+        "mmxg-cen8-b": {
+            "input": [
+                {
+                    "feat": "/home/marcoyang/asr_project/espnet2/egs/an4/asr1/downloads/an4/wav/an4_clstk/mmxg/cen8-mmxg-b.sph",
+                    "name": "input1",
+                    "shape": [
+                        228,
+                        83
+                    ],
+                    "filetype": "sph"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        36,
+                        30
+                    ],
+                    "text": "OCTOBER TWENTY FOUR NINETEEN SEVENTY",
+                    "token": "O C T O B E R <space> T W E N T Y <space> F O U R <space> N I N E T E E N <space> S E V E N T Y",
+                    "tokenid": "17 5 22 17 4 7 20 2 22 25 7 16 22 27 2 8 17 23 20 2 16 11 16 7 22 7 7 16 2 21 7 24 7 16 22 27"
+                }
+            ],
+            "utt2spk": "mmxg"
+        }
+    }
+}
