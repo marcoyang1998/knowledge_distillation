@@ -8,7 +8,7 @@ def add_arguments_rnn_encoder_common(group):
     """Define common arguments for RNN encoder."""
     group.add_argument(
         "--etype",
-        default="wav2vec",
+        default="blstmp",
         type=str,
         choices=[
             "lstm",
