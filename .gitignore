@@ -72,3 +72,5 @@ tools/festival*
 tools/speech_tools*
 tools/phonemizer*
 tools/fairseq*
+
+ci/*
