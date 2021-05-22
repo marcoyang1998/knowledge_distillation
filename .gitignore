@@ -41,6 +41,8 @@ egs*/*/*/tensorboard
 egs*/*/*/wav*
 
 # tools related
+tools/anaconda
+tools/activate_python.sh
 tools/bin
 tools/include
 tools/lib
