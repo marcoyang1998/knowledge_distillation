@@ -299,8 +299,11 @@ class Wav2VecEncoder(torch.nn.Module):
 
         xs_pad = enc_outputs["x"]  # (B,T,C),
         masks = enc_outputs["padding_mask"]  # (B, T)
-
-        olens = (~masks).sum(dim=1)
+        if masks == None:
+            print(xs_pad.shape)
+            print(masks)
+        olens = torch.logical_not(masks).sum(dim=1)
+        #olens = (~masks).sum(dim=1)
 
         if self.output_layer is not None:
             xs_pad = self.output_layer(xs_pad)
