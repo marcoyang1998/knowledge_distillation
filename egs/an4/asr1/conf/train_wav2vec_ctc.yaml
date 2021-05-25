@@ -13,10 +13,10 @@ sampling-probability: 0.0
 
 # encoder related
 etype: wav2vec     # encoder architecture type
-model_path: /home/marcoyang/asr_project/espnet2/egs2/an4/asr1/downloads/wav2vec_pretrained_models
-elayers: 4
-eunits: 320
-eprojs: 320
+w2v2-model-dir: /home/marcoyang/Downloads/wav2vec_model/wav2vec_small.pt
+w2v2-normalise-before: false
+w2v2-freeze-finetune-updates: 1000
+w2v2-output-dim: 320
 subsample: "1_1_1_1_1" # skip every n frame from input to nth layers
 # decoder related
 dlayers: 1

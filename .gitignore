@@ -39,6 +39,9 @@ egs*/*/*/mfcc
 egs*/*/*/stft
 egs*/*/*/tensorboard
 egs*/*/*/wav*
+egs*/*/*/modified_json/*
+egs*/*/*/run.sh
+egs*/*/*/cmd.sh
 
 # tools related
 tools/anaconda

@@ -34,6 +34,7 @@ from espnet.nets.pytorch_backend.rnn.argument import (
     add_arguments_rnn_decoder_common,  # noqa: H301
     add_arguments_rnn_attention_common,  # noqa: H301
 )
+from espnet.nets.pytorch_backend.wav2vec2.argument import add_arguments_w2v2_common
 from espnet.nets.pytorch_backend.rnn.attentions import att_for
 from espnet.nets.pytorch_backend.rnn.decoders import decoder_for
 from espnet.nets.pytorch_backend.rnn.encoders import encoder_for
@@ -73,6 +74,7 @@ class E2E(ASRInterface, torch.nn.Module):
         E2E.encoder_add_arguments(parser)
         E2E.attention_add_arguments(parser)
         E2E.decoder_add_arguments(parser)
+        E2E.w2v2_add_arguments(parser)
         return parser
 
     @staticmethod
@@ -94,6 +96,13 @@ class E2E(ASRInterface, torch.nn.Module):
         """Add arguments for the decoder."""
         group = parser.add_argument_group("E2E decoder setting")
         group = add_arguments_rnn_decoder_common(group)
+        return parser
+
+    @staticmethod
+    def w2v2_add_arguments(parser):
+        """Add arguments for the decoder."""
+        group = parser.add_argument_group("E2E w2v2 setting")
+        group = add_arguments_w2v2_common(group)
         return parser
 
     def get_total_subsampling_factor(self):

@@ -10,6 +10,7 @@ from torch.nn.utils.rnn import pack_padded_sequence
 from torch.nn.utils.rnn import pad_packed_sequence
 
 from espnet.nets.e2e_asr_common import get_vgg2l_odim
+from espnet.nets.pytorch_backend.transformer.layer_norm import LayerNorm
 from espnet.nets.pytorch_backend.nets_utils import make_pad_mask
 from espnet.nets.pytorch_backend.nets_utils import to_device
 
@@ -257,6 +258,8 @@ class Wav2VecEncoder(torch.nn.Module):
         self.encoders = model
         self.pretrained_params = copy.deepcopy(model.state_dict())
         self.normalize_before = normalize_before
+        if self.normalize_before:
+            self.after_norm = LayerNorm(output_size)
         self._output_size = output_size
         if model.cfg.encoder_embed_dim != output_size:
             self.output_layer = torch.nn.Sequential(
@@ -266,6 +269,7 @@ class Wav2VecEncoder(torch.nn.Module):
             self.output_layer = None
         self.freeze_finetune_updates = freeze_finetune_updates
         self.register_buffer("num_updates", torch.LongTensor([0]))
+        self.conv_subsampling_factor = 1
 
     def forward(self, xs_pad, ilens, prev_states=None):
         """Forward FairSeqWav2Vec2 Encoder.
@@ -415,8 +419,12 @@ def encoder_for(args, idim, subsample):
     :return: The encoder module
     """
     if args.etype == 'wav2vec':
-        model_path = '/home/marcoyang/Downloads/wav2vec_pretrained_models/wav2vec_small.pt'
-        return Wav2VecEncoder(model_path, args.eunits)
+        #model_path = '/home/marcoyang/Downloads/wav2vec_pretrained_models/wav2vec_small.pt'
+        model_path = args.w2v2_model_dir
+        normalise_before = args.w2v2_normalise_before
+        freeze_finetune_updates = args.w2v2_freeze_finetune_updates
+        output_dim = args.w2v2_output_dim
+        return Wav2VecEncoder(model_dir=model_path, output_size=output_dim, normalize_before=normalise_before, freeze_finetune_updates=freeze_finetune_updates)
     num_encs = getattr(args, "num_encs", 1)  # use getattr to keep compatibility
     if num_encs == 1:
         # compatible with single encoder asr mode
