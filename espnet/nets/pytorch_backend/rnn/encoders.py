@@ -246,10 +246,10 @@ class Wav2VecEncoder(torch.nn.Module):
                  normalize_before=False,
                  freeze_finetune_updates=0
                  ):
-        self.w2v_model_path = model_dir
         super().__init__()
         import fairseq
         #from fairseq.models.wav2vec.wav2vec2 import Wav2Vec2Model
+        self.w2v_model_path = model_dir
         models, _, _ = fairseq.checkpoint_utils.load_model_ensemble_and_task(
             [self.w2v_model_path],
             arg_overrides={"data": model_dir},

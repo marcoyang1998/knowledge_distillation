@@ -260,7 +260,8 @@ class E2E(ASRInterface, torch.nn.Module):
             for i, y in enumerate(y_hats):
                 y_hat = [x[0] for x in groupby(y)]
                 y_true = ys_pad[i]
-
+                print(y_hat)
+                print(max(y_hat))
                 seq_hat = [self.char_list[int(idx)] for idx in y_hat if int(idx) != -1]
                 seq_true = [
                     self.char_list[int(idx)] for idx in y_true if int(idx) != -1
