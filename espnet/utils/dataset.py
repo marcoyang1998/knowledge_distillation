@@ -43,7 +43,7 @@ class ChainerDataLoader(object):
 
     def __init__(self, **kwargs):
         """Init function."""
-        self.loader = torch.utils.data.dataloader.DataLoader(**kwargs)
+        self.loader = torch.utils.data.dataloader.DataLoader(**kwargs, drop_last=True)
         self.len = len(kwargs["dataset"])
         self.current_position = 0
         self.epoch = 0
