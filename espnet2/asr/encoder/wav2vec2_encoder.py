@@ -175,5 +175,7 @@ if __name__ == '__main__':
     #model_path = download_w2v(w2v_url, w2v_dir_path)
     w2v2_enc = FairSeqWav2Vec2Encoder(input_size=2048, w2v_url=w2v_url, w2v_dir_path=w2v_dir_path)
     print(w2v2_enc)
-    x = torch.ones(1,208, 2048)
+    x = torch.randn(1,16000)
+    enc = w2v2_enc.encoders
+    y = enc(x)
     w2v2_enc.forward(x,[208])

@@ -244,7 +244,7 @@ class Wav2VecEncoder(torch.nn.Module):
                  model_dir,
                  output_size=256,
                  normalize_before=False,
-                 freeze_finetune_updates=0
+                 freeze_finetune_updates=1000
                  ):
         super().__init__()
         import fairseq
@@ -458,3 +458,14 @@ def encoder_for(args, idim, subsample):
         raise ValueError(
             "Number of encoders needs to be more than one. {}".format(num_encs)
         )
+
+
+if __name__ == '__main__':
+    w2v_dir_path = '/home/marcoyang/Downloads/wav2vec_model/wav2vec_small.pt'
+    w2v2_enc = Wav2VecEncoder(model_dir=w2v_dir_path, output_size=768)
+    print(w2v2_enc)
+    x = torch.randn(1,16000)
+    enc = w2v2_enc.encoders
+    y = enc(x)
+    y = w2v2_enc.forward(x,[208])
+    print(y.mean())

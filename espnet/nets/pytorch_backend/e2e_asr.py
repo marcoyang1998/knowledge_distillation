@@ -171,7 +171,11 @@ class E2E(ASRInterface, torch.nn.Module):
         self.dec = decoder_for(args, odim, self.sos, self.eos, self.att, labeldist)
 
         # weight initialization
-        self.init_like_chainer()
+        if args.etype == 'wav2vec':
+            module_list = [self.ctc, self.att, self.dec]
+            self.init_modules_like_chainer(module_list)
+        else:
+            self.init_like_chainer()
 
         # options for beam search
         if args.report_cer or args.report_wer:
@@ -217,6 +221,13 @@ class E2E(ASRInterface, torch.nn.Module):
         # https://discuss.pytorch.org/t/set-forget-gate-bias-of-lstm/1745
         for i in six.moves.range(len(self.dec.decoder)):
             set_forget_bias_to_one(self.dec.decoder[i].bias_ih)
+    def init_modules_like_chainer(self, module_list):
+        for m in module_list:
+            lecun_normal_init_parameters(m)
+        self.dec.embed.weight.data.normal_(0, 1)
+        for i in six.moves.range(len(self.dec.decoder)):
+            set_forget_bias_to_one(self.dec.decoder[i].bias_ih)
+
 
     def forward(self, xs_pad, ilens, ys_pad):
         """E2E forward.
@@ -260,8 +271,6 @@ class E2E(ASRInterface, torch.nn.Module):
             for i, y in enumerate(y_hats):
                 y_hat = [x[0] for x in groupby(y)]
                 y_true = ys_pad[i]
-                print(y_hat)
-                print(max(y_hat))
                 seq_hat = [self.char_list[int(idx)] for idx in y_hat if int(idx) != -1]
                 seq_true = [
                     self.char_list[int(idx)] for idx in y_true if int(idx) != -1
