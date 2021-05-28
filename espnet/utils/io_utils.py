@@ -549,6 +549,10 @@ class LoadInputsAndTargets(object):
             raw_audio = librosa.load(filepath)[0]
             normalised = (raw_audio-raw_audio.mean())/raw_audio.std()
             return normalised
+        elif filetype == "flac":
+            raw_audio = soundfile.read(filepath)[0]
+            normalised = (raw_audio - raw_audio.mean()) / raw_audio.std()
+            return normalised
         elif filetype == "scp":
             # e.g.
             #    {"input": [{"feat": "some/path.scp:F01_050C0101_PED_REAL",
