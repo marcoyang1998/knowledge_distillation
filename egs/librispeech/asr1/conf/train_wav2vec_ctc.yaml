@@ -1,0 +1,33 @@
+# minibatch related
+batch-size: 2
+maxlen-in: 100000000  # if input length  > maxlen_in, batchsize is automatically reduced
+maxlen-out: 150 # if output length > maxlen_out, batchsize is automatically reduced
+# optimization related
+sortagrad: 0 # Feed samples from shortest to longest ; -1: enabled for all epochs, 0: disabled, other: enabled for 'other' epochs
+opt: adam
+epochs: 10
+patience: 3
+
+# scheduled sampling option
+sampling-probability: 0.0
+
+# encoder related
+etype: wav2vec     # encoder architecture type
+#w2v2-model-dir: /rds/user/xy316/hpc-work/mphil/pretrained_w2v2_models/wav2vec_small.pt
+w2v2-model-dir: /home/marcoyang/Downloads/wav2vec_model/wav2vec_small.pt
+w2v2-normalise-before: false
+w2v2-freeze-finetune-updates: 1000
+w2v2-output-dim: 768
+eprojs: 768
+subsample: "1_1_1_1_1" # skip every n frame from input to nth layers
+# decoder related
+dlayers: 1
+dunits: 300
+# attention related
+atype: location
+adim: 320
+aconv-chans: 10
+aconv-filts: 100
+
+# hybrid CTC/attention
+mtlalpha: 1.0

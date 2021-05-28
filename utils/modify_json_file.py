@@ -1,6 +1,12 @@
 import json
 import os
 import glob
+import argparse
+
+parser = argparse.ArgumentParser(description='Receive input')
+parser.add_argument('--dataset_dir',type=str)
+parser.add_argument('--dict_dir',type=str)
+parser.add_argument('--ext',type=str)
 
 def text_to_token(text, token_dict):
     token = []
@@ -21,9 +27,9 @@ def text_to_token(text, token_dict):
 
 
 
-def generate_w2v2_json_input(dataset_dir, ext):
-    char_dict = get_char_dict()
-    txt_files = glob.glob(dataset_dir + '/*/*/*.txt', recursive=True)
+def generate_w2v2_json_input(dataset_dir, dict_dir, ext):
+    char_dict = get_char_dict(dict_dir)
+    txt_files = glob.glob(dataset_dir + '/*/*/*/*/*.txt', recursive=True)
     json_dict = {}
     json_dict['utts'] = {}
     for txt in txt_files:
@@ -56,8 +62,7 @@ def generate_w2v2_json_input(dataset_dir, ext):
         json.dump(json_dict, f)
 
 
-def get_char_dict():
-    file_path = '../egs/an4/asr1/data/lang_1char/train_nodev_units.txt'
+def get_char_dict(file_path):
     with open(file_path, 'r') as f:
         data = f.readlines()
     char_dict = {}
@@ -70,6 +75,8 @@ def get_char_dict():
 
 
 if __name__ == '__main__':
-    #look_json()
-    dataset_dir = '/home/marcoyang/Downloads/librispeech/LibriSpeech/dev-clean'
-    generate_w2v2_json_input(dataset_dir,'flac')
+    args = parser.parse_args()
+    dataset_dir = args.dataset_dir
+    dict_dir = args.dict_dir
+    ext = args.ext
+    generate_w2v2_json_input(dataset_dir,dict_dir, ext)
