@@ -245,7 +245,8 @@ class Wav2VecEncoder(torch.nn.Module):
                  output_size=256,
                  normalize_before=False,
                  freeze_finetune_updates=1000,
-                 fine_tuned=False
+                 fine_tuned=False,
+                 mask_channel_prob=0.004
                  ):
         super().__init__()
         import fairseq
@@ -268,6 +269,8 @@ class Wav2VecEncoder(torch.nn.Module):
 
         model.remove_pretraining_modules() # remove modules that won't be used in fine-tuning
         self.encoders = model
+        self.encoders.mask_channel_length=64
+        self.encoders.mask_channel_prob=mask_channel_prob
         self.pretrained_params = copy.deepcopy(model.state_dict())
         self.normalize_before = normalize_before
         if self.normalize_before:
@@ -440,11 +443,13 @@ def encoder_for(args, idim, subsample):
         freeze_finetune_updates = args.w2v2_freeze_finetune_updates
         output_dim = args.w2v2_output_dim
         is_fine_tuned = args.w2v2_is_finetuned
+        mask_channel_prob = args.w2v2_mask_channel_prob
         return Wav2VecEncoder(model_dir=model_path,
                               output_size=output_dim,
                               normalize_before=normalise_before,
                               freeze_finetune_updates=freeze_finetune_updates,
-                              fine_tuned=is_fine_tuned)
+                              fine_tuned=is_fine_tuned,
+                              mask_channel_prob=mask_channel_prob)
     num_encs = getattr(args, "num_encs", 1)  # use getattr to keep compatibility
     if num_encs == 1:
         # compatible with single encoder asr mode

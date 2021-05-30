@@ -162,13 +162,13 @@ class E2E(ASRInterface, torch.nn.Module):
             self.frontend = None
 
         # encoder
-        if args.etype == 'wav2vec':
+        if args.etype == 'wav2vec' and args.w2v2_is_finetuned == True:
             self.enc = encoder_for(args, idim, self.subsample)
             fc_layer = self.enc.final_proj
             self.ctc = ctc_for(args, odim) # ctc
-            with torch.no_grad():
-                self.ctc.ctc_lo.weight.copy_(fc_layer.weight)
-                self.ctc.ctc_lo.bias.copy_(fc_layer.bias)
+            #with torch.no_grad():
+            #    self.ctc.ctc_lo.weight.copy_(fc_layer.weight)
+            #    self.ctc.ctc_lo.bias.copy_(fc_layer.bias)
             self.att = att_for(args) # attention
             self.dec = decoder_for(args, odim, self.sos, self.eos, self.att, labeldist) # decoder
         else:

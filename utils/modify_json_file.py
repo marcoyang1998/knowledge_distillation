@@ -7,6 +7,8 @@ parser = argparse.ArgumentParser(description='Receive input')
 parser.add_argument('--dataset_dir',type=str)
 parser.add_argument('--dict_dir',type=str)
 parser.add_argument('--ext',type=str)
+parser.add_argument('--output_dir',type=str)
+
 
 def text_to_token(text, token_dict):
     token = []
@@ -27,9 +29,9 @@ def text_to_token(text, token_dict):
 
 
 
-def generate_w2v2_json_input(dataset_dir, dict_dir, ext):
+def generate_w2v2_json_input(dataset_dir, dict_dir, ext, output_dir):
     char_dict = get_char_dict(dict_dir)
-    txt_files = glob.glob(dataset_dir + '/*/*/*/*/*.txt', recursive=True)
+    txt_files = glob.glob(dataset_dir + '/*/*/*.txt', recursive=True)
     json_dict = {}
     json_dict['utts'] = {}
     for txt in txt_files:
@@ -58,7 +60,7 @@ def generate_w2v2_json_input(dataset_dir, dict_dir, ext):
                                                             "token": token,
                                                             "tokenid": tokenid})
             json_dict['utts'][audio_name]["utt2spk"] = ""
-    with open(dataset_dir+"/data_w2v2.json",'w') as f:
+    with open(os.path.join(output_dir, "data_w2v2.json"),'w') as f:
         json.dump(json_dict, f)
 
 
@@ -78,5 +80,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     dataset_dir = args.dataset_dir
     dict_dir = args.dict_dir
+    output_dir = args.output_dir
     ext = args.ext
-    generate_w2v2_json_input(dataset_dir,dict_dir, ext)
+    generate_w2v2_json_input(dataset_dir,dict_dir, ext, output_dir)

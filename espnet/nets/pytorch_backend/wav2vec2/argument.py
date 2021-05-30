@@ -33,3 +33,9 @@ def add_arguments_w2v2_common(group):
         default=False,
         help="whether the model is fine-tuned"
     )
+    group.add_argument(
+        "--w2v2-mask-channel-prob",
+        type=float,
+        default=0.0,
+        help="probability of masking random channel"
+    )
