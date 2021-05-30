@@ -27,3 +27,9 @@ def add_arguments_w2v2_common(group):
         default=1024,
         help="output dimesion"
     )
+    group.add_argument(
+        "--w2v2-is-finetuned",
+        type=strtobool,
+        default=False,
+        help="whether the model is fine-tuned"
+    )

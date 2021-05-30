@@ -162,21 +162,26 @@ class E2E(ASRInterface, torch.nn.Module):
             self.frontend = None
 
         # encoder
-        self.enc = encoder_for(args, idim, self.subsample)
-        # ctc
-        self.ctc = ctc_for(args, odim)
-        # attention
-        self.att = att_for(args)
-        # decoder
-        self.dec = decoder_for(args, odim, self.sos, self.eos, self.att, labeldist)
-
+        if args.etype == 'wav2vec':
+            self.enc = encoder_for(args, idim, self.subsample)
+            fc_layer = self.enc.final_proj
+            self.ctc = ctc_for(args, odim) # ctc
+            with torch.no_grad():
+                self.ctc.ctc_lo.weight.copy_(fc_layer.weight)
+                self.ctc.ctc_lo.bias.copy_(fc_layer.bias)
+            self.att = att_for(args) # attention
+            self.dec = decoder_for(args, odim, self.sos, self.eos, self.att, labeldist) # decoder
+        else:
+            self.enc = encoder_for(args, idim, self.subsample)
+            self.ctc = ctc_for(args, odim)  # ctc
+            self.att = att_for(args)  # attention
+            self.dec = decoder_for(args, odim, self.sos, self.eos, self.att, labeldist)  # decoder
         # weight initialization
         if args.etype == 'wav2vec':
             module_list = [self.ctc, self.att, self.dec]
             self.init_modules_like_chainer(module_list)
         else:
             self.init_like_chainer()
-
         # options for beam search
         if args.report_cer or args.report_wer:
             recog_args = {

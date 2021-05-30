@@ -244,17 +244,29 @@ class Wav2VecEncoder(torch.nn.Module):
                  model_dir,
                  output_size=256,
                  normalize_before=False,
-                 freeze_finetune_updates=1000
+                 freeze_finetune_updates=1000,
+                 fine_tuned=False
                  ):
         super().__init__()
         import fairseq
-        #from fairseq.models.wav2vec.wav2vec2 import Wav2Vec2Model
+        from fairseq.models.wav2vec.wav2vec2 import Wav2Vec2Model
+        from fairseq.models.wav2vec.wav2vec2_asr import Wav2VecCtc
         self.w2v_model_path = model_dir
+        w2v_dir_path = '/'.join(model_dir.split('/')[:-1])
         models, _, _ = fairseq.checkpoint_utils.load_model_ensemble_and_task(
             [self.w2v_model_path],
-            arg_overrides={"data": model_dir},
+            arg_overrides={"data": w2v_dir_path},
         )
         model = models[0]
+        if fine_tuned:
+            assert isinstance(model, Wav2VecCtc)
+            self.final_proj = model.w2v_encoder.proj
+            model = model.w2v_encoder.w2v_model
+        else:
+            assert isinstance(model, Wav2Vec2Model)
+            self.final_proj = None
+
+        model.remove_pretraining_modules() # remove modules that won't be used in fine-tuning
         self.encoders = model
         self.pretrained_params = copy.deepcopy(model.state_dict())
         self.normalize_before = normalize_before
@@ -427,7 +439,12 @@ def encoder_for(args, idim, subsample):
         normalise_before = args.w2v2_normalise_before
         freeze_finetune_updates = args.w2v2_freeze_finetune_updates
         output_dim = args.w2v2_output_dim
-        return Wav2VecEncoder(model_dir=model_path, output_size=output_dim, normalize_before=normalise_before, freeze_finetune_updates=freeze_finetune_updates)
+        is_fine_tuned = args.w2v2_is_finetuned
+        return Wav2VecEncoder(model_dir=model_path,
+                              output_size=output_dim,
+                              normalize_before=normalise_before,
+                              freeze_finetune_updates=freeze_finetune_updates,
+                              fine_tuned=is_fine_tuned)
     num_encs = getattr(args, "num_encs", 1)  # use getattr to keep compatibility
     if num_encs == 1:
         # compatible with single encoder asr mode
@@ -461,8 +478,8 @@ def encoder_for(args, idim, subsample):
 
 
 if __name__ == '__main__':
-    w2v_dir_path = '/home/marcoyang/Downloads/wav2vec_model/wav2vec_small.pt'
-    w2v2_enc = Wav2VecEncoder(model_dir=w2v_dir_path, output_size=768)
+    w2v_dir_path = '/home/marcoyang/Downloads/wav2vec_model/wav2vec_small_100h.pt'
+    w2v2_enc = Wav2VecEncoder(model_dir=w2v_dir_path, output_size=768, fine_tuned=True)
     print(w2v2_enc)
     x = torch.randn(1,16000)
     enc = w2v2_enc.encoders
