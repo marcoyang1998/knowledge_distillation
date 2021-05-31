@@ -278,8 +278,34 @@ def get_parser(parser=None, required=True):
         "--opt",
         default="adadelta",
         type=str,
-        choices=["adadelta", "adam", "noam"],
+        choices=["adadelta", "adam", "noam", "tri-state-adam"],
         help="Optimizer",
+    )
+    parser.add_argument(
+        "--optim-phase",
+        type=str,
+        help="Phase of the tri-state optim"
+    )
+    parser.add_argument(
+        "--optim-total-steps",
+        type=int,
+        default=13000,
+        help="how many updates shoule be made"
+    )
+    parser.add_argument(
+        "--init-lr",
+        type=float,
+        default=5e-7
+    )
+    parser.add_argument(
+        "--warmup-lr",
+        type=float,
+        default=5e-5
+    )
+    parser.add_argument(
+        "--end-lr",
+        type=float,
+        default=2.5e-06
     )
     parser.add_argument(
         "--accum-grad", default=1, type=int, help="Number of gradient accumuration"

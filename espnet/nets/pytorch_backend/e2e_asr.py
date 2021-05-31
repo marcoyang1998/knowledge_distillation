@@ -169,17 +169,24 @@ class E2E(ASRInterface, torch.nn.Module):
             #with torch.no_grad():
             #    self.ctc.ctc_lo.weight.copy_(fc_layer.weight)
             #    self.ctc.ctc_lo.bias.copy_(fc_layer.bias)
-            self.att = att_for(args) # attention
-            self.dec = decoder_for(args, odim, self.sos, self.eos, self.att, labeldist) # decoder
         else:
             self.enc = encoder_for(args, idim, self.subsample)
             self.ctc = ctc_for(args, odim)  # ctc
+        # memory efficient
+        if args.mtlalpha == 1.0:
+            self.att = None
+            self.dec = None
+        else:
             self.att = att_for(args)  # attention
             self.dec = decoder_for(args, odim, self.sos, self.eos, self.att, labeldist)  # decoder
         # weight initialization
         if args.etype == 'wav2vec':
-            module_list = [self.ctc, self.att, self.dec]
-            self.init_modules_like_chainer(module_list)
+            if args.mtlalpha != 1.0:
+                module_list = [self.ctc, self.att, self.dec]
+                self.init_modules_like_chainer(module_list, decoder=True)
+            else:
+                module_list = [self.ctc]
+                self.init_modules_like_chainer(module_list, decoder=False)
         else:
             self.init_like_chainer()
         # options for beam search
@@ -226,12 +233,13 @@ class E2E(ASRInterface, torch.nn.Module):
         # https://discuss.pytorch.org/t/set-forget-gate-bias-of-lstm/1745
         for i in six.moves.range(len(self.dec.decoder)):
             set_forget_bias_to_one(self.dec.decoder[i].bias_ih)
-    def init_modules_like_chainer(self, module_list):
+    def init_modules_like_chainer(self, module_list, decoder=False):
         for m in module_list:
             lecun_normal_init_parameters(m)
-        self.dec.embed.weight.data.normal_(0, 1)
-        for i in six.moves.range(len(self.dec.decoder)):
-            set_forget_bias_to_one(self.dec.decoder[i].bias_ih)
+        if decoder:
+            self.dec.embed.weight.data.normal_(0, 1)
+            for i in six.moves.range(len(self.dec.decoder)):
+                set_forget_bias_to_one(self.dec.decoder[i].bias_ih)
 
 
     def forward(self, xs_pad, ilens, ys_pad):
@@ -360,6 +368,7 @@ class E2E(ASRInterface, torch.nn.Module):
             loss_ctc_data = float(self.loss_ctc)
 
         loss_data = float(self.loss)
+
         if loss_data < CTC_LOSS_THRESHOLD and not math.isnan(loss_data):
             self.reporter.report(
                 loss_ctc_data, loss_att_data, acc, cer_ctc, cer, wer, loss_data

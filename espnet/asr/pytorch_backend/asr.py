@@ -182,6 +182,8 @@ class CustomUpdater(StandardUpdater):
         # they are automatically named 'main'.
         train_iter = self.get_iterator("main")
         optimizer = self.get_optimizer("main")
+        #if optimizer._step%50 == 0:
+        #logging.info("current learning rate: {} at update: {}".format(optimizer._rate, optimizer._step))
         epoch = train_iter.epoch
 
         # Get the next batch (a list of json files)
@@ -530,6 +532,11 @@ def train(args):
         optimizer = get_std_opt(
             model_params, adim, args.transformer_warmup_steps, args.transformer_lr
         )
+    elif args.opt == "tri-state-adam":
+        from espnet.nets.pytorch_backend.wav2vec2.optimizer import get_opt
+        optim_phase = [float(num) for num in args.optim_phase.split()]
+        optimizer = get_opt(model_params, optim_phase, args.optim_total_steps, args.init_lr, args.warmup_lr, args.end_lr)
+        logging.info("Adopting tri-state-adam optimizer")
     else:
         raise NotImplementedError("unknown optimizer: " + args.opt)
 

@@ -303,7 +303,7 @@ class Wav2VecEncoder(torch.nn.Module):
             self.num_updates += 1
         elif ft and self.num_updates == self.freeze_finetune_updates + 1:
             self.num_updates += 1
-            logging.info("Start fine-tuning wav2vec parameters!")
+            print("Start fine-tuning wav2vec parameters after {} updates!".format(self.num_updates))
 
         with torch.no_grad() if not ft else contextlib.nullcontext():
             enc_outputs = self.encoders(
@@ -311,7 +311,6 @@ class Wav2VecEncoder(torch.nn.Module):
                 masks,
                 features_only=True,
             )
-
         xs_pad = enc_outputs["x"]  # (B,T,C),
         masks = enc_outputs["padding_mask"]  # (B, T)
         if masks == None:
@@ -437,10 +436,9 @@ def encoder_for(args, idim, subsample):
     :return: The encoder module
     """
     if args.etype == 'wav2vec':
-        #model_path = '/home/marcoyang/Downloads/wav2vec_pretrained_models/wav2vec_small.pt'
         model_path = args.w2v2_model_dir
         normalise_before = args.w2v2_normalise_before
-        freeze_finetune_updates = args.w2v2_freeze_finetune_updates
+        freeze_finetune_updates = args.w2v2_freeze_finetune_updates*args.accum_grad
         output_dim = args.w2v2_output_dim
         is_fine_tuned = args.w2v2_is_finetuned
         mask_channel_prob = args.w2v2_mask_channel_prob
