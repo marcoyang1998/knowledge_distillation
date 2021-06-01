@@ -546,13 +546,17 @@ class LoadInputsAndTargets(object):
             return self._loaders[filepath]
         elif filetype == "sph":
             # custom loader to load raw audio input
-            raw_audio = librosa.load(filepath)[0]
-            normalised = (raw_audio-raw_audio.mean())/raw_audio.std()
-            return normalised
+            if filepath not in self._loaders:
+                raw_audio = librosa.load(filepath)[0]
+                normalised = (raw_audio - raw_audio.mean()) / raw_audio.std()
+                self._loaders[filepath] = normalised
+            return self._loaders[filepath]
         elif filetype == "flac":
-            raw_audio = soundfile.read(filepath)[0]
-            normalised = (raw_audio - raw_audio.mean()) / raw_audio.std()
-            return normalised
+            if filepath not in self._loaders:
+                raw_audio = soundfile.read(filepath)[0]
+                normalised = (raw_audio - raw_audio.mean()) / raw_audio.std()
+                self._loaders[filepath] = normalised
+            return self._loaders[filepath]
         elif filetype == "scp":
             # e.g.
             #    {"input": [{"feat": "some/path.scp:F01_050C0101_PED_REAL",
