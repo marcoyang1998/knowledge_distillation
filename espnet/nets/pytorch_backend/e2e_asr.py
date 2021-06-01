@@ -174,8 +174,8 @@ class E2E(ASRInterface, torch.nn.Module):
             self.ctc = ctc_for(args, odim)  # ctc
         # memory efficient
         if args.mtlalpha == 1.0:
-            self.att = None
-            self.dec = None
+            self.att = att_for(args)
+            self.dec = decoder_for(args, odim, self.sos, self.eos, self.att, labeldist)
         else:
             self.att = att_for(args)  # attention
             self.dec = decoder_for(args, odim, self.sos, self.eos, self.att, labeldist)  # decoder
