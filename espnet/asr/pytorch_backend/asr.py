@@ -961,6 +961,7 @@ def recog(args):
         args (namespace): The program arguments.
 
     """
+    print("----Starting recoginition----")
     set_deterministic_pytorch(args)
     model, train_args = load_trained_model(args.model, training=False)
     assert isinstance(model, ASRInterface)
