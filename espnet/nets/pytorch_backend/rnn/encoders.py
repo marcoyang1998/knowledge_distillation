@@ -304,7 +304,8 @@ class Wav2VecEncoder(torch.nn.Module):
         elif ft and self.num_updates == self.freeze_finetune_updates + 1:
             self.num_updates += 1
             print("Start fine-tuning wav2vec parameters after {} updates!".format(self.num_updates))
-        print("Actual batch size: {} at update: {}".format(xs_pad.shape[0], self.num_updates))
+        if self.num_updates%10==0:
+            print("Actual batch size: {} at update: {}".format(xs_pad.shape[0], self.num_updates))
         with torch.no_grad() if not ft else contextlib.nullcontext():
             enc_outputs = self.encoders(
                 xs_pad,

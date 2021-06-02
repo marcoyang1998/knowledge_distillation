@@ -25,12 +25,12 @@ class Tri_state_adam(object):
         elif self._step >= self.phase[0]*self.total_steps and self._step < (1-self.phase[-1])*self.total_steps:
             return self.warmup_lr
         else:
-            return self.warmup_lr - (self._step - (1-self.phase[2])*self.total_steps)*self.decay_factor
+            return max(self.warmup_lr - (self._step - (1-self.phase[2])*self.total_steps)*self.decay_factor, self.end_lr)
 
 
     def step(self):
         rate = self.rate()
-        if self._step%50==0:
+        if self._step%10==0:
             print('Current learning rate: {} at step: {}'.format(rate, self._step))
         self._step += 1
         self._rate = rate

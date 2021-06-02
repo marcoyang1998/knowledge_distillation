@@ -106,6 +106,12 @@ def get_parser(parser=None, required=True):
         help="Save snapshot interval iterations",
     )
     parser.add_argument(
+        "--save-best",
+        default=True,
+        type=strtobool,
+        help="save best model or not",
+    )
+    parser.add_argument(
         "--report-interval-iters",
         default=100,
         type=int,
@@ -113,9 +119,9 @@ def get_parser(parser=None, required=True):
     )
     parser.add_argument(
         "--valid-interval",
-        default=1,
+        default=0,
         type=int,
-        help="Calculate validation result per x interval. if -1, no validation result will be calculated",
+        help="Calculate validation result per x interval. if 0, no validation result will be calculated",
     )
     parser.add_argument(
         "--save-interval-iters",

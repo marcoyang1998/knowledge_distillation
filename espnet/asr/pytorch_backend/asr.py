@@ -89,13 +89,13 @@ class CustomEvaluator(BaseEvaluator):
 
     """
 
-    def __init__(self, model, iterator, target, device, ngpu=None, interval=0):
+    def __init__(self, model, iterator, target, device, ngpu=None):
         super(CustomEvaluator, self).__init__(iterator, target)
         self.model = model
         self.device = device
         self._epoch = 0
-        self.interval = interval
-        print("Valid interval: {}".format(self.interval))
+        #self.interval = interval
+        #print("Valid interval: {}".format(self.interval))
         if ngpu is not None:
             self.ngpu = ngpu
         elif device.type == "cpu":
@@ -107,15 +107,15 @@ class CustomEvaluator(BaseEvaluator):
     # The core part of the update routine can be customized by overriding
     def evaluate(self):
         """Main evaluate routine for CustomEvaluator."""
-        if self.interval == -1:
-            return {'validation/main/loss_ctc': 0,
-                    'validation/main/cer_ctc': 0,
-                    'validation/main/cer': 0.0,
-                    'validation/main/wer': 0.0,
-                    'validation/main/loss': 0}
-        if self._epoch%self.interval != 0:
-            self._epoch+=1
-            return self.report
+        #if self.interval == -1:
+        #    return {'validation/main/loss_ctc': 0,
+        #            'validation/main/cer_ctc': 0,
+        #            'validation/main/cer': 0.0,
+        #            'validation/main/wer': 0.0,
+        #            'validation/main/loss': 0}
+        #if self._epoch%self.interval != 0:
+        #    self._epoch+=1
+        #    return self.report
         self._epoch += 1
         iterator = self._iterators["main"]
 
@@ -147,7 +147,7 @@ class CustomEvaluator(BaseEvaluator):
 
                 summary.add(observation)
         self.model.train()
-        self.report = summary.compute_mean()
+        #self.report = summary.compute_mean()
         return summary.compute_mean()
 
 
@@ -693,13 +693,15 @@ def train(args):
     # Evaluate the model with the test dataset for each epoch
     if args.save_interval_iters > 0:
         trainer.extend(
-            CustomEvaluator(model, {"main": valid_iter}, reporter, device, args.ngpu, args.valid_interval),
+            CustomEvaluator(model, {"main": valid_iter}, reporter, device, args.ngpu),
             trigger=(args.save_interval_iters, "epoch"),
         )
     else:
-        trainer.extend(
-            CustomEvaluator(model, {"main": valid_iter}, reporter, device, args.ngpu, args.valid_interval)
-        )
+        if args.valid_interval > 0:
+            trainer.extend(
+                CustomEvaluator(model, {"main": valid_iter}, reporter, device, args.ngpu),
+                trigger=(args.valid_interval, "epoch")
+            )
 
     # Save attention weight each epoch
     is_attn_plot = (
@@ -822,10 +824,11 @@ def train(args):
     )
 
     # Save best models
-    trainer.extend(
-        snapshot_object(model, "model.loss.best"),
-        trigger=training.triggers.MinValueTrigger("validation/main/loss"),
-    )
+    if args.save_best:
+        trainer.extend(
+            snapshot_object(model, "model.loss.best"),
+            trigger=training.triggers.MinValueTrigger("validation/main/loss"),
+        )
     if mtl_mode not in ["ctc", "transducer", "custom_transducer"]:
         trainer.extend(
             snapshot_object(model, "model.acc.best"),
