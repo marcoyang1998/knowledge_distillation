@@ -89,20 +89,34 @@ class CustomEvaluator(BaseEvaluator):
 
     """
 
-    def __init__(self, model, iterator, target, device, ngpu=None):
+    def __init__(self, model, iterator, target, device, ngpu=None, interval=0):
         super(CustomEvaluator, self).__init__(iterator, target)
         self.model = model
         self.device = device
+        self._epoch = 0
+        self.interval = interval
+        print("Valid interval: {}".format(self.interval))
         if ngpu is not None:
             self.ngpu = ngpu
         elif device.type == "cpu":
             self.ngpu = 0
         else:
             self.ngpu = 1
+        self.report = {}
 
     # The core part of the update routine can be customized by overriding
     def evaluate(self):
         """Main evaluate routine for CustomEvaluator."""
+        if self.interval == -1:
+            return {'validation/main/loss_ctc': 0,
+                    'validation/main/cer_ctc': 0,
+                    'validation/main/cer': 0.0,
+                    'validation/main/wer': 0.0,
+                    'validation/main/loss': 0}
+        if self._epoch%self.interval != 0:
+            self._epoch+=1
+            return self.report
+        self._epoch += 1
         iterator = self._iterators["main"]
 
         if self.eval_hook:
@@ -133,7 +147,7 @@ class CustomEvaluator(BaseEvaluator):
 
                 summary.add(observation)
         self.model.train()
-
+        self.report = summary.compute_mean()
         return summary.compute_mean()
 
 
@@ -679,12 +693,12 @@ def train(args):
     # Evaluate the model with the test dataset for each epoch
     if args.save_interval_iters > 0:
         trainer.extend(
-            CustomEvaluator(model, {"main": valid_iter}, reporter, device, args.ngpu),
-            trigger=(args.save_interval_iters, "iteration"),
+            CustomEvaluator(model, {"main": valid_iter}, reporter, device, args.ngpu, args.valid_interval),
+            trigger=(args.save_interval_iters, "epoch"),
         )
     else:
         trainer.extend(
-            CustomEvaluator(model, {"main": valid_iter}, reporter, device, args.ngpu)
+            CustomEvaluator(model, {"main": valid_iter}, reporter, device, args.ngpu, args.valid_interval)
         )
 
     # Save attention weight each epoch
@@ -826,7 +840,10 @@ def train(args):
         )
 
     # save snapshot at every epoch - for model averaging
-    trainer.extend(torch_snapshot(), trigger=(1, "epoch"))
+    if args.save_interval_epochs > 0:
+        trainer.extend(torch_snapshot(), trigger=(args.save_interval_epochs, "epoch"))
+    else:
+        trainer.extend(torch_snapshot(), trigger=(1, "epoch"))
 
     # epsilon decay in the optimizer
     if args.opt == "adadelta":

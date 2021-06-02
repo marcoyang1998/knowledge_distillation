@@ -29,10 +29,10 @@ class Tri_state_adam(object):
 
 
     def step(self):
-        self._step+=1
         rate = self.rate()
         if self._step%50==0:
             print('Current learning rate: {} at step: {}'.format(rate, self._step))
+        self._step += 1
         self._rate = rate
         for p in self.optimizer.param_groups:
             p["lr"] = rate

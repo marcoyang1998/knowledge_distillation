@@ -100,10 +100,22 @@ def get_parser(parser=None, required=True):
         help="Tensorboard log dir path",
     )
     parser.add_argument(
+        "--save-interval-epochs",
+        default=0,
+        type=int,
+        help="Save snapshot interval iterations",
+    )
+    parser.add_argument(
         "--report-interval-iters",
         default=100,
         type=int,
         help="Report interval iterations",
+    )
+    parser.add_argument(
+        "--valid-interval",
+        default=1,
+        type=int,
+        help="Calculate validation result per x interval. if -1, no validation result will be calculated",
     )
     parser.add_argument(
         "--save-interval-iters",
