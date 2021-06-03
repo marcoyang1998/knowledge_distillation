@@ -37,7 +37,7 @@ from espnet.nets.pytorch_backend.rnn.argument import (
 from espnet.nets.pytorch_backend.wav2vec2.argument import add_arguments_w2v2_common
 from espnet.nets.pytorch_backend.rnn.attentions import att_for
 from espnet.nets.pytorch_backend.rnn.decoders import decoder_for
-from espnet.nets.pytorch_backend.rnn.encoders import encoder_for
+from espnet.nets.pytorch_backend.rnn.encoders import encoder_for, Wav2VecEncoder
 from espnet.nets.scorers.ctc import CTCPrefixScorer
 from espnet.utils.fill_missing_args import fill_missing_args
 
@@ -139,8 +139,12 @@ class E2E(ASRInterface, torch.nn.Module):
 
         # below means the last number becomes eos/sos ID
         # note that sos/eos IDs are identical
-        self.sos = odim - 1
-        self.eos = odim - 1
+        if args.etype=="wav2vec" and args.w2v2_is_finetuned == True:
+            self.sos = 2
+            self.eos = 2
+        else:
+            self.sos = odim - 1
+            self.eos = odim - 1
 
         # subsample info
         self.subsample = get_subsample(args, mode="asr", arch="rnn")
@@ -166,9 +170,9 @@ class E2E(ASRInterface, torch.nn.Module):
             self.enc = encoder_for(args, idim, self.subsample)
             fc_layer = self.enc.final_proj
             self.ctc = ctc_for(args, odim) # ctc
-            #with torch.no_grad():
-            #    self.ctc.ctc_lo.weight.copy_(fc_layer.weight)
-            #    self.ctc.ctc_lo.bias.copy_(fc_layer.bias)
+            with torch.no_grad():
+                self.ctc.ctc_lo.weight.copy_(fc_layer.weight)
+                self.ctc.ctc_lo.bias.copy_(fc_layer.bias)
         else:
             self.enc = encoder_for(args, idim, self.subsample)
             self.ctc = ctc_for(args, odim)  # ctc
@@ -181,12 +185,13 @@ class E2E(ASRInterface, torch.nn.Module):
             self.dec = decoder_for(args, odim, self.sos, self.eos, self.att, labeldist)  # decoder
         # weight initialization
         if args.etype == 'wav2vec':
-            if args.mtlalpha != 1.0:
-                module_list = [self.ctc, self.att, self.dec]
-                self.init_modules_like_chainer(module_list, decoder=True)
-            else:
-                module_list = [self.ctc]
-                self.init_modules_like_chainer(module_list, decoder=False)
+            if args.w2v2_is_finetuned == False:    # only initialise if w2v2 model is not finetuned
+                if args.mtlalpha != 1.0:        # if not full ctc
+                    module_list = [self.ctc, self.att, self.dec]
+                    self.init_modules_like_chainer(module_list, decoder=True)
+                else:
+                    module_list = [self.ctc]
+                    self.init_modules_like_chainer(module_list, decoder=False)
         else:
             self.init_like_chainer()
         # options for beam search
@@ -465,6 +470,9 @@ class E2E(ASRInterface, torch.nn.Module):
         else:
             hs_pad, hlens = xs_pad, ilens
 
+        if isinstance(self.enc, Wav2VecEncoder): # set probs to zero during inference
+            self.enc.encoders.mask_prob=0
+            self.enc.encoders.mask_channel_prob=0
         # 1. Encoder
         hs_pad, hlens, _ = self.enc(hs_pad, hlens)
 
@@ -475,7 +483,24 @@ class E2E(ASRInterface, torch.nn.Module):
         else:
             lpz = None
             normalize_score = True
+        def best_path(prob):
+            # best path decoding for testing
+            best = torch.argmax(prob, dim=2)
+            output = []
+            prev = None
+            for i in range(best.shape[-1]):
+                if best[0,i] != prev:
+                    output.append(best[0,i].item())
+                    prev = best[0,i]
+            final_output = [2]
+            for num in output:
+                if num != 0:
+                    final_output.append(num)
+            final_output.append(2)
+            return final_output
 
+        #yy = best_path(lpz)
+        #return [[{'yseq': yy, 'vscore': 100, 'score': 100}]]
         # 2. Decoder
         hlens = torch.tensor(list(map(int, hlens)))  # make sure hlens is tensor
         y = self.dec.recognize_beam_batch(

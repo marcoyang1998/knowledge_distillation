@@ -652,8 +652,11 @@ def main(cmd_args):
         with open(args.dict, "rb") as f:
             dictionary = f.readlines()
         char_list = [entry.decode("utf-8").split(" ")[0] for entry in dictionary]
-        char_list.insert(0, "<blank>")
-        char_list.append("<eos>")
+        if args.etype == "wav2vec" and args.w2v2_is_finetuned:
+            pass
+        else:
+            char_list.insert(0, "<blank>")
+            char_list.append("<eos>")
         # for non-autoregressive maskctc model
         if "maskctc" in args.model_module:
             char_list.append("<mask>")

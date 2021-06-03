@@ -285,6 +285,7 @@ class Wav2VecEncoder(torch.nn.Module):
         self.freeze_finetune_updates = freeze_finetune_updates
         self.register_buffer("num_updates", torch.LongTensor([0]))
         self.conv_subsampling_factor = 1
+        #del model
 
     def forward(self, xs_pad, ilens, prev_states=None):
         """Forward FairSeqWav2Vec2 Encoder.
@@ -482,13 +483,29 @@ def encoder_for(args, idim, subsample):
 
 
 if __name__ == '__main__':
-    w2v_dir_path = '/home/marcoyang/Downloads/wav2vec_model/wav2vec_small.pt'
-    w2v2_enc = Wav2VecEncoder(model_dir=w2v_dir_path, output_size=768, fine_tuned=False)
+    import soundfile
+    import torch
+
+    cuda = torch.device('cuda')
+    audio_path = '/home/marcoyang/Downloads/3526-175658-0000.flac'
+    x = soundfile.read(audio_path)[0]
+    x = (x-x.mean())/x.std()
+    x = torch.from_numpy(x).view(1,-1)
+    x = torch.randn(16,64000)
+    x = x.float().to(cuda)
+
+    w2v_dir_path = '/home/marcoyang/Downloads/wav2vec_model/wav2vec_small_100h.pt'
+    w2v2_enc = Wav2VecEncoder(model_dir=w2v_dir_path, output_size=768, fine_tuned=True, freeze_finetune_updates=0)
+    w2v2_enc.to(cuda)
+
     print(w2v2_enc)
-    x = torch.randn(1,10000)
     enc = w2v2_enc.encoders
     #y = enc(x)
+
+
     from tqdm import tqdm
     for i in tqdm(range(2000)):
         y = w2v2_enc.forward(x,[10000])
+
+    print("Finished")
     #print(y.mean())
