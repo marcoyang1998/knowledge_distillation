@@ -560,6 +560,8 @@ def get_parser(parser=None, required=True):
     )
     parser.add_argument("--fbank-fmin", type=float, default=0.0, help="")
     parser.add_argument("--fbank-fmax", type=float, default=None, help="")
+    parser.add_argument("--model-init-path", type=str, help="Load model from a initialisation, this \
+                                                             folder must have a ")
     return parser
 
 

@@ -449,6 +449,8 @@ def train(args):
 
     if (args.enc_init is not None or args.dec_init is not None) and args.num_encs == 1:
         model = load_trained_modules(idim_list[0], odim, args)
+    elif args.model_init_path:
+        model = load_trained_model(args.model_init_path, training=True)
     else:
         model_class = dynamic_import(args.model_module)
         model = model_class(
