@@ -57,6 +57,13 @@ class Tri_state_adam(object):
             "optimizer": self.optimizer.state_dict(),
         }
 
+    def load_state_dict(self, state_dict):
+        for key, value in state_dict.items():
+            if key == "optimizer":
+                self.optimizer.load_state_dict(state_dict['optimizer'])
+            else:
+                setattr(self, key, value)
+
 def get_opt(model_params, phase, total_steps, init_lr, warmup_lr, end_lr):
     """Get standard NoamOpt."""
     base = torch.optim.Adam(model_params, lr=0, betas=(0.9, 0.98), eps=1e-08)
