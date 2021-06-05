@@ -269,8 +269,10 @@ class Wav2VecEncoder(torch.nn.Module):
 
         model.remove_pretraining_modules() # remove modules that won't be used in fine-tuning
         self.encoders = model
+        # initialise some fine-tuning parameters
         self.encoders.mask_channel_length=64
         self.encoders.mask_channel_prob=mask_channel_prob
+        self.encoders.feature_grad_mult = 0.0
         self.pretrained_params = copy.deepcopy(model.state_dict())
         self.normalize_before = normalize_before
         if self.normalize_before:
