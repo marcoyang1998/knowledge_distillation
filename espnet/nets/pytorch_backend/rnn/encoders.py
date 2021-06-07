@@ -308,7 +308,7 @@ class Wav2VecEncoder(torch.nn.Module):
             self.num_updates += 1
             print("Start fine-tuning wav2vec parameters after {} updates!".format(self.num_updates))
         if self.num_updates%10==0:
-            print("Actual batch size: {} at update: {}".format(xs_pad.shape[0], self.num_updates))
+            print("Actual batch size: {} at update: {}, finetuning transformer: {}".format(xs_pad.shape[0], self.num_updates, ft))
         with torch.no_grad() if not ft else contextlib.nullcontext():
             enc_outputs = self.encoders(
                 xs_pad,
@@ -489,25 +489,40 @@ if __name__ == '__main__':
     import torch
 
     cuda = torch.device('cuda')
-    audio_path = '/home/marcoyang/Downloads/3526-175658-0000.flac'
-    x = soundfile.read(audio_path)[0]
-    x = (x-x.mean())/x.std()
-    x = torch.from_numpy(x).view(1,-1)
-    x = torch.randn(16,64000)
-    x = x.float().to(cuda)
+
+    x1 = torch.randn(1,16000)
+    x2 = torch.randn(1,32000)
+    x3 = torch.randn(1,48000)
+    x = [x1,x2,x3]
+    xlen = [[16000],[32000],[48000]]
 
     w2v_dir_path = '/home/marcoyang/Downloads/wav2vec_model/wav2vec_small_100h.pt'
-    w2v2_enc = Wav2VecEncoder(model_dir=w2v_dir_path, output_size=768, fine_tuned=True, freeze_finetune_updates=0)
+    w2v2_enc = Wav2VecEncoder(model_dir=w2v_dir_path, output_size=768, fine_tuned=True, freeze_finetune_updates=10000)
     w2v2_enc.to(cuda)
+
+    def calculate_output_shape(dim):
+        strides = [5,2,2,2,2,2,2]
+        kernels = [10,3,3,3,3,2,2]
+        for i in range(7):
+            dim = int((dim-kernels[i])/strides[i])+1
+        return dim
 
     print(w2v2_enc)
     enc = w2v2_enc.encoders
-    #y = enc(x)
-
-
-    from tqdm import tqdm
-    for i in tqdm(range(2000)):
-        y = w2v2_enc.forward(x,[10000])
-
-    print("Finished")
-    #print(y.mean())
+    length = 16000
+    subsample_freq = []
+    plt_x = np.linspace(16000, 200000, 100)
+    with torch.no_grad():
+        for i in range(100):
+            dim = int(plt_x[i])
+            x = torch.randn(1, int(plt_x[i]))
+            y = w2v2_enc.forward(x.to(cuda).float(), [int(plt_x[i])])
+            assert y[0].shape[1] == calculate_output_shape(dim)
+            subsample_freq.append(y[0].shape[1]*16000/(int(plt_x[i])))
+        torch.cuda.empty_cache()
+    import matplotlib.pyplot as plt
+    print("Plotting")
+    plt.plot(plt_x, subsample_freq)
+    plt.ylabel('Frequency')
+    plt.xlabel('Num samples')
+    plt.show()

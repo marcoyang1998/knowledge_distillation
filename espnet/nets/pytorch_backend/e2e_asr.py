@@ -517,6 +517,35 @@ class E2E(ASRInterface, torch.nn.Module):
             self.train()
         return y
 
+    def generate_ctc_prob(self, xs):
+        prev = self.training
+        self.eval()
+        ilens = np.fromiter((xx.shape[0] for xx in xs), dtype=np.int64)
+
+        if len(xs[0].shape) > 1:
+            xs = [xx[:: self.subsample[0], :] for xx in xs]
+            xs = [to_device(self, to_torch_tensor(xx).float()) for xx in xs]
+            xs_pad = pad_list(xs, 0.0)
+        else:
+            xs = [xx[:: self.subsample[0]] for xx in xs]
+            xs = [to_device(self, to_torch_tensor(xx).float()) for xx in xs]
+            xs_pad = pad_list(xs, 0.0)
+
+        if self.frontend is not None:
+            enhanced, hlens, mask = self.frontend(xs_pad, ilens)
+            hs_pad, hlens = self.feature_transform(enhanced, hlens)
+        else:
+            hs_pad, hlens = xs_pad, ilens
+
+        if isinstance(self.enc, Wav2VecEncoder): # set probs to zero during inference
+            self.enc.encoders.mask_prob=0
+            self.enc.encoders.mask_channel_prob=0
+
+        hs_pad, hlens, _ = self.enc(hs_pad, hlens)
+        lpz = self.ctc.log_softmax(hs_pad)
+        return lpz
+
+
     def enhance(self, xs):
         """Forward only in the frontend stage.
 

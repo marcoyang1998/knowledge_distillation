@@ -257,6 +257,17 @@ def get_parser():
         default=0.999,
         help="Threshold probability for CTC output",
     )
+    parser.add_argument(
+        "--collect-ctc-label",
+        type=strtobool,
+        default=False,
+        help="If true, only collect ctc-labels and don't perform actual recognition"
+    )
+    parser.add_argument(
+        "--output-ctc-dir",
+        type=str,
+        help="Where to store the collected ctc label"
+    )
 
     return parser
 
@@ -325,6 +336,12 @@ def main(args):
 
             recog(args)
         elif args.backend == "pytorch":
+            if args.collect_ctc_label:
+                from espnet.asr.pytorch_backend.asr import collect_ctc_labels
+                logging.info("Do ctc label collection")
+                collect_ctc_labels(args)
+                return
+
             if args.num_encs == 1:
                 # Experimental API that supports custom LMs
                 if args.api == "v2":

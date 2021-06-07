@@ -1446,6 +1446,56 @@ def enhance(args):
                 logging.info("Breaking the process.")
                 break
 
+def collect_ctc_labels(args):
+    print("----Starting collecting labels----")
+    set_deterministic_pytorch(args)
+    model, train_args = load_trained_model(args.model, training=False)
+    assert isinstance(model, ASRInterface)
+
+    if args.ngpu == 1:
+        gpu_id = list(range(args.ngpu))
+        logging.info("gpu id: " + str(gpu_id))
+        model.cuda()
+
+    with open(args.recog_json, "rb") as f:
+        js = json.load(f)["utts"]
+    new_js = {}
+
+    load_inputs_and_targets = LoadInputsAndTargets(
+        mode="asr",
+        load_output=False,
+        sort_in_input_length=False,
+        preprocess_conf=train_args.preprocess_conf
+        if args.preprocess_conf is None
+        else args.preprocess_conf,
+        preprocess_args={"train": False},
+    )
+
+    def calculate_output_shape(dim):
+        strides = [5,2,2,2,2,2,2]
+        kernels = [10,3,3,3,3,2,2]
+        for i in range(7):
+            dim = int((dim-kernels[i])/strides[i])+1
+        return dim
+
+    #outputs = {}
+    keys = list(js.keys())
+    assert args.batchsize == 1
+    with torch.no_grad():
+        for name in keys:
+            batch = [(name, js[name])]
+            feats = (
+                load_inputs_and_targets(batch)[0]
+                if args.num_encs == 1
+                else load_inputs_and_targets(batch)
+            )
+            output_prob = model.generate_ctc_prob(feats)
+            assert output_prob.shape[1] == calculate_output_shape(feats[0].shape[0])
+            np.save(os.path.join(args.output_ctc_dir, name+".npy"), output_prob.numpy())
+            logging.info("Generated ctc prob for {}".format(name))
+
+
+
 
 def ctc_align(args):
     """CTC forced alignments with the given args.
