@@ -19,12 +19,13 @@ class CTC(torch.nn.Module):
     :param bool reduce: reduce the CTC loss into a scalar
     """
 
-    def __init__(self, odim, eprojs, dropout_rate, ctc_type="warpctc", reduce=True):
+    def __init__(self, odim, eprojs, dropout_rate, ctc_type="warpctc", reduce=True, do_kd=False, kd_factor=1.0):
         super().__init__()
         self.dropout_rate = dropout_rate
         self.loss = None
         self.ctc_lo = torch.nn.Linear(eprojs, odim)
         self.probs = None  # for visualization
+        self.do_knowledge_distillation = do_kd
 
         # In case of Pytorch >= 1.7.0, CTC will be always builtin
         self.ctc_type = (
@@ -32,6 +33,11 @@ class CTC(torch.nn.Module):
             if LooseVersion(torch.__version__) < LooseVersion("1.7.0")
             else "builtin"
         )
+        if do_kd:
+            if self.ctc_type != "builtin":
+                raise NotImplementedError("Only support knowledge ditillation with builtin ctc")
+            else:
+                self.kd_factor = kd_factor
 
         # ctc_type = buitin not support Pytorch=1.0.1
         if self.ctc_type == "builtin" and (
@@ -85,6 +91,25 @@ class CTC(torch.nn.Module):
         else:
             raise NotImplementedError
 
+    def kd_loss_fn(self, logits, soft_logits, hlens):
+        # logits (B, adim,odim)
+        # soft_label ()
+        def CXE(predicted, target):
+            # target: a valid distribution
+            # predicted: logits
+            return -(target * predicted.log_softmax(-1)).sum(dim=1).mean()
+        bs = logits.shape[0]
+        loss = torch.zeros(1).to(torch.device('cuda'))
+        for b in range(bs):
+
+            #soft_probs = soft_logits[b].softmax(-1)
+            loss += CXE(logits[b, :hlens[b],:], soft_logits[b][:hlens[b],:].softmax(-1))
+        return loss
+
+
+        pass
+
+
     def forward(self, hs_pad, hlens, ys_pad):
         """CTC forward
 
@@ -106,8 +131,13 @@ class CTC(torch.nn.Module):
         if self.ctc_type == "builtin":
             olens = to_device(ys_hat, torch.LongTensor([len(s) for s in ys]))
             hlens = hlens.long()
-            ys_pad = torch.cat(ys)  # without this the code breaks for asr_mix
-            self.loss = self.loss_fn(ys_hat, ys_pad, hlens, olens)
+
+            if self.do_knowledge_distillation:
+                self.kd_loss = self.kd_loss_fn(ys_hat.transpose(0,1), ys_pad, hlens)
+                self.loss = self.kd_loss
+            else:
+                ys_pad = torch.cat(ys)  # without this the code breaks for asr_mix
+                self.loss = self.loss_fn(ys_hat, ys_pad, hlens, olens)
         else:
             self.loss = None
             hlens = torch.from_numpy(np.fromiter(hlens, dtype=np.int32))
@@ -259,8 +289,9 @@ def ctc_for(args, odim, reduce=True):
     num_encs = getattr(args, "num_encs", 1)  # use getattr to keep compatibility
     if num_encs == 1:
         # compatible with single encoder asr mode
+        do_kd = getattr(args, "do_knowledge_distillation", False)
         return CTC(
-            odim, args.eprojs, args.dropout_rate, ctc_type=args.ctc_type, reduce=reduce
+            odim, args.eprojs, args.dropout_rate, ctc_type=args.ctc_type, reduce=reduce, do_kd=do_kd
         )
     elif num_encs >= 1:
         ctcs_list = torch.nn.ModuleList()

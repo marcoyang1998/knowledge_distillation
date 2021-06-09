@@ -269,11 +269,12 @@ class CustomConverter(object):
 
     """
 
-    def __init__(self, subsampling_factor=1, dtype=torch.float32):
+    def __init__(self, subsampling_factor=1, dtype=torch.float32, do_knowledge_distillation=False):
         """Construct a CustomConverter object."""
         self.subsampling_factor = subsampling_factor
         self.ignore_id = -1
         self.dtype = dtype
+        self.do_knowledge_distillation = do_knowledge_distillation
 
     def __call__(self, batch, device=torch.device("cpu")):
         """Transform a batch and send it to a device.
@@ -288,7 +289,10 @@ class CustomConverter(object):
         """
         # batch should be located in list
         assert len(batch) == 1
-        xs, ys = batch[0]
+        if len(batch[0])==2:
+            xs, ys = batch[0]
+        else:
+            xs, ys, y_kd = batch[0]
 
         # perform subsampling
         if self.subsampling_factor > 1:
@@ -318,15 +322,29 @@ class CustomConverter(object):
 
         ilens = torch.from_numpy(ilens).to(device)
         # NOTE: this is for multi-output (e.g., speech translation)
-        ys_pad = pad_list(
-            [
-                torch.from_numpy(
-                    np.array(y[0][:]) if isinstance(y, tuple) else y
-                ).long()
-                for y in ys
-            ],
-            self.ignore_id,
-        ).to(device)
+        if self.do_knowledge_distillation:
+            for i in range(len(ys)):
+                if ys[i].shape[0] == 1:
+                    ys[i] = np.squeeze(ys[i], axis=0)
+            ys_pad = pad_list(
+                [
+                    torch.from_numpy(
+                        np.array(y[0][:]) if isinstance(y, tuple) else y
+                    ).float()
+                    for y in ys
+                ],
+                self.ignore_id,
+            ).to(device)
+        else:
+            ys_pad = pad_list(
+                [
+                    torch.from_numpy(
+                        np.array(y[0][:]) if isinstance(y, tuple) else y
+                    ).long()
+                    for y in ys
+                ],
+                self.ignore_id,
+            ).to(device)
 
         return xs_pad, ilens, ys_pad
 
@@ -591,7 +609,10 @@ def train(args):
 
     # Setup a converter
     if args.num_encs == 1:
-        converter = CustomConverter(subsampling_factor=model.subsample[0], dtype=dtype)
+        if args.do_knowledge_distillation:
+            converter = CustomConverter(subsampling_factor=model.subsample[0], dtype=dtype, do_knowledge_distillation=args.do_knowledge_distillation)
+        else:
+            converter = CustomConverter(subsampling_factor=model.subsample[0], dtype=dtype)
     else:
         converter = CustomConverterMulEnc(
             [i[0] for i in model.subsample_list], dtype=dtype
@@ -642,6 +663,8 @@ def train(args):
         load_output=True,
         preprocess_conf=args.preprocess_conf,
         preprocess_args={"train": True},  # Switch the mode of preprocessing
+        do_knowledge_distillation=args.do_knowledge_distillation, # if is doing knowledge distillation
+        use_second_target=args.do_knowledge_distillation
     )
     load_cv = LoadInputsAndTargets(
         mode="asr",

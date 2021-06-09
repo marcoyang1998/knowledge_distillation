@@ -12,6 +12,7 @@ parser.add_argument('--dict_dir',type=str, help="dictionary directory")
 parser.add_argument('--ext',type=str, help="audio extension")
 parser.add_argument('--output_dir',type=str, help="output directory")
 parser.add_argument('--odim', type=int, help="output dimension")
+parser.add_argument('--kd_folder', type=str, nargs='?', default=None, help="folder storing KD training data")
 
 
 def text_to_token(text, token_dict):
@@ -34,16 +35,18 @@ def text_to_token(text, token_dict):
 
 
 
-def generate_w2v2_json_input(dataset_dir, dict_dir, ext, output_dir, odim):
+def generate_w2v2_json_input(dataset_dir, dict_dir, ext, output_dir, odim, kd_folder):
     char_dict = get_char_dict(dict_dir)
-    txt_files = glob.glob(dataset_dir + '/*/*/*.txt', recursive=True)
+    txt_files = glob.glob(dataset_dir + '/*/*/*/*.txt', recursive=True)
     json_dict = {}
     json_dict['utts'] = {}
+    count = 0
     for txt in txt_files:
         folder_dir = '/'.join(txt.split('/')[:-1])
         with open(txt, 'r') as f:
             data = f.readlines()
         for line in data:
+            count += 1
             audio_name = line.split(' ')[0]
             audio_path = os.path.join(folder_dir,audio_name+'.'+ext)
             if ext == 'flac':
@@ -67,16 +70,25 @@ def generate_w2v2_json_input(dataset_dir, dict_dir, ext, output_dir, odim):
                                                             "text": transcript,
                                                             "token": token,
                                                             "tokenid": tokenid})
+            if kd_folder:
+                kd_path = os.path.join(kd_folder, audio_name+'.npy')
+                if not os.path.isfile(kd_path):
+                    raise ValueError("{} is not prepared!".format(kd_path))
+                json_dict['utts'][audio_name]["output"].append({
+                    "feat": kd_path,
+                    "filetype": "npy"
+                })
             json_dict['utts'][audio_name]["utt2spk"] = '-'.join(audio_name.split('-')[:-1])
     with open(os.path.join(output_dir, "data_w2v2.json"),'w') as f:
         json.dump(json_dict, f)
-
+    print("Output stored in {} with {} utterances".format(os.path.join(output_dir, "data_w2v2.json"), count))
 
 def get_char_dict(file_path):
     with open(file_path, 'r') as f:
         data = f.readlines()
     char_dict = {}
     for line in data:
+        #print(line)
         ch, id =line.split(' ')
         if id[-1] == '\n':
             id = id[:-1]
@@ -91,4 +103,5 @@ if __name__ == '__main__':
     output_dir = args.output_dir
     ext = args.ext
     odim = args.odim
-    generate_w2v2_json_input(dataset_dir,dict_dir, ext, output_dir, odim)
+    kd = args.kd_folder
+    generate_w2v2_json_input(dataset_dir,dict_dir, ext, output_dir, odim, kd)

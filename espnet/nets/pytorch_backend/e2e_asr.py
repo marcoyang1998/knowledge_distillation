@@ -288,7 +288,10 @@ class E2E(ASRInterface, torch.nn.Module):
             y_hats = self.ctc.argmax(hs_pad).data
             for i, y in enumerate(y_hats):
                 y_hat = [x[0] for x in groupby(y)]
-                y_true = ys_pad[i]
+                if len(ys_pad[0].shape) == 2: # doing knowledge distillation
+                    y_true = ys_pad[i].argmax(-1)
+                else:
+                    y_true = ys_pad[i]
                 seq_hat = [self.char_list[int(idx)] for idx in y_hat if int(idx) != -1]
                 seq_true = [
                     self.char_list[int(idx)] for idx in y_true if int(idx) != -1

@@ -562,6 +562,19 @@ def get_parser(parser=None, required=True):
     parser.add_argument("--fbank-fmax", type=float, default=None, help="")
     parser.add_argument("--model-init-path", type=str, help="Load model from a initialisation, this \
                                                              folder must have a ")
+
+    parser.add_argument(
+        "--do-knowledge-distillation",
+        type=strtobool,
+        default=False,
+        help="do knowledge distillation?"
+    )
+    parser.add_argument(
+        "--kd-mtl-factor",
+        type=float,
+        default=1.0,
+        help="doing KD in a mtl manner, the factor is the proportion of the KD loss in the total loss"
+    )
     return parser
 
 

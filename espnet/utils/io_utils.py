@@ -49,9 +49,10 @@ class LoadInputsAndTargets(object):
         use_second_target=False,
         preprocess_args=None,
         keep_all_data_on_mem=False,
+        do_knowledge_distillation=False
     ):
         self._loaders = {}
-        if mode not in ["asr", "tts", "mt", "vc"]:
+        if mode not in ["asr", "tts", "mt", "vc", "kd"]:
             raise ValueError("Only asr or tts are allowed: mode={}".format(mode))
         if preprocess_conf is not None:
             self.preprocessing = Transformation(preprocess_conf)
@@ -76,6 +77,10 @@ class LoadInputsAndTargets(object):
                 '"use_second_target" and "use_speaker_embedding" is '
                 "used only for tts or vc mode"
             )
+        if (
+            do_knowledge_distillation and not use_second_target
+        ):
+            raise ValueError("If doing knowledge distillation, the second target should also be used")
 
         self.mode = mode
         self.load_output = load_output
@@ -83,6 +88,7 @@ class LoadInputsAndTargets(object):
         self.sort_in_input_length = sort_in_input_length
         self.use_speaker_embedding = use_speaker_embedding
         self.use_second_target = use_second_target
+        self.do_knowledge_distillation=do_knowledge_distillation
         if preprocess_args is None:
             self.preprocess_args = {}
         else:

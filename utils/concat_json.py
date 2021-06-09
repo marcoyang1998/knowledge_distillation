@@ -1,5 +1,6 @@
 import json
 import argparse
+import os
 
 parser = argparse.ArgumentParser(description="Concatenate two json files")
 parser.add_argument("--file1", type=str, help="First json file")
@@ -14,9 +15,9 @@ def concat(f1, f2, output_folder):
     print("File1: {} utterances, file2: {} utterances".format(len(data1['utts']), len(data2['utts'])))
     for k in data2["utts"]:
         data1["utts"][k] = data2["utts"][k]
-    with open(output_folder, 'w') as f:
+    with open(os.path.join(output_folder, "data_w2v2.json"), 'w') as f:
         json.dump(data1, f)
-    print("New json stored in {} with {} utterances".format(output_folder, len(data1['utts'])))
+    print("New json stored in {} with {} utterances".format(os.path.join(output_folder, "data_w2v2.json"), len(data1['utts'])))
 
 if __name__ == '__main__':
     args = parser.parse_args()
