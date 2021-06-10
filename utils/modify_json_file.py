@@ -75,6 +75,7 @@ def generate_w2v2_json_input(dataset_dir, dict_dir, ext, output_dir, odim, kd_fo
                 if not os.path.isfile(kd_path):
                     raise ValueError("{} is not prepared!".format(kd_path))
                 json_dict['utts'][audio_name]["output"].append({
+                    "name": "target2",
                     "feat": kd_path,
                     "filetype": "npy"
                 })

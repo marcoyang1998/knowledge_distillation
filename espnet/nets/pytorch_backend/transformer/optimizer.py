@@ -71,5 +71,5 @@ class NoamOpt(object):
 
 def get_std_opt(model_params, d_model, warmup, factor):
     """Get standard NoamOpt."""
-    base = torch.optim.Adam(model_params, lr=0, betas=(0.9, 0.98), eps=1e-9)
+    base = torch.optim.Adam(model_params, lr=0, betas=(0.9, 0.98), eps=1e-9, weight_decay=1e-6)
     return NoamOpt(d_model, factor, warmup, base)
