@@ -163,7 +163,11 @@ class ErrorCalculator(object):
         cers, char_ref_lens = [], []
         for i, y in enumerate(ys_hat):
             y_hat = [x[0] for x in groupby(y)]
-            y_true = ys_pad[i]
+            if len(ys_pad[0].shape) == 2:  # doing knowledge distillation
+                y_true = ys_pad[i].argmax(-1)
+            else:
+                y_true = ys_pad[i]
+            #y_true = ys_pad[i]
             seq_hat, seq_true = [], []
             for idx in y_hat:
                 idx = int(idx)
