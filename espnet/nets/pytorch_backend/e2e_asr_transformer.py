@@ -138,7 +138,7 @@ class E2E(ASRInterface, torch.nn.Module):
         self.mtlalpha = args.mtlalpha
         if args.mtlalpha > 0.0:
             self.ctc = CTC(
-                odim, args.adim, args.dropout_rate, ctc_type=args.ctc_type, reduce=True
+                odim, args.adim, args.dropout_rate, ctc_type=args.ctc_type, reduce=True, do_kd=args.do_knowledge_distillation
             )
         else:
             self.ctc = None

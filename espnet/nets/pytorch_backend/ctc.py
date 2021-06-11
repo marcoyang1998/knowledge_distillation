@@ -97,13 +97,19 @@ class CTC(torch.nn.Module):
         def CXE(predicted, target):
             # target: a valid distribution
             # predicted: logits
-            return -(target * predicted.log_softmax(-1)).sum(dim=1).mean()
+            #return -(target * predicted.log_softmax(-1)).sum(dim=1).mean()
+            return -(target * predicted.log_softmax(-1)).sum()
         bs = logits.shape[0]
         loss = torch.zeros(1).to(torch.device('cuda'))
         for b in range(bs):
-
+            if soft_logits[b].shape[0]/hlens[b] > 2:
             #soft_probs = soft_logits[b].softmax(-1)
-            loss += CXE(logits[b, :hlens[b],:], soft_logits[b][:hlens[b],:].softmax(-1))
+                truncated = soft_logits[b][:(2*hlens[b]),:]
+                loss += CXE(logits[b, :hlens[b], :], truncated[::2, :].softmax(-1))
+            else:
+                loss += CXE(logits[b, :hlens[b], :], soft_logits[b, :hlens[b], :].softmax(-1))
+
+
         return loss
 
 

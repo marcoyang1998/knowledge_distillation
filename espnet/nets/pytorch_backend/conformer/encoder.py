@@ -30,6 +30,7 @@ from espnet.nets.pytorch_backend.transformer.positionwise_feed_forward import (
 )
 from espnet.nets.pytorch_backend.transformer.repeat import repeat
 from espnet.nets.pytorch_backend.transformer.subsampling import Conv2dSubsampling
+from espnet.nets.pytorch_backend.transformer.subsampling import Conv2dSubsampling2
 
 
 class Encoder(torch.nn.Module):
@@ -120,6 +121,9 @@ class Encoder(torch.nn.Module):
                 pos_enc_class(attention_dim, positional_dropout_rate),
             )
             self.conv_subsampling_factor = 4
+        elif input_layer == "conv2d2":
+            self.embed = Conv2dSubsampling2(idim, attention_dim, dropout_rate, pos_enc_class(attention_dim, positional_dropout_rate))
+            self.conv_subsampling_factor = 2
         elif input_layer == "vgg2l":
             self.embed = VGG2L(idim, attention_dim)
             self.conv_subsampling_factor = 4
@@ -231,7 +235,7 @@ class Encoder(torch.nn.Module):
             torch.Tensor: Mask tensor (#batch, time).
 
         """
-        if isinstance(self.embed, (Conv2dSubsampling, VGG2L)):
+        if isinstance(self.embed, (Conv2dSubsampling, VGG2L, Conv2dSubsampling2)):
             xs, masks = self.embed(xs, masks)
         else:
             xs = self.embed(xs)
