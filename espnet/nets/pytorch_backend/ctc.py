@@ -99,21 +99,10 @@ class CTC(torch.nn.Module):
             # predicted: logits
             #return -(target * predicted.log_softmax(-1)).sum(dim=1).mean()
             return -(target * predicted.log_softmax(-1)).sum()
-        bs = logits.shape[0]
-        loss = torch.zeros(1).to(torch.device('cuda'))
-        for b in range(bs):
-            if soft_logits[b].shape[0]/hlens[b] > 2:
-            #soft_probs = soft_logits[b].softmax(-1)
-                truncated = soft_logits[b][:(2*hlens[b]),:]
-                loss += CXE(logits[b, :hlens[b], :], truncated[::2, :].softmax(-1))
-            else:
-                assert soft_logits[b].shape[0]/hlens[b] < 1.1
-                loss += CXE(logits[b, :hlens[b], :], soft_logits[b, :hlens[b], :].softmax(-1))
-        loss = loss/bs
-        return loss
 
-
-        pass
+        soft_logits = soft_logits.view(-1, 31)
+        assert soft_logits.shape[0] >= hlens
+        return CXE(logits[:hlens,:], soft_logits[:hlens,:].softmax(-1))
 
 
     def forward(self, hs_pad, hlens, ys_pad):
@@ -135,12 +124,17 @@ class CTC(torch.nn.Module):
             ys_hat = ys_hat.transpose(0, 1)
 
         if self.ctc_type == "builtin":
-            olens = to_device(ys_hat, torch.LongTensor([len(s) for s in ys]))
             hlens = hlens.long()
-
+            olens = to_device(ys_hat, torch.LongTensor([len(s) for s in ys]))
             if self.do_knowledge_distillation:
-                self.kd_loss = self.kd_loss_fn(ys_hat.transpose(0,1), ys_pad, hlens)
-                self.loss = self.kd_loss
+                ys_hat = ys_hat.transpose(0, 1)
+                bs = len(ys_pad)
+                self.kd_loss = torch.zeros(1).to(ys_hat.device)
+                for b in range(bs):
+                    self.kd_loss += self.kd_loss_fn(ys_hat[b], ys[b], hlens[b])
+                print("Teach label length: {}, student length: {}, hlens: {}".format(ys[b].shape[0]/31,
+                                                                                     ys_hat[b].shape[0], hlens[b]))
+                self.loss = self.kd_loss/bs
             else:
                 ys_pad = torch.cat(ys)  # without this the code breaks for asr_mix
                 self.loss = self.loss_fn(ys_hat, ys_pad, hlens, olens)
