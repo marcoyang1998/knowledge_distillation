@@ -107,9 +107,9 @@ class CTC(torch.nn.Module):
                 truncated = soft_logits[b][:(2*hlens[b]),:]
                 loss += CXE(logits[b, :hlens[b], :], truncated[::2, :].softmax(-1))
             else:
+                assert soft_logits[b].shape[0]/hlens[b] < 1.1
                 loss += CXE(logits[b, :hlens[b], :], soft_logits[b, :hlens[b], :].softmax(-1))
-
-
+        loss = loss/bs
         return loss
 
 
