@@ -138,16 +138,16 @@ class CustomEvaluator(BaseEvaluator):
                     # x: original json with loaded features
                     #    will be converted to chainer variable later
                     if self.ngpu == 0:
-                        if self.do_kd and len(x) == 3:
-                            self.model._forward(*x)
-                        else:
+                        if self.do_kd and len(x) == 4:
                             self.model._forward_kd(*x)
+                        else:
+                            self.model._forward(*x)
                     elif self.ngpu == 1:
                         # apex does not support torch.nn.DataParallel
-                        if self.do_kd and len(x) == 3: # if the default forward is _forward_kd
-                            self.model._forward(*x)
-                        else:
+                        if self.do_kd and len(x) == 4:
                             self.model._forward_kd(*x)
+                        else:
+                            self.model._forward(*x)
                     else:
                         data_parallel(self.model, x, range(self.ngpu))
 
