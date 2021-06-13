@@ -19,10 +19,11 @@ class CTC(torch.nn.Module):
     :param bool reduce: reduce the CTC loss into a scalar
     """
 
-    def __init__(self, odim, eprojs, dropout_rate, ctc_type="warpctc", reduce=True, do_kd=False, kd_factor=1.0):
+    def __init__(self, odim, eprojs, dropout_rate, ctc_type="warpctc", reduce=True, do_kd=False, kd_factor=1.0, kd_temp=1.0):
         super().__init__()
         self.dropout_rate = dropout_rate
         self.loss = None
+        self.ctc_odim=odim
         self.ctc_lo = torch.nn.Linear(eprojs, odim)
         self.probs = None  # for visualization
         self.do_knowledge_distillation = do_kd
@@ -33,11 +34,16 @@ class CTC(torch.nn.Module):
             if LooseVersion(torch.__version__) < LooseVersion("1.7.0")
             else "builtin"
         )
-        if do_kd:
+
+        if self.do_knowledge_distillation:
             if self.ctc_type != "builtin":
                 raise NotImplementedError("Only support knowledge ditillation with builtin ctc")
-            else:
-                self.kd_factor = kd_factor
+
+            self.kd_factor = kd_factor
+            self.forward = self._forward_kd
+            self.kd_temp=kd_temp
+        else:
+            self.forward = self._forward
 
         # ctc_type = buitin not support Pytorch=1.0.1
         if self.ctc_type == "builtin" and (
@@ -93,19 +99,18 @@ class CTC(torch.nn.Module):
 
     def kd_loss_fn(self, logits, soft_logits, hlens):
         # logits (B, adim,odim)
-        # soft_label ()
-        def CXE(predicted, target):
+        def CXE(target, predicted):
             # target: a valid distribution
             # predicted: logits
-            #return -(target * predicted.log_softmax(-1)).sum(dim=1).mean()
+
             return -(target * predicted.log_softmax(-1)).sum()
 
         soft_logits = soft_logits.view(-1, 31)
         assert soft_logits.shape[0] >= hlens
-        return CXE(logits[:hlens,:], soft_logits[:hlens,:].softmax(-1))
+        return CXE((soft_logits[:hlens,:]/self.kd_temp).softmax(-1), logits[:hlens,:]/self.kd_temp)
 
 
-    def forward(self, hs_pad, hlens, ys_pad):
+    def _forward(self, hs_pad, hlens, ys_pad):
         """CTC forward
 
         :param torch.Tensor hs_pad: batch of padded hidden state sequences (B, Tmax, D)
@@ -126,18 +131,8 @@ class CTC(torch.nn.Module):
         if self.ctc_type == "builtin":
             hlens = hlens.long()
             olens = to_device(ys_hat, torch.LongTensor([len(s) for s in ys]))
-            if self.do_knowledge_distillation:
-                ys_hat = ys_hat.transpose(0, 1)
-                bs = len(ys_pad)
-                self.kd_loss = torch.zeros(1).to(ys_hat.device)
-                for b in range(bs):
-                    self.kd_loss += self.kd_loss_fn(ys_hat[b], ys[b], hlens[b])
-                print("Teach label length: {}, student length: {}, hlens: {}".format(ys[b].shape[0]/31,
-                                                                                     ys_hat[b].shape[0], hlens[b]))
-                self.loss = self.kd_loss/bs
-            else:
-                ys_pad = torch.cat(ys)  # without this the code breaks for asr_mix
-                self.loss = self.loss_fn(ys_hat, ys_pad, hlens, olens)
+            ys_pad = torch.cat(ys)  # without this the code breaks for asr_mix
+            self.loss = self.loss_fn(ys_hat, ys_pad, hlens, olens)
         else:
             self.loss = None
             hlens = torch.from_numpy(np.fromiter(hlens, dtype=np.int32))
@@ -183,6 +178,54 @@ class CTC(torch.nn.Module):
             logging.info("ctc loss:" + str(float(self.loss)))
 
         return self.loss
+
+    def _forward_kd(self, hs_pad, hlens, ys_pad, ys_kd_pad):
+        ys = [y[y != self.ignore_id] for y in ys_pad]
+        ys_kd = [y[y != self.ignore_id] for y in ys_kd_pad]
+
+        # zero padding for hs
+        ys_hat = self.ctc_lo(F.dropout(hs_pad, p=self.dropout_rate))
+        if self.ctc_type != "gtnctc":
+            ys_hat = ys_hat.transpose(0, 1)
+        if self.ctc_type == "builtin":
+            hlens = hlens.long()
+            olens = to_device(ys_hat, torch.LongTensor([len(s) for s in ys]))
+            # original ctc loss
+            ys_pad = torch.cat(ys)  # without this the code breaks for asr_mix
+            self.loss_ctc = self.loss_fn(ys_hat, ys_pad, hlens, olens)
+            # distillation loss
+            bs = len(hlens)
+            self.loss_kd = 0
+            for b in range(bs):
+                self.loss_kd += self.kd_loss_fn(ys_hat.transpose(0, 1)[b], ys_kd[b], hlens[b])
+            self.loss_kd = self.loss_kd / bs
+
+            # cast type of kd_factor
+            kd_factor = torch.tensor(self.kd_factor).float().to(self.loss_ctc.device)
+            self.loss = kd_factor * self.loss_kd + (1 - kd_factor) * self.loss_ctc
+
+        else:
+            raise NotImplementedError('Types other than builtin are not implemented')
+
+        logging.info(
+            self.__class__.__name__
+            + " input lengths:  "
+            + "".join(str(hlens).split("\n"))
+        )
+        logging.info(
+            self.__class__.__name__
+            + " output lengths: "
+            + "".join(str(olens).split("\n"))
+        )
+
+        if self.reduce:
+            # NOTE: sum() is needed to keep consistency
+            # since warpctc return as tensor w/ shape (1,)
+            # but builtin return as tensor w/o shape (scalar).
+            self.loss = self.loss.sum()
+            logging.info("kd loss:{}, ctc loss:{}, joint loss:{}".format(self.loss_kd, self.loss_ctc, self.loss))
+
+        return tuple([self.loss_kd, self.loss_ctc, kd_factor])
 
     def softmax(self, hs_pad):
         """softmax of frame activations
@@ -277,6 +320,235 @@ class CTC(torch.nn.Module):
 
         return output_state_seq
 
+class CTC_kd_mtl(torch.nn.Module):
+    def __init__(self, odim, eprojs, dropout_rate,
+                 ctc_type="warpctc",
+                 reduce=True,
+                 kd_factor=1.0):
+        super().__init__()
+        self.dropout_rate = dropout_rate
+        self.loss = None
+        self.ctc_lo = torch.nn.Linear(eprojs, odim)
+        self.probs = None  # for visualization
+
+        # In case of Pytorch >= 1.7.0, CTC will be always builtin
+        self.ctc_type = (
+            ctc_type
+            if LooseVersion(torch.__version__) < LooseVersion("1.7.0")
+            else "builtin"
+        )
+
+        if self.ctc_type != "builtin":
+            raise NotImplementedError("Only support knowledge ditillation with builtin ctc")
+
+        self.kd_factor = kd_factor
+        assert kd_factor <= 1.0 and kd_factor > 0, "kd factor is invalid, value must be within (0,1], get {}".format(kd_factor)
+
+        if self.ctc_type == "builtin" and (
+            LooseVersion(torch.__version__) < LooseVersion("1.1.0")
+        ):
+            self.ctc_type = "cudnnctc"
+
+        if ctc_type != self.ctc_type:
+            logging.warning(f"CTC was set to {self.ctc_type} due to PyTorch version.")
+
+        if self.ctc_type == "builtin":
+            reduction_type = "sum" if reduce else "none"
+            self.ctc_loss = torch.nn.CTCLoss(
+                reduction=reduction_type, zero_infinity=True
+            )
+        elif self.ctc_type == "cudnnctc":
+            reduction_type = "sum" if reduce else "none"
+            self.ctc_loss = torch.nn.CTCLoss(reduction=reduction_type)
+        elif self.ctc_type == "warpctc":
+            import warpctc_pytorch as warp_ctc
+
+            self.ctc_loss = warp_ctc.CTCLoss(size_average=True, reduce=reduce)
+        elif self.ctc_type == "gtnctc":
+            from espnet.nets.pytorch_backend.gtn_ctc import GTNCTCLossFunction
+
+            self.ctc_loss = GTNCTCLossFunction.apply
+        else:
+            raise ValueError(
+                'ctc_type must be "builtin" or "warpctc": {}'.format(self.ctc_type)
+            )
+        self.ignore_id = -1
+        self.reduce = reduce
+
+    def ctc_loss_fn(self, th_pred, th_target, th_ilen, th_olen):
+        if self.ctc_type in ["builtin", "cudnnctc"]:
+            th_pred = th_pred.log_softmax(2)
+            # Use the deterministic CuDNN implementation of CTC loss to avoid
+            #  [issue#17798](https://github.com/pytorch/pytorch/issues/17798)
+            with torch.backends.cudnn.flags(deterministic=True):
+                loss = self.ctc_loss(th_pred, th_target, th_ilen, th_olen)
+            # Batch-size average
+            loss = loss / th_pred.size(1)
+            return loss
+        elif self.ctc_type == "warpctc":
+            return self.ctc_loss(th_pred, th_target, th_ilen, th_olen)
+        elif self.ctc_type == "gtnctc":
+            targets = [t.tolist() for t in th_target]
+            log_probs = torch.nn.functional.log_softmax(th_pred, dim=2)
+            return self.ctc_loss(log_probs, targets, 0, "none")
+        else:
+            raise NotImplementedError
+
+    def kd_loss_fn(self, logits, soft_logits, hlens):
+        # logits (B, adim,odim)
+        # soft_label ()
+        def CXE(predicted, target):
+            # target: a valid distribution
+            # predicted: logits
+            return -(target * predicted.log_softmax(-1)).sum()
+
+        soft_logits = soft_logits.view(-1, 31)
+        assert soft_logits.shape[0] >= hlens
+        return CXE(logits[:hlens, :], soft_logits[:hlens, :].softmax(-1))
+
+    def forward(self, hs_pad, hlens, ys_pad, ys_kd_pad):
+        ys = [y[y != self.ignore_id] for y in ys_pad]
+        ys_kd = [y[y != self.ignore_id] for y in ys_kd_pad]
+
+        # zero padding for hs
+        ys_hat = self.ctc_lo(F.dropout(hs_pad, p=self.dropout_rate))
+        if self.ctc_type != "gtnctc":
+            ys_hat = ys_hat.transpose(0, 1)
+        if self.ctc_type == "builtin":
+            hlens = hlens.long()
+            olens = to_device(ys_hat, torch.LongTensor([len(s) for s in ys]))
+            # original ctc loss
+            ys_pad = torch.cat(ys)  # without this the code breaks for asr_mix
+            self.loss_ctc = self.ctc_loss_fn(ys_hat, ys_pad, hlens, olens)
+            # distillation loss
+            #ys_hat = ys_hat.transpose(0, 1)
+            bs = len(hlens)
+            self.loss_kd = 0
+            for b in range(bs):
+                self.loss_kd += self.kd_loss_fn(ys_hat.transpose(0,1)[b], ys_kd[b], hlens[b])
+            self.loss_kd = self.loss_kd / bs
+
+
+
+            # cast type of kd_factor
+            kd_factor = torch.tensor(self.kd_factor).float().to(self.loss_ctc.device)
+            self.loss = kd_factor*self.loss_kd + (1-kd_factor)*self.loss_ctc
+
+        else:
+            raise NotImplementedError('Types other than builtin are not implemented')
+
+        logging.info(
+            self.__class__.__name__
+            + " input lengths:  "
+            + "".join(str(hlens).split("\n"))
+        )
+        logging.info(
+            self.__class__.__name__
+            + " output lengths: "
+            + "".join(str(olens).split("\n"))
+        )
+
+        if self.reduce:
+            # NOTE: sum() is needed to keep consistency
+            # since warpctc return as tensor w/ shape (1,)
+            # but builtin return as tensor w/o shape (scalar).
+            self.loss = self.loss.sum()
+            logging.info("kd loss:{}, ctc loss:{}, joint loss:{}".format(self.loss_kd, self.loss_ctc, self.loss))
+
+        return tuple([self.loss_kd, self.loss_ctc, kd_factor])
+
+    def softmax(self, hs_pad):
+        """softmax of frame activations
+
+        :param torch.Tensor hs_pad: 3d tensor (B, Tmax, eprojs)
+        :return: log softmax applied 3d tensor (B, Tmax, odim)
+        :rtype: torch.Tensor
+        """
+        self.probs = F.softmax(self.ctc_lo(hs_pad), dim=2)
+        return self.probs
+
+    def log_softmax(self, hs_pad):
+        """log_softmax of frame activations
+
+        :param torch.Tensor hs_pad: 3d tensor (B, Tmax, eprojs)
+        :return: log softmax applied 3d tensor (B, Tmax, odim)
+        :rtype: torch.Tensor
+        """
+        return F.log_softmax(self.ctc_lo(hs_pad), dim=2)
+
+    def argmax(self, hs_pad):
+        """argmax of frame activations
+
+        :param torch.Tensor hs_pad: 3d tensor (B, Tmax, eprojs)
+        :return: argmax applied 2d tensor (B, Tmax)
+        :rtype: torch.Tensor
+        """
+        return torch.argmax(self.ctc_lo(hs_pad), dim=2)
+
+    def forced_align(self, h, y, blank_id=0):
+        """forced alignment.
+
+        :param torch.Tensor h: hidden state sequence, 2d tensor (T, D)
+        :param torch.Tensor y: id sequence tensor 1d tensor (L)
+        :param int y: blank symbol index
+        :return: best alignment results
+        :rtype: list
+        """
+
+        def interpolate_blank(label, blank_id=0):
+            """Insert blank token between every two label token."""
+            label = np.expand_dims(label, 1)
+            blanks = np.zeros((label.shape[0], 1), dtype=np.int64) + blank_id
+            label = np.concatenate([blanks, label], axis=1)
+            label = label.reshape(-1)
+            label = np.append(label, label[0])
+            return label
+
+        lpz = self.log_softmax(h)
+        lpz = lpz.squeeze(0)
+
+        y_int = interpolate_blank(y, blank_id)
+
+        logdelta = np.zeros((lpz.size(0), len(y_int))) - 100000000000.0  # log of zero
+        state_path = (
+            np.zeros((lpz.size(0), len(y_int)), dtype=np.int16) - 1
+        )  # state path
+
+        logdelta[0, 0] = lpz[0][y_int[0]]
+        logdelta[0, 1] = lpz[0][y_int[1]]
+
+        for t in six.moves.range(1, lpz.size(0)):
+            for s in six.moves.range(len(y_int)):
+                if y_int[s] == blank_id or s < 2 or y_int[s] == y_int[s - 2]:
+                    candidates = np.array([logdelta[t - 1, s], logdelta[t - 1, s - 1]])
+                    prev_state = [s, s - 1]
+                else:
+                    candidates = np.array(
+                        [
+                            logdelta[t - 1, s],
+                            logdelta[t - 1, s - 1],
+                            logdelta[t - 1, s - 2],
+                        ]
+                    )
+                    prev_state = [s, s - 1, s - 2]
+                logdelta[t, s] = np.max(candidates) + lpz[t][y_int[s]]
+                state_path[t, s] = prev_state[np.argmax(candidates)]
+
+        state_seq = -1 * np.ones((lpz.size(0), 1), dtype=np.int16)
+
+        candidates = np.array(
+            [logdelta[-1, len(y_int) - 1], logdelta[-1, len(y_int) - 2]]
+        )
+        prev_state = [len(y_int) - 1, len(y_int) - 2]
+        state_seq[-1] = prev_state[np.argmax(candidates)]
+        for t in six.moves.range(lpz.size(0) - 2, -1, -1):
+            state_seq[t] = state_path[t + 1, state_seq[t + 1, 0]]
+
+        output_state_seq = []
+        for t in six.moves.range(0, lpz.size(0)):
+            output_state_seq.append(y_int[state_seq[t, 0]])
+
+        return output_state_seq
 
 def ctc_for(args, odim, reduce=True):
     """Returns the CTC module for the given args and output dimension
@@ -290,8 +562,9 @@ def ctc_for(args, odim, reduce=True):
     if num_encs == 1:
         # compatible with single encoder asr mode
         do_kd = getattr(args, "do_knowledge_distillation", False)
+        kd_mtl_factor = getattr(args, "kd_mtl_factor", 1.0)
         return CTC(
-            odim, args.eprojs, args.dropout_rate, ctc_type=args.ctc_type, reduce=reduce, do_kd=do_kd
+            odim, args.eprojs, args.dropout_rate, ctc_type=args.ctc_type, reduce=reduce, do_kd=do_kd, kd_factor=kd_mtl_factor
         )
     elif num_encs >= 1:
         ctcs_list = torch.nn.ModuleList()

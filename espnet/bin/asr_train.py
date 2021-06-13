@@ -575,6 +575,17 @@ def get_parser(parser=None, required=True):
         default=1.0,
         help="doing KD in a mtl manner, the factor is the proportion of the KD loss in the total loss"
     )
+    parser.add_argument(
+        "--kd-temperature",
+        type=float,
+        default=1.0,
+    )
+    parser.add_argument(
+        "--start-evaluation-epoch",
+        type=int,
+        default=0,
+        help="start evaluation after xx epochs"
+    )
     return parser
 
 

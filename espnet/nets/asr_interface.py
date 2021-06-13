@@ -52,6 +52,9 @@ class ASRInterface:
         """
         raise NotImplementedError("forward method is not implemented")
 
+    def forward_kd(self, xs, ilens, ys, ys_kd):
+        raise NotImplementedError("forward_kd method is not implemented")
+
     def recognize(self, x, recog_args, char_list=None, rnnlm=None):
         """Recognize x for evaluation.
 

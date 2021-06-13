@@ -58,6 +58,18 @@ class Reporter(chainer.Chain):
         logging.info("mtl loss:" + str(mtl_loss))
         reporter.report({"loss": mtl_loss}, self)
 
+    def report_kd(self, loss_ctc, loss_kd, loss_att, acc, cer_ctc, cer, wer, mtl_loss):
+        """Report at every step."""
+        reporter.report({"loss_ctc": loss_ctc}, self)
+        reporter.report({"loss_kd": loss_kd}, self)
+        reporter.report({"loss_att": loss_att}, self)
+        reporter.report({"acc": acc}, self)
+        reporter.report({"cer_ctc": cer_ctc}, self)
+        reporter.report({"cer": cer}, self)
+        reporter.report({"wer": wer}, self)
+        logging.info("mtl loss:" + str(mtl_loss))
+        reporter.report({"loss": mtl_loss}, self)
+
 
 class E2E(ASRInterface, torch.nn.Module):
     """E2E module.

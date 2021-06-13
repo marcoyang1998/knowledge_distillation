@@ -52,7 +52,7 @@ class LoadInputsAndTargets(object):
         do_knowledge_distillation=False
     ):
         self._loaders = {}
-        if mode not in ["asr", "tts", "mt", "vc", "kd"]:
+        if mode not in ["asr", "tts", "mt", "vc", "asr_kd"]:
             raise ValueError("Only asr or tts are allowed: mode={}".format(mode))
         if preprocess_conf is not None:
             self.preprocessing = Transformation(preprocess_conf)
@@ -170,6 +170,10 @@ class LoadInputsAndTargets(object):
             return_batch, uttid_list = self._create_batch_asr(
                 x_feats_dict, y_feats_dict, uttid_list
             )
+        elif self.mode == "asr_kd":
+            return_batch, uttid_list = self._create_batch_asr_kd(
+                x_feats_dict, y_feats_dict, uttid_list
+            )
         elif self.mode == "tts":
             _, info = batch[0]
             eos = int(info["output"][0]["shape"][1]) - 1
@@ -262,6 +266,60 @@ class LoadInputsAndTargets(object):
         else:
             return_batch = OrderedDict([(x_name, x) for x_name, x in zip(x_names, xs)])
         return return_batch, uttid_list
+
+    def _create_batch_asr_kd(self, x_feats_dict, y_feats_dict, uttid_list):
+        xs = list(x_feats_dict.values())
+
+        if self.load_output:
+            ys, ys_kd = list(y_feats_dict.values()) # token label and distillatio label
+            ys = [ys]
+            ys_kd = [ys_kd]
+            assert len(xs[0]) == len(ys[0]), "Number of input: {}, number of total targets {}".format(len(xs[0]), len(ys[0]))
+
+            # get index of non-zero length samples
+            nonzero_idx = list(filter(lambda i: len(ys[0][i]) > 0, range(len(ys[0]))))
+            for n in range(1, len(ys)):
+                nonzero_idx = filter(lambda i: len(ys[n][i]) > 0, nonzero_idx)
+        else:
+            # Note(kamo): Be careful not to make nonzero_idx to a generator
+            nonzero_idx = list(range(len(xs[0])))
+
+        if self.sort_in_input_length:
+            # sort in input lengths based on the first input
+            nonzero_sorted_idx = sorted(nonzero_idx, key=lambda i: -len(xs[0][i]))
+        else:
+            nonzero_sorted_idx = nonzero_idx
+
+        if len(nonzero_sorted_idx) != len(xs[0]):
+            logging.warning(
+                "Target sequences include empty tokenid (batch {} -> {}).".format(
+                    len(xs[0]), len(nonzero_sorted_idx)
+                )
+            )
+
+        # remove zero-length samples
+        xs = [[x[i] for i in nonzero_sorted_idx] for x in xs]
+        uttid_list = [uttid_list[i] for i in nonzero_sorted_idx]
+
+        x_names = list(x_feats_dict.keys())
+        if self.load_output:
+            ys = [[y[i] for i in nonzero_sorted_idx] for y in ys]
+            y_names = list(y_feats_dict.keys())
+            y_token_name = [y_names[0]]
+            y_kd_name = [y_names[1]]
+
+            # Keeping x_name and y_name, e.g. input1, for future extension
+            return_batch = OrderedDict(
+                [
+                    *[(x_name, x) for x_name, x in zip(x_names, xs)],
+                    *[(y_name, y) for y_name, y in zip(y_token_name, ys)],
+                    *[(y_name, y) for y_name, y in zip(y_kd_name, ys_kd)],
+                ]
+            )
+        else:
+            return_batch = OrderedDict([(x_name, x) for x_name, x in zip(x_names, xs)])
+        return return_batch, uttid_list
+
 
     def _create_batch_mt(self, x_feats_dict, y_feats_dict, uttid_list):
         """Create a OrderedDict for the mini-batch

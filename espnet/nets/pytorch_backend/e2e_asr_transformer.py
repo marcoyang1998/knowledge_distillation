@@ -14,7 +14,7 @@ from espnet.nets.asr_interface import ASRInterface
 from espnet.nets.ctc_prefix_score import CTCPrefixScore
 from espnet.nets.e2e_asr_common import end_detect
 from espnet.nets.e2e_asr_common import ErrorCalculator
-from espnet.nets.pytorch_backend.ctc import CTC
+from espnet.nets.pytorch_backend.ctc import CTC, CTC_kd_mtl
 from espnet.nets.pytorch_backend.e2e_asr import CTC_LOSS_THRESHOLD
 from espnet.nets.pytorch_backend.e2e_asr import Reporter
 from espnet.nets.pytorch_backend.nets_utils import get_subsample
@@ -138,10 +138,27 @@ class E2E(ASRInterface, torch.nn.Module):
         self.mtlalpha = args.mtlalpha
         if args.mtlalpha > 0.0:
             self.ctc = CTC(
-                odim, args.adim, args.dropout_rate, ctc_type=args.ctc_type, reduce=True, do_kd=args.do_knowledge_distillation
+                odim,
+                args.adim,
+                args.dropout_rate,
+                ctc_type=args.ctc_type,
+                reduce=True,
+                do_kd=args.do_knowledge_distillation,
+                kd_factor=args.kd_mtl_factor,
+                kd_temp=args.kd_temperature
             )
         else:
             self.ctc = None
+
+        # select the actual forward function
+        if args.do_knowledge_distillation:
+            self.forward = self._forward_kd
+            self.calculate_all_attentions = self._calculate_all_ctc_probs_kd
+            self.calculate_all_ctc_probs = self._calculate_all_ctc_probs_kd
+        else:
+            self.forward = self._forward
+            self.calculate_all_attentions = self._calculate_all_ctc_probs
+            self.calculate_all_ctc_probs = self._calculate_all_ctc_probs
 
         if args.report_cer or args.report_wer:
             self.error_calculator = ErrorCalculator(
@@ -160,7 +177,7 @@ class E2E(ASRInterface, torch.nn.Module):
         # initialize parameters
         initialize(self, args.transformer_init)
 
-    def forward(self, xs_pad, ilens, ys_pad):
+    def _forward(self, xs_pad, ilens, ys_pad):
         """E2E forward.
 
         :param torch.Tensor xs_pad: batch of padded source sequences (B, Tmax, idim)
@@ -205,7 +222,7 @@ class E2E(ASRInterface, torch.nn.Module):
         else:
             batch_size = xs_pad.size(0)
             hs_len = hs_mask.view(batch_size, -1).sum(1)
-            loss_ctc = self.ctc(hs_pad.view(batch_size, -1, self.adim), hs_len, ys_pad)
+            loss_ctc = self.ctc._forward(hs_pad.view(batch_size, -1, self.adim), hs_len, ys_pad)
             if not self.training and self.error_calculator is not None:
                 ys_hat = self.ctc.argmax(hs_pad.view(batch_size, -1, self.adim)).data
                 cer_ctc = self.error_calculator(ys_hat.cpu(), ys_pad.cpu(), is_ctc=True)
@@ -243,6 +260,89 @@ class E2E(ASRInterface, torch.nn.Module):
         else:
             logging.warning("loss (=%f) is not correct", loss_data)
         return self.loss
+
+    def _forward_kd(self, xs_pad, ilens, ys_pad, ys_kd_pad):
+        if ys_kd_pad is None:
+            print("During evaluation!")
+            self._forward(xs_pad, ilens, ys_pad)
+            return
+        xs_pad = xs_pad[:, : max(ilens)]  # for data parallel
+        src_mask = make_non_pad_mask(ilens.tolist()).to(xs_pad.device).unsqueeze(-2)
+        hs_pad, hs_mask = self.encoder(xs_pad, src_mask)
+        self.hs_pad = hs_pad
+
+        # 2. forward decoder
+        if self.decoder is not None:
+            ys_in_pad, ys_out_pad = add_sos_eos(
+                ys_pad, self.sos, self.eos, self.ignore_id
+            )
+            ys_mask = target_mask(ys_in_pad, self.ignore_id)
+            pred_pad, pred_mask = self.decoder(ys_in_pad, ys_mask, hs_pad, hs_mask)
+            self.pred_pad = pred_pad
+
+            # 3. compute attention loss
+            loss_att = self.criterion(pred_pad, ys_out_pad)
+            self.acc = th_accuracy(
+                pred_pad.view(-1, self.odim), ys_out_pad, ignore_label=self.ignore_id
+            )
+        else:
+            loss_att = None
+            self.acc = None
+
+        cer_ctc = None
+        if self.mtlalpha == 0.0:
+            loss_ctc = None
+        else:
+            batch_size = xs_pad.size(0)
+            hs_len = hs_mask.view(batch_size, -1).sum(1)
+            loss_kd, loss_ctc, kd_factor = self.ctc._forward_kd(hs_pad.view(batch_size, -1, self.adim), hs_len, ys_pad, ys_kd_pad)
+            if not self.training and self.error_calculator is not None:
+                ys_hat = self.ctc.argmax(hs_pad.view(batch_size, -1, self.adim)).data
+                cer_ctc = self.error_calculator(ys_hat.cpu(), ys_pad.cpu(), is_ctc=True)
+            # for visualization
+            if not self.training:
+                self.ctc.softmax(hs_pad)
+
+        # 5. compute cer/wer
+        if self.training or self.error_calculator is None or self.decoder is None:
+            cer, wer = None, None
+        else:
+            ys_hat = pred_pad.argmax(dim=-1)
+            cer, wer = self.error_calculator(ys_hat.cpu(), ys_pad.cpu())
+
+        kd_mtl_loss = kd_factor*loss_kd + (1-kd_factor)*loss_ctc
+        alpha = self.mtlalpha
+        if alpha == 0:
+            self.loss = loss_att
+            loss_att_data = float(loss_att)
+            loss_ctc_data = None
+            loss_kd_data = None
+        elif alpha == 1:
+            self.loss = kd_mtl_loss
+            loss_att_data = None
+            loss_ctc_data = float(loss_ctc)
+            loss_kd_data = float(loss_kd)
+        else:
+            self.loss = alpha * kd_mtl_loss + (1 - alpha) * loss_att
+            loss_att_data = float(loss_att)
+            loss_ctc_data = float(loss_ctc)
+            loss_kd_data = float(loss_kd)
+
+        loss_data = float(self.loss)
+        if loss_data < CTC_LOSS_THRESHOLD and not math.isnan(loss_data):
+            self.reporter.report_kd(
+                loss_ctc_data, loss_kd_data, loss_att_data, self.acc, cer_ctc, cer, wer, loss_data
+            )
+        else:
+            logging.warning("loss (=%f) is not correct", loss_data)
+        return self.loss
+
+    def set_forward(self, type='kd'):
+        if type=='kd':
+            print("Forward changed to kd")
+            self.forward = self._forward_kd
+        else:
+            self.forward = self._forward
 
     def scorers(self):
         """Scorers."""
@@ -480,7 +580,7 @@ class E2E(ASRInterface, torch.nn.Module):
         )
         return nbest_hyps
 
-    def calculate_all_attentions(self, xs_pad, ilens, ys_pad):
+    def _calculate_all_attentions(self, xs_pad, ilens, ys_pad):
         """E2E attention calculation.
 
         :param torch.Tensor xs_pad: batch of padded input sequences (B, Tmax, idim)
@@ -506,7 +606,25 @@ class E2E(ASRInterface, torch.nn.Module):
         self.train()
         return ret
 
-    def calculate_all_ctc_probs(self, xs_pad, ilens, ys_pad):
+    def _calculate_all_attentions_kd(self, xs_pad, ilens, ys_pad, ys_kd_pad):
+        self.eval()
+        with torch.no_grad():
+            self.forward(xs_pad, ilens, ys_pad, ys_kd_pad)
+        ret = dict()
+        for name, m in self.named_modules():
+            if (
+                    isinstance(m, MultiHeadedAttention)
+                    or isinstance(m, DynamicConvolution)
+                    or isinstance(m, RelPositionMultiHeadedAttention)
+            ):
+                ret[name] = m.attn.cpu().numpy()
+            if isinstance(m, DynamicConvolution2D):
+                ret[name + "_time"] = m.attn_t.cpu().numpy()
+                ret[name + "_freq"] = m.attn_f.cpu().numpy()
+        self.train()
+        return ret
+
+    def _calculate_all_ctc_probs(self, xs_pad, ilens, ys_pad):
         """E2E CTC probability calculation.
 
         :param torch.Tensor xs_pad: batch of padded input sequences (B, Tmax)
@@ -522,6 +640,20 @@ class E2E(ASRInterface, torch.nn.Module):
         self.eval()
         with torch.no_grad():
             self.forward(xs_pad, ilens, ys_pad)
+        for name, m in self.named_modules():
+            if isinstance(m, CTC) and m.probs is not None:
+                ret = m.probs.cpu().numpy()
+        self.train()
+        return ret
+
+    def _calculate_all_ctc_probs_kd(self, xs_pad, ilens, ys_pad, ys_kd_pad):
+        ret = None
+        if self.mtlalpha == 0:
+            return ret
+
+        self.eval()
+        with torch.no_grad():
+            self.forward(xs_pad, ilens, ys_pad, ys_kd_pad)
         for name, m in self.named_modules():
             if isinstance(m, CTC) and m.probs is not None:
                 ret = m.probs.cpu().numpy()

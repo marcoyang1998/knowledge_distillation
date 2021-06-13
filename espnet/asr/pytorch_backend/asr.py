@@ -89,13 +89,11 @@ class CustomEvaluator(BaseEvaluator):
 
     """
 
-    def __init__(self, model, iterator, target, device, ngpu=None):
+    def __init__(self, model, iterator, target, device, ngpu=None, do_kd=False, interval=1, start=0):
         super(CustomEvaluator, self).__init__(iterator, target)
         self.model = model
         self.device = device
-        self._epoch = 0
-        #self.interval = interval
-        #print("Valid interval: {}".format(self.interval))
+        self._call = 0
         if ngpu is not None:
             self.ngpu = ngpu
         elif device.type == "cpu":
@@ -103,20 +101,20 @@ class CustomEvaluator(BaseEvaluator):
         else:
             self.ngpu = 1
         self.report = {}
+        self.do_kd = do_kd
+        self.interval = interval
+        self.start = start
 
     # The core part of the update routine can be customized by overriding
     def evaluate(self):
         """Main evaluate routine for CustomEvaluator."""
-        #if self.interval == -1:
-        #    return {'validation/main/loss_ctc': 0,
-        #            'validation/main/cer_ctc': 0,
-        #            'validation/main/cer': 0.0,
-        #            'validation/main/wer': 0.0,
-        #            'validation/main/loss': 0}
-        #if self._epoch%self.interval != 0:
-        #    self._epoch+=1
-        #    return self.report
-        self._epoch += 1
+        self._call += 1
+        if self._call*self.interval < self.start:
+            return {#'validation/main/loss_ctc': None,
+                    'validation/main/cer_ctc': 1,
+                    #'validation/main/loss': 1000
+                    }
+
         iterator = self._iterators["main"]
 
         if self.eval_hook:
@@ -140,9 +138,17 @@ class CustomEvaluator(BaseEvaluator):
                     # x: original json with loaded features
                     #    will be converted to chainer variable later
                     if self.ngpu == 0:
-                        self.model(*x)
-                    else:
+                        if self.do_kd and len(x) == 3:
+                            self.model._forward(*x)
+                        else:
+                            self.model._forward_kd(*x)
+                    elif self.ngpu == 1:
                         # apex does not support torch.nn.DataParallel
+                        if self.do_kd and len(x) == 3: # if the default forward is _forward_kd
+                            self.model._forward(*x)
+                        else:
+                            self.model._forward_kd(*x)
+                    else:
                         data_parallel(self.model, x, range(self.ngpu))
 
                 summary.add(observation)
@@ -177,6 +183,7 @@ class CustomUpdater(StandardUpdater):
         grad_noise=False,
         accum_grad=1,
         use_apex=False,
+        do_kd=False
     ):
         super(CustomUpdater, self).__init__(train_iter, optimizer)
         self.model = model
@@ -188,6 +195,7 @@ class CustomUpdater(StandardUpdater):
         self.grad_noise = grad_noise
         self.iteration = 0
         self.use_apex = use_apex
+        self.do_kd = do_kd
 
     # The core part of the update routine can be customized by overriding.
     def update_core(self):
@@ -347,6 +355,67 @@ class CustomConverter(object):
             ).to(device)
 
         return xs_pad, ilens, ys_pad
+
+# A converter for knowledge distillation
+class CustomConverterKD(object):
+    def __init__(self, subsampling_factor=1, dtype=torch.float32):
+        self.subsampling_factor = subsampling_factor
+        self.ignore_id = -1
+        self.dtype = dtype
+
+    def __call__(self, batch, device=torch.device("cpu")):
+        assert len(batch) == 1
+        if len(batch[0]) == 2: # no multitask distillation
+            xs, ys = batch[0]
+        else:
+            xs, ys, ys_kd = batch[0]
+        if self.subsampling_factor > 1:
+            xs = [x[:: self.subsampling_factor, :] for x in xs]
+        ilens = np.array([x.shape[0] for x in xs])
+
+        # perform padding and convert to tensor
+        # currently only support real number
+        if xs[0].dtype.kind == "c":
+            xs_pad_real = pad_list(
+                [torch.from_numpy(x.real).float() for x in xs], 0
+            ).to(device, dtype=self.dtype)
+            xs_pad_imag = pad_list(
+                [torch.from_numpy(x.imag).float() for x in xs], 0
+            ).to(device, dtype=self.dtype)
+            # Note(kamo):
+            # {'real': ..., 'imag': ...} will be changed to ComplexTensor in E2E.
+            # Don't create ComplexTensor and give it E2E here
+            # because torch.nn.DataParellel can't handle it.
+            xs_pad = {"real": xs_pad_real, "imag": xs_pad_imag}
+        else:
+            xs_pad = pad_list([torch.from_numpy(x).float() for x in xs], 0).to(
+                device, dtype=self.dtype
+            )
+        # pad distillation soft label
+        for i in range(len(ys)):
+            if ys_kd[i].shape[0] == 1:
+                ys_kd[i] = np.squeeze(ys_kd[i], axis=0)
+        ys_kd_pad = pad_list(
+            [
+                torch.from_numpy(
+                    np.array(y[0][:]) if isinstance(y, tuple) else y
+                ).float()
+                for y in ys_kd
+            ],
+            self.ignore_id,
+        ).to(device)
+        # pad input sequence
+        ys_pad = pad_list(
+            [
+                torch.from_numpy(
+                    np.array(y[0][:]) if isinstance(y, tuple) else y
+                ).long()
+                for y in ys
+            ],
+            self.ignore_id,
+        ).to(device)
+        ilens = torch.from_numpy(ilens).to(device)
+        return xs_pad, ilens, ys_pad, ys_kd_pad
 
 
 class CustomConverterMulEnc(object):
@@ -610,9 +679,12 @@ def train(args):
     # Setup a converter
     if args.num_encs == 1:
         if args.do_knowledge_distillation:
-            converter = CustomConverter(subsampling_factor=model.subsample[0], dtype=dtype, do_knowledge_distillation=args.do_knowledge_distillation)
+            converter = CustomConverterKD(subsampling_factor=model.subsample[0], dtype=dtype)
+            valid_converter = CustomConverter(subsampling_factor=model.subsample[0], dtype=dtype)
         else:
             converter = CustomConverter(subsampling_factor=model.subsample[0], dtype=dtype)
+            valid_converter = CustomConverter(subsampling_factor=model.subsample[0], dtype=dtype)
+
     else:
         converter = CustomConverterMulEnc(
             [i[0] for i in model.subsample_list], dtype=dtype
@@ -657,9 +729,13 @@ def train(args):
         iaxis=0,
         oaxis=0,
     )
+    if args.do_knowledge_distillation:
+        mode = "asr_kd"
+    else:
+        mode = "asr"
 
     load_tr = LoadInputsAndTargets(
-        mode="asr",
+        mode=mode,
         load_output=True,
         preprocess_conf=args.preprocess_conf,
         preprocess_args={"train": True},  # Switch the mode of preprocessing
@@ -667,7 +743,7 @@ def train(args):
         use_second_target=args.do_knowledge_distillation
     )
     load_cv = LoadInputsAndTargets(
-        mode="asr",
+        mode='asr', # valid loader should always be asr
         load_output=True,
         preprocess_conf=args.preprocess_conf,
         preprocess_args={"train": False},  # Switch the mode of preprocessing
@@ -684,7 +760,7 @@ def train(args):
         collate_fn=lambda x: x[0],
     )
     valid_iter = ChainerDataLoader(
-        dataset=TransformDataset(valid, lambda data: converter([load_cv(data)])),
+        dataset=TransformDataset(valid, lambda data: valid_converter([load_cv(data)])),
         batch_size=1,
         shuffle=False,
         collate_fn=lambda x: x[0],
@@ -719,13 +795,13 @@ def train(args):
     # Evaluate the model with the test dataset for each epoch
     if args.save_interval_iters > 0:
         trainer.extend(
-            CustomEvaluator(model, {"main": valid_iter}, reporter, device, args.ngpu),
+            CustomEvaluator(model, {"main": valid_iter}, reporter, device, ngpu=args.ngpu, do_kd=args.do_knowledge_distillation),
             trigger=(args.save_interval_iters, "epoch"),
         )
     else:
         if args.valid_interval > 0:
             trainer.extend(
-                CustomEvaluator(model, {"main": valid_iter}, reporter, device, args.ngpu),
+                CustomEvaluator(model, {"main": valid_iter}, reporter, device, ngpu=args.ngpu, do_kd=args.do_knowledge_distillation, interval=args.valid_interval, start=args.start_evaluation_epoch),
                 trigger=(args.valid_interval, "epoch")
             )
 
@@ -828,6 +904,8 @@ def train(args):
                     "validation/main/loss_ctc",
                     "main/loss_att",
                     "validation/main/loss_att",
+                    "main/loss_kd",
+                    "validation/main/loss_kd"
                 ]
                 + ([] if args.num_encs == 1 else report_keys_loss_ctc),
                 "epoch",
@@ -974,6 +1052,8 @@ def train(args):
             trigger=(args.report_interval_iters, "iteration"),
         )
         report_keys.append("eps")
+    if args.do_knowledge_distillation:
+        report_keys.append("main/loss_kd")
     if args.report_cer:
         report_keys.append("validation/main/cer")
     if args.report_wer:
