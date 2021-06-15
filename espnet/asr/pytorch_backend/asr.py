@@ -689,10 +689,12 @@ def train(args):
         converter = CustomConverterMulEnc(
             [i[0] for i in model.subsample_list], dtype=dtype
         )
-
+    load_data_on_disk=False
     # read json data
     with open(args.train_json, "rb") as f:
         train_json = json.load(f)["utts"]
+        if len(train_json)<10000:
+            load_data_on_disk=True
     with open(args.valid_json, "rb") as f:
         valid_json = json.load(f)["utts"]
 
@@ -739,6 +741,7 @@ def train(args):
         load_output=True,
         preprocess_conf=args.preprocess_conf,
         preprocess_args={"train": True},  # Switch the mode of preprocessing
+        keep_all_data_on_mem=load_data_on_disk,
         do_knowledge_distillation=args.do_knowledge_distillation, # if is doing knowledge distillation
         use_second_target=args.do_knowledge_distillation
     )
@@ -795,11 +798,11 @@ def train(args):
     # Evaluate the model with the test dataset for each epoch
     if args.save_interval_iters > 0:
         trainer.extend(
-            CustomEvaluator(model, {"main": valid_iter}, reporter, device, ngpu=args.ngpu, do_kd=args.do_knowledge_distillation),
-            trigger=(args.save_interval_iters, "epoch"),
+            CustomEvaluator(model, {"main": valid_iter}, reporter, device, ngpu=args.ngpu, interval=args.save_interval_iters, do_kd=args.do_knowledge_distillation, start=args.start_evaluation_epoch),
+            trigger=(args.save_interval_iters, "iteration"),
         )
     else:
-        if args.valid_interval > 0:
+        if args.valid_interval > 0: # in epoch
             trainer.extend(
                 CustomEvaluator(model, {"main": valid_iter}, reporter, device, ngpu=args.ngpu, do_kd=args.do_knowledge_distillation, interval=args.valid_interval, start=args.start_evaluation_epoch),
                 trigger=(args.valid_interval, "epoch")
@@ -894,6 +897,26 @@ def train(args):
                 file_name="loss.png",
             )
         )
+        trainer.extend(
+            extensions.PlotReport(
+                [
+                    "main/loss",
+                    "validation/main/loss",
+                    "main/loss_trans",
+                    "validation/main/loss_trans",
+                    "main/loss_ctc",
+                    "validation/main/loss_ctc",
+                    "main/loss_lm",
+                    "validation/main/loss_lm",
+                    "main/loss_aux_trans",
+                    "validation/main/loss_aux_trans",
+                    "main/loss_aux_symm_kl",
+                    "validation/main/loss_aux_symm_kl",
+                ],
+                "iteration",
+                file_name="loss_iter.png",
+            ),trigger=(args.save_interval_iters, "iteration")
+        )
     else:
         trainer.extend(
             extensions.PlotReport(
@@ -912,6 +935,23 @@ def train(args):
                 file_name="loss.png",
             )
         )
+        trainer.extend(
+            extensions.PlotReport(
+                [
+                    "main/loss",
+                    "validation/main/loss",
+                    "main/loss_ctc",
+                    "validation/main/loss_ctc",
+                    "main/loss_att",
+                    "validation/main/loss_att",
+                    "main/loss_kd",
+                    "validation/main/loss_kd"
+                ]
+                + ([] if args.num_encs == 1 else report_keys_loss_ctc),
+                "iteration",
+                file_name="loss_iter.png",
+            )
+        )
 
     trainer.extend(
         extensions.PlotReport(
@@ -925,6 +965,14 @@ def train(args):
             "epoch",
             file_name="cer.png",
         )
+    )
+    trainer.extend(
+        extensions.PlotReport(
+            ["main/cer_ctc", "validation/main/cer_ctc"]
+            + ([] if args.num_encs == 1 else report_keys_loss_ctc),
+            "iteration",
+            file_name="cer_iter.png",
+        ),trigger=(args.save_interval_iters, "iteration")
     )
 
     # Save best models

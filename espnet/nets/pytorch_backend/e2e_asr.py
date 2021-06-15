@@ -137,6 +137,7 @@ class E2E(ASRInterface, torch.nn.Module):
         # fill missing arguments for compatibility
         args = fill_missing_args(args, self.add_arguments)
 
+        self._forward = self.forward
         self.mtlalpha = args.mtlalpha
         assert 0.0 <= self.mtlalpha <= 1.0, "mtlalpha should be [0.0, 1.0]"
         self.etype = args.etype
