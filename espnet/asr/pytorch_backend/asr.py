@@ -1646,7 +1646,7 @@ def collect_ctc_labels(args):
             if not os.path.isdir(os.path.join(args.output_ctc_dir, spkr)):
                 os.makedirs(os.path.join(args.output_ctc_dir, spkr))
 
-            np.save(os.path.join(args.output_ctc_dir,spkr, name+".npy"), output_prob.numpy())
+            np.save(os.path.join(args.output_ctc_dir,spkr, name+".npy"), output_prob.cpu().numpy())
             logging.info("Generated ctc prob for {}".format(name))
 
 
