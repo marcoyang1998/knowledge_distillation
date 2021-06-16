@@ -1642,7 +1642,11 @@ def collect_ctc_labels(args):
             )
             output_prob = model.generate_ctc_prob(feats)
             assert output_prob.shape[1] == calculate_output_shape(feats[0].shape[0])
-            np.save(os.path.join(args.output_ctc_dir, name+".npy"), output_prob.numpy())
+            spkr = '-'.join(name.split('-')[:-1])
+            if not os.path.isdir(os.path.join(args.output_ctc_dir, spkr)):
+                os.makedirs(os.path.join(args.output_ctc_dir, spkr))
+
+            np.save(os.path.join(args.output_ctc_dir,spkr, name+".npy"), output_prob.numpy())
             logging.info("Generated ctc prob for {}".format(name))
 
 
