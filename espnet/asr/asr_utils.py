@@ -780,7 +780,7 @@ def torch_load(path, model):
     del model_state_dict
 
 
-def torch_resume(snapshot_path, trainer):
+def torch_resume(snapshot_path, trainer, load_optimizer=False):
     """Resume from snapshot for pytorch.
 
     Args:
@@ -812,7 +812,8 @@ def torch_resume(snapshot_path, trainer):
             trainer.updater.model.load_state_dict(snapshot_dict["model"])
 
     # retore optimizer states
-    trainer.updater.get_optimizer("main").load_state_dict(snapshot_dict["optimizer"])
+    if load_optimizer:
+        trainer.updater.get_optimizer("main").load_state_dict(snapshot_dict["optimizer"])
 
     # delete opened snapshot
     del snapshot_dict
