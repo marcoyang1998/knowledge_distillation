@@ -556,10 +556,12 @@ class E2E(ASRInterface, torch.nn.Module):
         if isinstance(self.enc, Wav2VecEncoder): # set probs to zero during inference
             self.enc.encoders.mask_prob=0
             self.enc.encoders.mask_channel_prob=0
-
-        hs_pad, hlens, _ = self.enc(hs_pad, hlens)
-        lpz = self.ctc.log_softmax(hs_pad)
-        return lpz
+        with torch.no_grad():
+            hs_pad, hlens, _ = self.enc(hs_pad, hlens)
+            lpz = self.ctc.log_softmax(hs_pad)
+        if prev:
+            self.train()
+        return lpz.cpu().numpy()
 
 
     def enhance(self, xs):

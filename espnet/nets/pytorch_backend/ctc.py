@@ -342,7 +342,7 @@ class CTC_kd_mtl(torch.nn.Module):
             raise NotImplementedError("Only support knowledge ditillation with builtin ctc")
 
         self.kd_factor = kd_factor
-        assert kd_factor <= 1.0 and kd_factor > 0, "kd factor is invalid, value must be within (0,1], get {}".format(kd_factor)
+        assert kd_factor <= 1.0 and kd_factor >= 0, "kd factor is invalid, value must be within [0,1], get {}".format(kd_factor)
 
         if self.ctc_type == "builtin" and (
             LooseVersion(torch.__version__) < LooseVersion("1.1.0")

@@ -326,6 +326,11 @@ def get_parser(parser=None, required=True):
         default=2.5e-06
     )
     parser.add_argument(
+        "--adam-lr",
+        type=float,
+        default=2.5e-06
+    )
+    parser.add_argument(
         "--accum-grad", default=1, type=int, help="Number of gradient accumuration"
     )
     parser.add_argument(
