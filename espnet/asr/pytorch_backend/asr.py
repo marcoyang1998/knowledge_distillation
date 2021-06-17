@@ -4,6 +4,7 @@
 """Training/decoding definition for the speech recognition task."""
 
 import copy
+import gc
 import json
 import logging
 import math
@@ -622,7 +623,7 @@ def train(args):
             model_params, rho=0.95, eps=args.eps, weight_decay=args.weight_decay
         )
     elif args.opt == "adam":
-        optimizer = torch.optim.Adam(model_params, weight_decay=args.weight_decay, lr=0.00005)
+        optimizer = torch.optim.Adam(model_params, weight_decay=args.weight_decay, lr=args.adam_lr)
     elif args.opt == "noam":
         from espnet.nets.pytorch_backend.transformer.optimizer import get_std_opt
 
@@ -793,7 +794,7 @@ def train(args):
     # Resume from a snapshot
     if args.resume:
         logging.info("resumed from %s" % args.resume)
-        torch_resume(args.resume, trainer)
+        torch_resume(args.resume, trainer, args.resume_without_previous_opt)
 
     # Evaluate the model with the test dataset for each epoch
     if args.save_interval_iters > 0:
@@ -1619,6 +1620,7 @@ def collect_ctc_labels(args):
         preprocess_conf=train_args.preprocess_conf
         if args.preprocess_conf is None
         else args.preprocess_conf,
+        keep_all_data_on_mem=False,
         preprocess_args={"train": False},
     )
 
@@ -1645,10 +1647,20 @@ def collect_ctc_labels(args):
             spkr = '-'.join(name.split('-')[:-1])
             if not os.path.isdir(os.path.join(args.output_ctc_dir, spkr)):
                 os.makedirs(os.path.join(args.output_ctc_dir, spkr))
-
-            np.save(os.path.join(args.output_ctc_dir,spkr, name+".npy"), output_prob.cpu().numpy())
+            with open(os.path.join(args.output_ctc_dir, spkr, name + ".npy"), 'wb') as f:
+                np.save(f, output_prob)
             logging.info("Generated ctc prob for {}".format(name))
 
+
+    spkr = '-'.join(name.split('-')[:-1])
+    if not os.path.isdir(os.path.join(args.output_ctc_dir, spkr)):
+        os.makedirs(os.path.join(args.output_ctc_dir, spkr))
+    #with open(os.path.join(args.output_ctc_dir, spkr, name + ".npy"), 'wb') as f:
+    #    np.save(f, output_prob.cpu().numpy())
+
+    #del output_prob
+    torch.cuda.empty_cache()
+    gc.collect()
 
 
 
