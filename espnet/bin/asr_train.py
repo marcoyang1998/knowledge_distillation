@@ -331,9 +331,9 @@ def get_parser(parser=None, required=True):
         default=2.5e-06
     )
     parser.add_argument(
-        "--resume-without-previous-opt",
+        "--resume-with-previous-opt",
         type=strtobool,
-        default=False
+        default=True
     )
 
     parser.add_argument(

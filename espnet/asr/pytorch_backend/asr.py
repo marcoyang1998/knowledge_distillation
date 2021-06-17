@@ -794,7 +794,7 @@ def train(args):
     # Resume from a snapshot
     if args.resume:
         logging.info("resumed from %s" % args.resume)
-        torch_resume(args.resume, trainer, args.resume_without_previous_opt)
+        torch_resume(args.resume, trainer, args.resume_with_previous_opt)
 
     # Evaluate the model with the test dataset for each epoch
     if args.save_interval_iters > 0:
