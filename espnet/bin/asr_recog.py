@@ -336,11 +336,6 @@ def main(args):
 
             recog(args)
         elif args.backend == "pytorch":
-            if args.collect_ctc_label:
-                from espnet.asr.pytorch_backend.asr import collect_ctc_labels
-                logging.info("Do ctc label collection")
-                collect_ctc_labels(args)
-                return
 
             if args.num_encs == 1:
                 # Experimental API that supports custom LMs
@@ -348,6 +343,10 @@ def main(args):
                     from espnet.asr.pytorch_backend.recog import recog_v2
 
                     recog_v2(args)
+                elif args.collect_ctc_label:
+                    from espnet.asr.pytorch_backend.asr import collect_ctc_labels
+                    logging.info("Do ctc label collection")
+                    collect_ctc_labels(args)
                 else:
                     from espnet.asr.pytorch_backend.asr import recog
 
