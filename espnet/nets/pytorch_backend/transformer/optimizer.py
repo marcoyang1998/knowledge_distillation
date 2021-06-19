@@ -30,6 +30,7 @@ class NoamOpt(object):
         """Update parameters and rate."""
         self._step += 1
         rate = self.rate()
+        print(rate)
         for p in self.optimizer.param_groups:
             p["lr"] = rate
         self._rate = rate
@@ -73,3 +74,14 @@ def get_std_opt(model_params, d_model, warmup, factor):
     """Get standard NoamOpt."""
     base = torch.optim.Adam(model_params, lr=0, betas=(0.9, 0.98), eps=1e-9, weight_decay=1e-6)
     return NoamOpt(d_model, factor, warmup, base)
+
+if __name__ == '__main__':
+    a = [torch.ones(2,10)]
+    opt = get_std_opt(a, 144, 1, 0.001)
+    rates = []
+    for i in range(1000):
+        opt.step()
+        rates.append(opt.rate())
+    import matplotlib.pyplot as plt
+    plt.plot(rates)
+    plt.show()

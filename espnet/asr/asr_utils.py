@@ -780,7 +780,7 @@ def torch_load(path, model):
     del model_state_dict
 
 
-def torch_resume(snapshot_path, trainer, load_optimizer=True):
+def torch_resume(snapshot_path, trainer, load_optimizer=True, load_trainer=False):
     """Resume from snapshot for pytorch.
 
     Args:
@@ -794,8 +794,9 @@ def torch_resume(snapshot_path, trainer, load_optimizer=True):
     snapshot_dict = torch.load(snapshot_path, map_location=lambda storage, loc: storage)
 
     # restore trainer states
-    d = NpzDeserializer(snapshot_dict["trainer"])
-    d.load(trainer)
+    if load_trainer:
+        d = NpzDeserializer(snapshot_dict["trainer"])
+        d.load(trainer)
 
     # restore model states
     if hasattr(trainer.updater.model, "model"):

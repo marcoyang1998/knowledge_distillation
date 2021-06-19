@@ -335,7 +335,11 @@ def get_parser(parser=None, required=True):
         type=strtobool,
         default=True
     )
-
+    parser.add_argument(
+        "--resume-with-previous-trainer",
+        type=strtobool,
+        default=True
+    )
     parser.add_argument(
         "--accum-grad", default=1, type=int, help="Number of gradient accumuration"
     )
