@@ -794,7 +794,7 @@ def train(args):
     # Resume from a snapshot
     if args.resume:
         logging.info("resumed from %s" % args.resume)
-        torch_resume(args.resume, trainer, args.resume_with_previous_opt)
+        torch_resume(args.resume, trainer, args.resume_with_previous_opt, args.resume_with_previous_trainer)
 
     # Evaluate the model with the test dataset for each epoch
     if args.save_interval_iters > 0:
@@ -898,26 +898,7 @@ def train(args):
                 file_name="loss.png",
             )
         )
-        trainer.extend(
-            extensions.PlotReport(
-                [
-                    "main/loss",
-                    "validation/main/loss",
-                    "main/loss_trans",
-                    "validation/main/loss_trans",
-                    "main/loss_ctc",
-                    "validation/main/loss_ctc",
-                    "main/loss_lm",
-                    "validation/main/loss_lm",
-                    "main/loss_aux_trans",
-                    "validation/main/loss_aux_trans",
-                    "main/loss_aux_symm_kl",
-                    "validation/main/loss_aux_symm_kl",
-                ],
-                "iteration",
-                file_name="loss_iter.png",
-            ),trigger=(args.save_interval_iters, "iteration")
-        )
+
     else:
         trainer.extend(
             extensions.PlotReport(
@@ -973,7 +954,7 @@ def train(args):
             + ([] if args.num_encs == 1 else report_keys_loss_ctc),
             "iteration",
             file_name="cer_iter.png",
-        ),trigger=(args.save_interval_iters, "iteration")
+        ),trigger=(max(1,args.save_interval_iters), "iteration")
     )
 
     # Save best models
