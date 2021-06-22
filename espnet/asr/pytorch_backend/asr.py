@@ -138,18 +138,16 @@ class CustomEvaluator(BaseEvaluator):
                     # read scp files
                     # x: original json with loaded features
                     #    will be converted to chainer variable later
+                    if len(x) == 4:
+                        x = x[:-1]
                     if self.ngpu == 0:
-                        if self.do_kd and len(x) == 4:
-                            self.model._forward_kd(*x)
-                        else:
-                            self.model._forward(*x)
+                        self.model.forward(*x)
                     elif self.ngpu == 1:
                         # apex does not support torch.nn.DataParallel
-                        if self.do_kd and len(x) == 4:
-                            self.model._forward_kd(*x)
-                        else:
-                            self.model._forward(*x)
+                        self.model.forward(*x)
                     else:
+                        if self.do_kd:
+                            raise NotImplementedError("KD does not support multi gpu!")
                         data_parallel(self.model, x, range(self.ngpu))
 
                 summary.add(observation)
@@ -222,9 +220,19 @@ class CustomUpdater(StandardUpdater):
 
         # Compute the loss at this time step and accumulate it
         if self.ngpu == 0:
-            loss = self.model(*x).mean() / self.accum_grad
+            if self.do_kd:
+                loss = self.model.forward_kd(*x).mean() / self.accum_grad
+            else:
+                loss = self.model(*x).mean() / self.accum_grad
+        elif self.ngpu == 1:
+            if self.do_kd:
+                loss = self.model.forward_kd(*x).mean() / self.accum_grad
+            else:
+                loss = self.model(*x).mean() / self.accum_grad
         else:
             # apex does not support torch.nn.DataParallel
+            if self.do_kd:
+                raise NotImplementedError("KD does not support multi gpu!")
             loss = (
                 data_parallel(self.model, x, range(self.ngpu)).mean() / self.accum_grad
             )
@@ -782,6 +790,7 @@ def train(args):
         args.grad_noise,
         args.accum_grad,
         use_apex=use_apex,
+        do_kd=args.do_knowledge_distillation
     )
     trainer = training.Trainer(updater, (args.epochs, "epoch"), out=args.outdir)
 
