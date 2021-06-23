@@ -192,6 +192,8 @@ class CTC(torch.nn.Module):
             if self.kd_factor != 1.0:
                 ys_pad = torch.cat(ys)  # without this the code breaks for asr_mix
                 self.loss_ctc = self.loss_fn(ys_hat, ys_pad, hlens, olens)
+            else:
+                self.loss_ctc = 0
             # distillation loss
             if self.kd_factor != 0:
                 self.loss_kd = self.kd_loss_fn(ys_hat.transpose(0, 1), ys_kd, hlens)
@@ -199,7 +201,7 @@ class CTC(torch.nn.Module):
                 self.loss_kd = 0
 
             # cast type of kd_factor
-            kd_factor = torch.tensor(self.kd_factor).float().to(self.loss_ctc.device)
+            kd_factor = self.kd_factor
             self.loss = kd_factor * self.loss_kd + (1 - kd_factor) * self.loss_ctc
 
         else:
