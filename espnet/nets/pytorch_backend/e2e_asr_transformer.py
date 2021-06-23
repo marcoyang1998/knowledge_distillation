@@ -152,11 +152,9 @@ class E2E(ASRInterface, torch.nn.Module):
 
         # select the actual forward function
         if args.do_knowledge_distillation:
-            self.forward = self._forward_kd
             self.calculate_all_attentions = self._calculate_all_ctc_probs_kd
             self.calculate_all_ctc_probs = self._calculate_all_ctc_probs_kd
         else:
-            self.forward = self._forward
             self.calculate_all_attentions = self._calculate_all_ctc_probs
             self.calculate_all_ctc_probs = self._calculate_all_ctc_probs
 
@@ -177,7 +175,7 @@ class E2E(ASRInterface, torch.nn.Module):
         # initialize parameters
         initialize(self, args.transformer_init)
 
-    def _forward(self, xs_pad, ilens, ys_pad):
+    def forward(self, xs_pad, ilens, ys_pad):
         """E2E forward.
 
         :param torch.Tensor xs_pad: batch of padded source sequences (B, Tmax, idim)
@@ -222,7 +220,7 @@ class E2E(ASRInterface, torch.nn.Module):
         else:
             batch_size = xs_pad.size(0)
             hs_len = hs_mask.view(batch_size, -1).sum(1)
-            loss_ctc = self.ctc._forward(hs_pad.view(batch_size, -1, self.adim), hs_len, ys_pad)
+            loss_ctc = self.ctc.forward(hs_pad.view(batch_size, -1, self.adim), hs_len, ys_pad)
             if not self.training and self.error_calculator is not None:
                 ys_hat = self.ctc.argmax(hs_pad.view(batch_size, -1, self.adim)).data
                 cer_ctc = self.error_calculator(ys_hat.cpu(), ys_pad.cpu(), is_ctc=True)
@@ -261,10 +259,10 @@ class E2E(ASRInterface, torch.nn.Module):
             logging.warning("loss (=%f) is not correct", loss_data)
         return self.loss
 
-    def _forward_kd(self, xs_pad, ilens, ys_pad, ys_kd_pad):
+    def forward_kd(self, xs_pad, ilens, ys_pad, ys_kd_pad):
         if ys_kd_pad is None:
             print("During evaluation!")
-            self._forward(xs_pad, ilens, ys_pad)
+            self.forward(xs_pad, ilens, ys_pad)
             return
         xs_pad = xs_pad[:, : max(ilens)]  # for data parallel
         src_mask = make_non_pad_mask(ilens.tolist()).to(xs_pad.device).unsqueeze(-2)
@@ -295,7 +293,7 @@ class E2E(ASRInterface, torch.nn.Module):
         else:
             batch_size = xs_pad.size(0)
             hs_len = hs_mask.view(batch_size, -1).sum(1)
-            loss_kd, loss_ctc, kd_factor = self.ctc._forward_kd(hs_pad.view(batch_size, -1, self.adim), hs_len, ys_pad, ys_kd_pad)
+            loss_kd, loss_ctc, kd_factor = self.ctc.forward_kd(hs_pad.view(batch_size, -1, self.adim), hs_len, ys_pad, ys_kd_pad)
             if not self.training and self.error_calculator is not None:
                 ys_hat = self.ctc.argmax(hs_pad.view(batch_size, -1, self.adim)).data
                 cer_ctc = self.error_calculator(ys_hat.cpu(), ys_pad.cpu(), is_ctc=True)

@@ -38,12 +38,9 @@ class CTC(torch.nn.Module):
         if self.do_knowledge_distillation:
             if self.ctc_type != "builtin":
                 raise NotImplementedError("Only support knowledge ditillation with builtin ctc")
-
             self.kd_factor = kd_factor
-            self.forward = self._forward_kd
             self.kd_temp=kd_temp
-        else:
-            self.forward = self._forward
+
 
         # ctc_type = buitin not support Pytorch=1.0.1
         if self.ctc_type == "builtin" and (
@@ -100,17 +97,18 @@ class CTC(torch.nn.Module):
     def kd_loss_fn(self, logits, soft_logits, hlens):
         # logits (B, adim,odim)
         def CXE(target, predicted):
-            # target: a valid distribution
-            # predicted: logits
-
             return -(target * predicted.log_softmax(-1)).sum()
 
-        soft_logits = soft_logits.view(-1, 31)
-        assert soft_logits.shape[0] >= hlens
-        return CXE((soft_logits[:hlens,:]/self.kd_temp).softmax(-1), logits[:hlens,:]/self.kd_temp)
+        bs = logits.shape[0]
+        loss = 0
+        for b in range(bs):
+            soft_logit = soft_logits[b].view(-1, 31)
+            assert soft_logit.shape[0] >= hlens[b]
+            loss += CXE((soft_logit[:hlens[b], :] / self.kd_temp).softmax(-1), logits[b, :hlens[b], :] / self.kd_temp)
+        return loss / bs
 
 
-    def _forward(self, hs_pad, hlens, ys_pad):
+    def forward(self, hs_pad, hlens, ys_pad):
         """CTC forward
 
         :param torch.Tensor hs_pad: batch of padded hidden state sequences (B, Tmax, D)
@@ -179,7 +177,7 @@ class CTC(torch.nn.Module):
 
         return self.loss
 
-    def _forward_kd(self, hs_pad, hlens, ys_pad, ys_kd_pad):
+    def forward_kd(self, hs_pad, hlens, ys_pad, ys_kd_pad):
         ys = [y[y != self.ignore_id] for y in ys_pad]
         ys_kd = [y[y != self.ignore_id] for y in ys_kd_pad]
 
@@ -191,14 +189,14 @@ class CTC(torch.nn.Module):
             hlens = hlens.long()
             olens = to_device(ys_hat, torch.LongTensor([len(s) for s in ys]))
             # original ctc loss
-            ys_pad = torch.cat(ys)  # without this the code breaks for asr_mix
-            self.loss_ctc = self.loss_fn(ys_hat, ys_pad, hlens, olens)
+            if self.kd_factor != 1.0:
+                ys_pad = torch.cat(ys)  # without this the code breaks for asr_mix
+                self.loss_ctc = self.loss_fn(ys_hat, ys_pad, hlens, olens)
             # distillation loss
-            bs = len(hlens)
-            self.loss_kd = 0
-            for b in range(bs):
-                self.loss_kd += self.kd_loss_fn(ys_hat.transpose(0, 1)[b], ys_kd[b], hlens[b])
-            self.loss_kd = self.loss_kd / bs
+            if self.kd_factor != 0:
+                self.loss_kd = self.kd_loss_fn(ys_hat.transpose(0, 1), ys_kd, hlens)
+            else:
+                self.loss_kd = 0
 
             # cast type of kd_factor
             kd_factor = torch.tensor(self.kd_factor).float().to(self.loss_ctc.device)
@@ -396,15 +394,16 @@ class CTC_kd_mtl(torch.nn.Module):
 
     def kd_loss_fn(self, logits, soft_logits, hlens):
         # logits (B, adim,odim)
-        # soft_label ()
-        def CXE(predicted, target):
-            # target: a valid distribution
-            # predicted: logits
+        def CXE(target, predicted):
             return -(target * predicted.log_softmax(-1)).sum()
 
-        soft_logits = soft_logits.view(-1, 31)
-        assert soft_logits.shape[0] >= hlens
-        return CXE(logits[:hlens, :], soft_logits[:hlens, :].softmax(-1))
+        bs = logits.shape[0]
+        loss = 0
+        for b in range(bs):
+            soft_logit = soft_logits[b].view(-1, 31)
+            assert soft_logit.shape[0] >= hlens[b]
+            loss += CXE((soft_logit[:hlens[b], :] / self.kd_temp).softmax(-1), logits[b, :hlens[b], :] / self.kd_temp)
+        return loss / bs
 
     def forward(self, hs_pad, hlens, ys_pad, ys_kd_pad):
         ys = [y[y != self.ignore_id] for y in ys_pad]
@@ -418,22 +417,17 @@ class CTC_kd_mtl(torch.nn.Module):
             hlens = hlens.long()
             olens = to_device(ys_hat, torch.LongTensor([len(s) for s in ys]))
             # original ctc loss
-            ys_pad = torch.cat(ys)  # without this the code breaks for asr_mix
-            self.loss_ctc = self.ctc_loss_fn(ys_hat, ys_pad, hlens, olens)
+            if self.kd_factor != 1.0:
+                ys_pad = torch.cat(ys)  # without this the code breaks for asr_mix
+                self.loss_ctc = self.ctc_loss_fn(ys_hat, ys_pad, hlens, olens)
             # distillation loss
-            #ys_hat = ys_hat.transpose(0, 1)
-            bs = len(hlens)
-            self.loss_kd = 0
-            for b in range(bs):
-                self.loss_kd += self.kd_loss_fn(ys_hat.transpose(0,1)[b], ys_kd[b], hlens[b])
-            self.loss_kd = self.loss_kd / bs
-
-
-
+            if self.kd_factor != 0:
+                self.loss_kd = self.kd_loss_fn(ys_hat.transpose(0, 1), ys_kd, hlens)
+            else:
+                self.loss_kd = 0
             # cast type of kd_factor
             kd_factor = torch.tensor(self.kd_factor).float().to(self.loss_ctc.device)
             self.loss = kd_factor*self.loss_kd + (1-kd_factor)*self.loss_ctc
-
         else:
             raise NotImplementedError('Types other than builtin are not implemented')
 
