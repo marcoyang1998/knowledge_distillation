@@ -191,7 +191,7 @@ class CTC(torch.nn.Module):
             # original ctc loss
             if self.kd_factor != 1.0:
                 ys_pad = torch.cat(ys)  # without this the code breaks for asr_mix
-                self.loss_ctc = self.ctc_loss_fn(ys_hat, ys_pad, hlens, olens)
+                self.loss_ctc = self.loss_fn(ys_hat, ys_pad, hlens, olens)
             # distillation loss
             if self.kd_factor != 0:
                 self.loss_kd = self.kd_loss_fn(ys_hat.transpose(0, 1), ys_kd, hlens)
