@@ -188,10 +188,18 @@ class CTC(torch.nn.Module):
         if self.ctc_type == "builtin":
             hlens = hlens.long()
             olens = to_device(ys_hat, torch.LongTensor([len(s) for s in ys]))
+
             # original ctc loss
             if self.kd_factor != 1.0:
-                ys_pad = torch.cat(ys)  # without this the code breaks for asr_mix
-                self.loss_ctc = self.loss_fn(ys_hat, ys_pad, hlens, olens)
+                if torch.sum(olens != 1) ==0:
+                    self.loss_ctc = 0
+                else:
+                    ys_hat_valid = ys_hat[:, olens != 1]
+                    hlens_valid = hlens[olens != 1]
+                    olens_valid = olens[olens != 1]
+                    ys_valid = [k for k in ys if k.shape[-1] != 1]
+                    ys_pad_valid = torch.cat(ys_valid)  # without this the code breaks for asr_mix
+                    self.loss_ctc = self.loss_fn(ys_hat_valid, ys_pad_valid, hlens_valid, olens_valid)
             else:
                 self.loss_ctc = 0
             # distillation loss

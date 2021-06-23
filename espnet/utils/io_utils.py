@@ -14,7 +14,6 @@ from espnet.transform.transformation import Transformation
 
 class LoadInputsAndTargets(object):
     """Create a mini-batch from a list of dicts
-
     >>> batch = [('utt1',
     ...           dict(input=[dict(feat='some.ark:123',
     ...                            filetype='mat',
@@ -25,7 +24,6 @@ class LoadInputsAndTargets(object):
     ...                             shape=[4, 31])]]))
     >>> l = LoadInputsAndTargets()
     >>> feat, target = l(batch)
-
     :param: str mode: Specify the task mode, "asr" or "tts"
     :param: str preprocess_conf: The path of a json file for pre-processing
     :param: bool load_input: If False, not to load the input data
@@ -99,7 +97,6 @@ class LoadInputsAndTargets(object):
 
     def __call__(self, batch, return_uttid=False):
         """Function to load inputs and targets from list of dicts
-
         :param List[Tuple[str, dict]] batch: list of dict which is subset of
             loaded data.json
         :param bool return_uttid: return utterance ID information for visualization
@@ -109,7 +106,6 @@ class LoadInputsAndTargets(object):
         :rtype: list of float ndarray
         :return: list of target token id sequences [(L_1), (L_2), ..., (L_B)]
         :rtype: list of int ndarray
-
         """
         x_feats_dict = OrderedDict()  # OrderedDict[str, List[np.ndarray]]
         y_feats_dict = OrderedDict()  # OrderedDict[str, List[np.ndarray]]
@@ -207,7 +203,6 @@ class LoadInputsAndTargets(object):
 
     def _create_batch_asr(self, x_feats_dict, y_feats_dict, uttid_list):
         """Create a OrderedDict for the mini-batch
-
         :param OrderedDict x_feats_dict:
             e.g. {"input1": [ndarray, ndarray, ...],
                   "input2": [ndarray, ndarray, ...]}
@@ -323,7 +318,6 @@ class LoadInputsAndTargets(object):
 
     def _create_batch_mt(self, x_feats_dict, y_feats_dict, uttid_list):
         """Create a OrderedDict for the mini-batch
-
         :param OrderedDict x_feats_dict:
         :param OrderedDict y_feats_dict:
         :return: batch, uttid_list
@@ -370,7 +364,6 @@ class LoadInputsAndTargets(object):
 
     def _create_batch_tts(self, x_feats_dict, y_feats_dict, uttid_list, eos):
         """Create a OrderedDict for the mini-batch
-
         :param OrderedDict x_feats_dict:
             e.g. {"input1": [ndarray, ndarray, ...],
                   "input2": [ndarray, ndarray, ...]}
@@ -447,7 +440,6 @@ class LoadInputsAndTargets(object):
 
     def _create_batch_vc(self, x_feats_dict, y_feats_dict, uttid_list):
         """Create a OrderedDict for the mini-batch
-
         :param OrderedDict x_feats_dict:
             e.g. {"input1": [ndarray, ndarray, ...],
                   "input2": [ndarray, ndarray, ...]}
@@ -525,13 +517,10 @@ class LoadInputsAndTargets(object):
 
     def _get_from_loader(self, filepath, filetype):
         """Return ndarray
-
         In order to make the fds to be opened only at the first referring,
         the loader are stored in self._loaders
-
         >>> ndarray = loader.get_from_loader(
         ...     'some/path.h5:F01_050C0101_PED_REAL', filetype='hdf5')
-
         :param: str filepath:
         :param: str filetype:
         :return:
@@ -632,24 +621,22 @@ class LoadInputsAndTargets(object):
                 loader = kaldiio.load_scp(filepath)
                 self._loaders[filepath] = loader
             return loader[key]
+        elif filetype == "pseudo":
+            return np.zeros((1,))
         else:
             raise NotImplementedError("Not supported: loader_type={}".format(filetype))
 
 
 class SoundHDF5File(object):
     """Collecting sound files to a HDF5 file
-
     >>> f = SoundHDF5File('a.flac.h5', mode='a')
     >>> array = np.random.randint(0, 100, 100, dtype=np.int16)
     >>> f['id'] = (array, 16000)
     >>> array, rate = f['id']
-
-
     :param: str filepath:
     :param: str mode:
     :param: str format: The type used when saving wav. flac, nist, htk, etc.
     :param: str dtype:
-
     """
 
     def __init__(self, filepath, mode="r+", format=None, dtype="int16", **kwargs):
