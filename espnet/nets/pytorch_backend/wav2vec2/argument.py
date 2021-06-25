@@ -39,3 +39,9 @@ def add_arguments_w2v2_common(group):
         default=0.0,
         help="probability of masking random channel"
     )
+    group.add_argument(
+        "--w2v2-subsample",
+        type=strtobool,
+        default=False,
+        help="add an average pooling layer to subsample bby 2"
+    )

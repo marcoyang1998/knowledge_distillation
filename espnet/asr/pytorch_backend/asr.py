@@ -29,7 +29,7 @@ from espnet.asr.asr_utils import plot_spectrogram
 from espnet.asr.asr_utils import restore_snapshot
 from espnet.asr.asr_utils import snapshot_object
 from espnet.asr.asr_utils import torch_load
-from espnet.asr.asr_utils import torch_resume
+from espnet.asr.asr_utils import torch_resume,torch_resume_only_weight
 from espnet.asr.asr_utils import torch_snapshot
 from espnet.asr.pytorch_backend.asr_init import freeze_modules
 from espnet.asr.pytorch_backend.asr_init import load_trained_model
@@ -803,7 +803,10 @@ def train(args):
     # Resume from a snapshot
     if args.resume:
         logging.info("resumed from %s" % args.resume)
-        torch_resume(args.resume, trainer, args.resume_with_previous_opt, args.resume_with_previous_trainer)
+        if args.resume_only_weight:
+            torch_resume_only_weight(args.resume, trainer)
+        else:
+            torch_resume(args.resume, trainer, args.resume_with_previous_opt, args.resume_with_previous_trainer)
 
     # Evaluate the model with the test dataset for each epoch
     if args.save_interval_iters > 0:

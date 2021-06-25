@@ -246,7 +246,8 @@ class Wav2VecEncoder(torch.nn.Module):
                  normalize_before=False,
                  freeze_finetune_updates=1000,
                  fine_tuned=False,
-                 mask_channel_prob=0.25
+                 mask_channel_prob=0.25,
+                 subsample_output=False
                  ):
         super().__init__()
         import fairseq
@@ -287,7 +288,10 @@ class Wav2VecEncoder(torch.nn.Module):
         self.freeze_finetune_updates = freeze_finetune_updates
         self.register_buffer("num_updates", torch.LongTensor([0]))
         self.conv_subsampling_factor = 1
-        #del model
+        if subsample_output:
+            self.subsample = torch.nn.AvgPool1d(kernel_size=2, stride=2)
+        else:
+            self.subsample = None
 
     def forward(self, xs_pad, ilens, prev_states=None):
         """Forward FairSeqWav2Vec2 Encoder.
@@ -308,7 +312,7 @@ class Wav2VecEncoder(torch.nn.Module):
             self.num_updates += 1
             print("Start fine-tuning wav2vec parameters after {} updates!".format(self.num_updates))
         if self.num_updates%10==0:
-            print("Actual batch size: {} at update: {}, finetuning transformer: {}".format(xs_pad.shape[0], self.num_updates, ft))
+            print("Actual batch size: {} at update: {}, finetuning transformer: {}".format(xs_pad.shape[0], self.num_updates.cpu().numpy(), ft.cpu().numpy()))
         with torch.no_grad() if not ft else contextlib.nullcontext():
             enc_outputs = self.encoders(
                 xs_pad,
@@ -317,11 +321,10 @@ class Wav2VecEncoder(torch.nn.Module):
             )
         xs_pad = enc_outputs["x"]  # (B,T,C),
         masks = enc_outputs["padding_mask"]  # (B, T)
-        if masks == None:
-            print(xs_pad.shape)
-            print(masks)
         olens = torch.logical_not(masks).sum(dim=1)
-        #olens = (~masks).sum(dim=1)
+        if self.subsample:
+            xs_pad = self.subsample(xs_pad.permute(0,2,1)).permute(0,2,1)
+            olens = olens//2
 
         if self.output_layer is not None:
             xs_pad = self.output_layer(xs_pad)
@@ -451,7 +454,8 @@ def encoder_for(args, idim, subsample):
                               normalize_before=normalise_before,
                               freeze_finetune_updates=freeze_finetune_updates,
                               fine_tuned=is_fine_tuned,
-                              mask_channel_prob=mask_channel_prob)
+                              mask_channel_prob=mask_channel_prob,
+                              subsample_output=args.w2v2_subsample)
     num_encs = getattr(args, "num_encs", 1)  # use getattr to keep compatibility
     if num_encs == 1:
         # compatible with single encoder asr mode

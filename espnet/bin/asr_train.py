@@ -341,6 +341,11 @@ def get_parser(parser=None, required=True):
         default=True
     )
     parser.add_argument(
+        "--resume-only-weight",
+        type=strtobool,
+        default=False
+    )
+    parser.add_argument(
         "--accum-grad", default=1, type=int, help="Number of gradient accumuration"
     )
     parser.add_argument(

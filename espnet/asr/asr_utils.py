@@ -823,7 +823,21 @@ def torch_resume(snapshot_path, trainer, load_optimizer=True, load_trainer=False
     # delete opened snapshot
     del snapshot_dict
 
-
+def torch_resume_only_weight(snapshot_path, trainer):
+    snapshot_dict = torch.load(snapshot_path, map_location=lambda storage, loc: storage)
+    if hasattr(trainer.updater.model, "model"):
+        # (for TTS model)
+        if hasattr(trainer.updater.model.model, "module"):
+            trainer.updater.model.model.module.load_state_dict(snapshot_dict["model"])
+        else:
+            trainer.updater.model.model.load_state_dict(snapshot_dict["model"])
+    else:
+        # (for ASR model)
+        if hasattr(trainer.updater.model, "module"):
+            trainer.updater.model.module.load_state_dict(snapshot_dict["model"])
+        else:
+            trainer.updater.model.load_state_dict(snapshot_dict["model"])
+    del snapshot_dict
 # * ------------------ recognition related ------------------ *
 def parse_hypothesis(hyp, char_list):
     """Parse hypothesis.
