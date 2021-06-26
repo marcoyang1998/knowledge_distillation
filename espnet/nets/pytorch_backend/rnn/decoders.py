@@ -683,7 +683,7 @@ class Decoder(torch.nn.Module, ScorerInterface):
         n_bb = batch * beam
         pad_b = to_device(h[0], torch.arange(batch) * beam).view(-1, 1)
 
-        max_hlen = np.amin([max(hlens[idx]) for idx in range(self.num_encs)])
+        max_hlen = np.amin([max(hlens[idx].cpu()) for idx in range(self.num_encs)])
         if recog_args.maxlenratio == 0:
             maxlen = max_hlen
         else:
