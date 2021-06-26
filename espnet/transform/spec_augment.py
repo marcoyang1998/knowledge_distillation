@@ -2,7 +2,7 @@
 
 import random
 
-import numpy
+import numpy as np
 from PIL import Image
 from PIL.Image import BICUBIC
 
@@ -13,12 +13,12 @@ def time_warp(x, max_time_warp=80, inplace=False, mode="PIL"):
     """time warp for spec augment
 
     move random center frame by the random width ~ uniform(-window, window)
-    :param numpy.ndarray x: spectrogram (time, freq)
+    :param np.ndarray x: spectrogram (time, freq)
     :param int max_time_warp: maximum time frames to warp
     :param bool inplace: overwrite x with the result
     :param str mode: "PIL" (default, fast, not differentiable) or "sparse_image_warp"
         (slow, differentiable)
-    :returns numpy.ndarray: time warped spectrogram (time, freq)
+    :returns np.ndarray: time warped spectrogram (time, freq)
     """
     window = max_time_warp
     if mode == "PIL":
@@ -35,7 +35,7 @@ def time_warp(x, max_time_warp=80, inplace=False, mode="PIL"):
             x[:warped] = left
             x[warped:] = right
             return x
-        return numpy.concatenate((left, right), 0)
+        return np.concatenate((left, right), 0)
     elif mode == "sparse_image_warp":
         import torch
 
@@ -64,7 +64,7 @@ class TimeWarp(FuncTrans):
 def freq_mask(x, F=30, n_mask=2, replace_with_zero=True, inplace=False):
     """freq mask for spec agument
 
-    :param numpy.ndarray x: (time, freq)
+    :param np.ndarray x: (time, freq)
     :param int n_mask: the number of masks
     :param bool inplace: overwrite
     :param bool replace_with_zero: pad zero on mask if true else use mean
@@ -75,20 +75,14 @@ def freq_mask(x, F=30, n_mask=2, replace_with_zero=True, inplace=False):
         cloned = x.copy()
 
     num_mel_channels = cloned.shape[1]
-    fs = numpy.random.randint(0, F, size=(n_mask, 2))
-
-    for f, mask_end in fs:
-        f_zero = random.randrange(0, num_mel_channels - f)
-        mask_end += f_zero
-
-        # avoids randrange error if values are equal and range is empty
-        if f_zero == f_zero + f:
-            continue
-
+    mask_bands = np.random.randint(0, F, size=n_mask)
+    for mask_band in mask_bands:
+        mask_start = np.random.randint(0, np.maximum(num_mel_channels - mask_band, 1))
+        mask_end = mask_start + mask_band
         if replace_with_zero:
-            cloned[:, f_zero:mask_end] = 0
+            cloned[:, mask_start:mask_end] = 0
         else:
-            cloned[:, f_zero:mask_end] = cloned.mean()
+            cloned[:, mask_start:mask_end] = cloned.mean()
     return cloned
 
 
@@ -102,10 +96,12 @@ class FreqMask(FuncTrans):
         return super().__call__(x)
 
 
-def time_mask(spec, T=40, n_mask=2, replace_with_zero=True, inplace=False):
+def time_mask(spec, T=40, max_ratio=1.0, n_mask=2, replace_with_zero=True, inplace=False):
     """freq mask for spec agument
 
-    :param numpy.ndarray spec: (time, freq)
+    :param np.ndarray spec: (time, freq)
+    :param int T: the maximum number of frames for each mask
+    :param float max_ratio: the maximum ratio regarding sequence length for each mask
     :param int n_mask: the number of masks
     :param bool inplace: overwrite
     :param bool replace_with_zero: pad zero on mask if true else use mean
@@ -115,22 +111,15 @@ def time_mask(spec, T=40, n_mask=2, replace_with_zero=True, inplace=False):
     else:
         cloned = spec.copy()
     len_spectro = cloned.shape[0]
-    ts = numpy.random.randint(0, T, size=(n_mask, 2))
-    for t, mask_end in ts:
-        # avoid randint range error
-        if len_spectro - t <= 0:
-            continue
-        t_zero = random.randrange(0, len_spectro - t)
-
-        # avoids randrange error if values are equal and range is empty
-        if t_zero == t_zero + t:
-            continue
-
-        mask_end += t_zero
+    mask_durs = np.random.randint(0, T, size=n_mask)
+    mask_durs = np.minimum(mask_durs, int(len_spectro * max_ratio))
+    for mask_dur in mask_durs:
+        mask_start = np.random.randint(0, np.maximum(len_spectro - mask_dur, 1))
+        mask_end = mask_start + mask_dur
         if replace_with_zero:
-            cloned[t_zero:mask_end] = 0
+            cloned[mask_start:mask_end] = 0
         else:
-            cloned[t_zero:mask_end] = cloned.mean()
+            cloned[mask_start:mask_end] = cloned.mean()
     return cloned
 
 
@@ -151,6 +140,7 @@ def spec_augment(
     max_freq_width=27,
     n_freq_mask=2,
     max_time_width=100,
+    max_time_ratio=1.0,
     n_time_mask=2,
     inplace=True,
     replace_with_zero=True,
@@ -161,18 +151,19 @@ def spec_augment(
     default setting is based on LD (Librispeech double) in Table 2
         https://arxiv.org/pdf/1904.08779.pdf
 
-    :param numpy.ndarray x: (time, freq)
+    :param np.ndarray x: (time, freq)
     :param str resize_mode: "PIL" (fast, nondifferentiable) or "sparse_image_warp"
         (slow, differentiable)
     :param int max_time_warp: maximum frames to warp the center frame in spectrogram (W)
-    :param int freq_mask_width: maximum width of the random freq mask (F)
+    :param int max_freq_width: maximum width of the random freq mask (F)
     :param int n_freq_mask: the number of the random freq mask (m_F)
-    :param int time_mask_width: maximum width of the random time mask (T)
+    :param int max_time_width: maximum width of the random time mask (T)
+    :param int max_time_ratio: maximum width of the random time mask (T) / seqeunce length
     :param int n_time_mask: the number of the random time mask (m_T)
     :param bool inplace: overwrite intermediate array
     :param bool replace_with_zero: pad zero on mask if true else use mean
     """
-    assert isinstance(x, numpy.ndarray)
+    assert isinstance(x, np.ndarray)
     assert x.ndim == 2
     x = time_warp(x, max_time_warp, inplace=inplace, mode=resize_mode)
     x = freq_mask(
@@ -185,6 +176,7 @@ def spec_augment(
     x = time_mask(
         x,
         max_time_width,
+        max_time_ratio,
         n_time_mask,
         inplace=inplace,
         replace_with_zero=replace_with_zero,
