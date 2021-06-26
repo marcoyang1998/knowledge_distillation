@@ -289,7 +289,11 @@ class Wav2VecEncoder(torch.nn.Module):
         self.register_buffer("num_updates", torch.LongTensor([0]))
         self.conv_subsampling_factor = 1
         if subsample_output:
-            self.subsample = torch.nn.AvgPool1d(kernel_size=2, stride=2)
+            self.subsample = torch.nn.Sequential(
+                torch.nn.Dropout(p=0.1),
+                torch.nn.Linear(2*output_size, output_size),
+                torch.nn.ReLU()
+            )
         else:
             self.subsample = None
 
@@ -323,7 +327,10 @@ class Wav2VecEncoder(torch.nn.Module):
         masks = enc_outputs["padding_mask"]  # (B, T)
         olens = torch.logical_not(masks).sum(dim=1)
         if self.subsample:
-            xs_pad = self.subsample(xs_pad.permute(0,2,1)).permute(0,2,1)
+            xs_pad_1 = xs_pad[:,0:-1:2,:]
+            xs_pad_2 = xs_pad[:,1::2,:]
+            xs_pad = torch.cat((xs_pad_1, xs_pad_2), dim=2)
+            xs_pad = self.subsample(xs_pad)
             olens = olens//2
 
         if self.output_layer is not None:
@@ -501,8 +508,8 @@ if __name__ == '__main__':
     xlen = [[16000],[32000],[48000]]
 
     w2v_dir_path = '/home/marcoyang/Downloads/wav2vec_model/wav2vec_small_100h.pt'
-    w2v2_enc = Wav2VecEncoder(model_dir=w2v_dir_path, output_size=768, fine_tuned=True, freeze_finetune_updates=10000)
-    w2v2_enc.to(cuda)
+    w2v2_enc = Wav2VecEncoder(model_dir=w2v_dir_path, output_size=768, fine_tuned=True, freeze_finetune_updates=10000, subsample_output=True)
+    #w2v2_enc.to(cuda)
 
     def calculate_output_shape(dim):
         strides = [5,2,2,2,2,2,2]
@@ -520,8 +527,8 @@ if __name__ == '__main__':
         for i in range(100):
             dim = int(plt_x[i])
             x = torch.randn(1, int(plt_x[i]))
-            y = w2v2_enc.forward(x.to(cuda).float(), [int(plt_x[i])])
-            assert y[0].shape[1] == calculate_output_shape(dim)
+            y = w2v2_enc.forward(x.float(), [int(plt_x[i])])
+            #assert y[0].shape[1] == calculate_output_shape(dim)
             subsample_freq.append(y[0].shape[1]*16000/(int(plt_x[i])))
         torch.cuda.empty_cache()
     import matplotlib.pyplot as plt
