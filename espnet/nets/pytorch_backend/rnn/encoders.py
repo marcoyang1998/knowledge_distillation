@@ -292,7 +292,7 @@ class Wav2VecEncoder(torch.nn.Module):
             self.subsample = torch.nn.Sequential(
                 torch.nn.Dropout(p=0.1),
                 torch.nn.Linear(2*output_size, output_size),
-                torch.nn.ReLU()
+                #torch.nn.ReLU()
             )
         else:
             self.subsample = None
@@ -508,7 +508,7 @@ if __name__ == '__main__':
     xlen = [[16000],[32000],[48000]]
 
     w2v_dir_path = '/home/marcoyang/Downloads/wav2vec_model/wav2vec_small_100h.pt'
-    w2v2_enc = Wav2VecEncoder(model_dir=w2v_dir_path, output_size=768, fine_tuned=True, freeze_finetune_updates=10000, subsample_output=True)
+    w2v2_enc = Wav2VecEncoder(model_dir=w2v_dir_path, output_size=768, fine_tuned=True, freeze_finetune_updates=10000, subsample_output=False)
     #w2v2_enc.to(cuda)
 
     def calculate_output_shape(dim):

@@ -523,6 +523,22 @@ def encoder_for(
         : The encoder module or list of encoder modules
 
     """
+    if args.etype == 'wav2vec':
+        from espnet.nets.pytorch_backend.rnn.encoders import Wav2VecEncoder
+        model_path = args.w2v2_model_dir
+        normalise_before = args.w2v2_normalise_before
+        freeze_finetune_updates = args.w2v2_freeze_finetune_updates*args.accum_grad
+        output_dim = args.w2v2_output_dim
+        is_fine_tuned = args.w2v2_is_finetuned
+        mask_channel_prob = args.w2v2_mask_channel_prob
+        return Wav2VecEncoder(model_dir=model_path,
+                              output_size=output_dim,
+                              normalize_before=normalise_before,
+                              freeze_finetune_updates=freeze_finetune_updates,
+                              fine_tuned=is_fine_tuned,
+                              mask_channel_prob=mask_channel_prob,
+                              subsample_output=args.w2v2_subsample)
+
     return Encoder(
         args.etype,
         idim,

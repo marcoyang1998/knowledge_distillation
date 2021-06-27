@@ -25,6 +25,7 @@ from espnet.nets.pytorch_backend.transducer.arguments import (
     add_transducer_arguments,  # noqa: H301
     add_auxiliary_task_arguments,  # noqa: H301
 )
+from espnet.nets.pytorch_backend.wav2vec2.argument import add_arguments_w2v2_common
 from espnet.nets.pytorch_backend.transducer.auxiliary_task import AuxiliaryTask
 from espnet.nets.pytorch_backend.transducer.custom_decoder import CustomDecoder
 from espnet.nets.pytorch_backend.transducer.custom_encoder import CustomEncoder
@@ -93,6 +94,7 @@ class E2E(ASRInterface, torch.nn.Module):
         E2E.encoder_add_general_arguments(parser)
         E2E.encoder_add_rnn_arguments(parser)
         E2E.encoder_add_custom_arguments(parser)
+        E2E.encoder_add_w2v2_arguments(parser)
 
         E2E.decoder_add_general_arguments(parser)
         E2E.decoder_add_rnn_arguments(parser)
@@ -117,6 +119,13 @@ class E2E(ASRInterface, torch.nn.Module):
         """Add arguments for RNN encoder."""
         group = parser.add_argument_group("RNN encoder arguments")
         group = add_rnn_encoder_arguments(group)
+
+        return parser
+
+    @staticmethod
+    def encoder_add_w2v2_arguments(parser):
+        group = parser.add_argument_group("W2V2 encoder arguments")
+        group = add_arguments_w2v2_common(group)
 
         return parser
 
@@ -305,7 +314,8 @@ class E2E(ASRInterface, torch.nn.Module):
                 key=lambda x: x[0],
                 reverse=True,
             )[0][0]
-
+        else:
+            self.most_dom_dim = args.dunits/2
         self.etype = args.etype
         self.dtype = args.dtype
 

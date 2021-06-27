@@ -28,6 +28,7 @@ def add_encoder_general_arguments(group):
             "vggbgrup",
             "vgggru",
             "vggbgru",
+            "wav2vec",
         ],
         help="Type of encoder network architecture",
     )
