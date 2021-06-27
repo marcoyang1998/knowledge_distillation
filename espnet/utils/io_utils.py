@@ -605,11 +605,16 @@ class LoadInputsAndTargets(object):
                 self._loaders[filepath] = normalised
             return self._loaders[filepath]
         elif filetype == "flac":
-            if filepath not in self._loaders:
+            if self.keep_all_data_on_mem:
+                if filepath not in self._loaders:
+                    raw_audio = soundfile.read(filepath)[0]
+                    normalised = (raw_audio - raw_audio.mean()) / raw_audio.std()
+                    self._loaders[filepath] = normalised
+                return self._loaders[filepath]
+            else:
                 raw_audio = soundfile.read(filepath)[0]
                 normalised = (raw_audio - raw_audio.mean()) / raw_audio.std()
-                self._loaders[filepath] = normalised
-            return self._loaders[filepath]
+                return normalised
         elif filetype == "scp":
             # e.g.
             #    {"input": [{"feat": "some/path.scp:F01_050C0101_PED_REAL",
