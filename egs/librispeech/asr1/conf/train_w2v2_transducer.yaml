@@ -1,0 +1,51 @@
+# minibatch related
+batch-size: 4
+maxlen-in: 250000
+maxlen-out: 150
+#maxioratio: 300
+#minioratio: 6
+
+# optimization related
+#criterion: loss
+#early-stop-criterion: "validation/main/loss"
+save-interval-iters: 0
+sortagrad: 0
+opt: tri-state-adam
+init-lr: 5e-7
+warmup-lr: 5e-5
+end-lr: 2.5e-06
+optim-phase: 0.1 0.4 0.5
+epochs: 150
+patience: 0
+accum-grad: 4
+grad-clip: 5.0
+#ema-decay: 0.999
+
+# network architecture
+## general
+custom-enc-positional-encoding-type: rel_pos
+custom-enc-self-attn-type: rel_self_attn
+custom-enc-pw-activation-type: swish
+## encoder related
+etype: wav2vec
+w2v2-model-dir: /home/marcoyang/Downloads/wav2vec_model/wav2vec_small.pt
+w2v2-is-finetuned: false
+w2v2-mask-channel-prob: 0.5
+w2v2-normalise-before: false
+w2v2-freeze-finetune-updates: 10000
+w2v2-output-dim: 768
+w2v2-subsample: false
+eprojs: 768
+
+## decoder related
+dtype: lstm
+dlayers: 2
+dunits: 1024
+dropout-rate-decoder: 0.1
+dropout-rate-embed-decoder: 0.1
+
+## joint network related
+joint-dim: 1024
+
+# transducer related
+model-module: "espnet.nets.pytorch_backend.e2e_asr_transducer:E2E"
