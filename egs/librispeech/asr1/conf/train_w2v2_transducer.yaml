@@ -39,13 +39,13 @@ eprojs: 768
 
 ## decoder related
 dtype: lstm
-dlayers: 2
-dunits: 1024
+dlayers: 1
+dunits: 640
 dropout-rate-decoder: 0.1
 dropout-rate-embed-decoder: 0.1
 
 ## joint network related
-joint-dim: 1024
+joint-dim: 640
 
 # transducer related
 model-module: "espnet.nets.pytorch_backend.e2e_asr_transducer:E2E"
