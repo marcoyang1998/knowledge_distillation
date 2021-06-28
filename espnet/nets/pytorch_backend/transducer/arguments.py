@@ -91,7 +91,7 @@ def add_custom_encoder_arguments(group):
         "--custom-enc-input-layer",
         type=str,
         default="conv2d",
-        choices=["conv2d", "vgg2l", "linear", "embed"],
+        choices=["conv2d", "vgg2l", "linear", "embed", "conv2d2"],
         help="Custom encoder input layer type",
     )
     group.add_argument(

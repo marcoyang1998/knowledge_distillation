@@ -16,8 +16,12 @@ def initializer(model, args):
         args (Namespace): argument Namespace containing options
 
     """
+    if args.etype == 'wav2vec':
+        components_list = ["dec.", "joint_network"]
+    else:
+        components_list = ["enc.", "dec.", "joint_network"]
     for name, p in model.named_parameters():
-        if any(x in name for x in ["enc.", "dec.", "joint_network"]):
+        if any(x in name for x in components_list):
             # rnn based parts + joint network
             if p.dim() == 1:
                 # bias
