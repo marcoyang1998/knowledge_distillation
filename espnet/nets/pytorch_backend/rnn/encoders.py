@@ -294,6 +294,7 @@ class Wav2VecEncoder(torch.nn.Module):
                 torch.nn.Linear(2*output_size, output_size),
                 #torch.nn.ReLU()
             )
+            print(self.subsample)
         else:
             self.subsample = None
 
