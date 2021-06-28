@@ -290,7 +290,7 @@ class Wav2VecEncoder(torch.nn.Module):
         self.conv_subsampling_factor = 1
         if subsample_output:
             self.subsample = torch.nn.Sequential(
-                torch.nn.Dropout(p=0.1),
+                #torch.nn.Dropout(p=0.1),
                 torch.nn.Linear(2*output_size, output_size),
                 #torch.nn.ReLU()
             )
