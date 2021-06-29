@@ -45,3 +45,9 @@ def add_arguments_w2v2_common(group):
         default=False,
         help="add an average pooling layer to subsample bby 2"
     )
+    group.add_argument(
+        "--w2v2-subsample-mode",
+        type=strtobool,
+        default=False,
+        help="concat, concat_relu, concat_tanh, avgpooling"
+    )

@@ -247,7 +247,8 @@ class Wav2VecEncoder(torch.nn.Module):
                  freeze_finetune_updates=1000,
                  fine_tuned=False,
                  mask_channel_prob=0.25,
-                 subsample_output=False
+                 subsample_output=False,
+                 subsample_mode=None
                  ):
         super().__init__()
         import fairseq
@@ -274,7 +275,8 @@ class Wav2VecEncoder(torch.nn.Module):
         self.encoders.mask_channel_length=64
         self.encoders.mask_channel_prob=mask_channel_prob
         self.encoders.feature_grad_mult = 0.0
-        self.pretrained_params = copy.deepcopy(model.state_dict())
+        #self.pretrained_params = copy.deepcopy(model.state_dict())
+        self.pretrained_params = None
         self.normalize_before = normalize_before
         if self.normalize_before:
             self.after_norm = LayerNorm(output_size)
@@ -289,11 +291,28 @@ class Wav2VecEncoder(torch.nn.Module):
         self.register_buffer("num_updates", torch.LongTensor([0]))
         self.conv_subsampling_factor = 1
         if subsample_output:
-            self.subsample = torch.nn.Sequential(
-                #torch.nn.Dropout(p=0.1),
-                torch.nn.Linear(2*output_size, output_size),
-                #torch.nn.ReLU()
-            )
+            self.subsample_mode = subsample_mode
+            if subsample_mode == "concat":
+                self.subsample = torch.nn.Sequential(
+                    torch.nn.Dropout(p=0.1),
+                    torch.nn.Linear(2*output_size, output_size),
+                )
+            elif subsample_mode == 'concat_relu':
+                self.subsample = torch.nn.Sequential(
+                    torch.nn.Dropout(p=0.1),
+                    torch.nn.Linear(2 * output_size, output_size),
+                    torch.nn.ReLU()
+                )
+            elif subsample_mode == 'concat_tanh':
+                self.subsample = torch.nn.Sequential(
+                    torch.nn.Dropout(p=0.1),
+                    torch.nn.Linear(2 * output_size, output_size),
+                    torch.nn.Tanh()
+                )
+            elif subsample_mode == 'avgpooling':
+                self.subsample = torch.nn.Sequential(torch.nn.AvgPool1d(kernel_size=2, stride=2))
+            else:
+                raise NotImplementedError('only support: concat, concat_relu, concat_tanh, avgpooling')
             print(self.subsample)
         else:
             self.subsample = None
@@ -328,11 +347,15 @@ class Wav2VecEncoder(torch.nn.Module):
         masks = enc_outputs["padding_mask"]  # (B, T)
         olens = torch.logical_not(masks).sum(dim=1)
         if self.subsample:
-            xs_pad_1 = xs_pad[:,0:-1:2,:]
-            xs_pad_2 = xs_pad[:,1::2,:]
-            xs_pad = torch.cat((xs_pad_1, xs_pad_2), dim=2)
-            xs_pad = self.subsample(xs_pad)
-            olens = olens//2
+            if 'concat' in self.subsample_mode:
+                xs_pad_1 = xs_pad[:,0:-1:2,:]
+                xs_pad_2 = xs_pad[:,1::2,:]
+                xs_pad = torch.cat((xs_pad_1, xs_pad_2), dim=2)
+                xs_pad = self.subsample(xs_pad)
+                olens = olens//2
+            else:
+                xs_pad = self.subsample(xs_pad.permute(0, 2, 1)).permute(0, 2, 1)
+                olens = olens // 2
 
         if self.output_layer is not None:
             xs_pad = self.output_layer(xs_pad)
@@ -463,7 +486,9 @@ def encoder_for(args, idim, subsample):
                               freeze_finetune_updates=freeze_finetune_updates,
                               fine_tuned=is_fine_tuned,
                               mask_channel_prob=mask_channel_prob,
-                              subsample_output=args.w2v2_subsample)
+                              subsample_output=args.w2v2_subsample,
+                              subsample_mode=args.w2v2_subsample_mode
+                              )
     num_encs = getattr(args, "num_encs", 1)  # use getattr to keep compatibility
     if num_encs == 1:
         # compatible with single encoder asr mode

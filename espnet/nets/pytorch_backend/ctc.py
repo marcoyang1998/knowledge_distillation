@@ -100,9 +100,10 @@ class CTC(torch.nn.Module):
             return -(target * predicted.log_softmax(-1)).sum()
 
         bs = logits.shape[0]
+        odim = logits.shape[-1]
         loss = 0
         for b in range(bs):
-            soft_logit = soft_logits[b].view(-1, 31)
+            soft_logit = soft_logits[b].view(-1, odim)
             assert soft_logit.shape[0] >= hlens[b]
             loss += CXE((soft_logit[:hlens[b], :] / self.kd_temp).softmax(-1), logits[b, :hlens[b], :] / self.kd_temp)
         return loss / bs
@@ -408,9 +409,10 @@ class CTC_kd_mtl(torch.nn.Module):
             return -(target * predicted.log_softmax(-1)).sum()
 
         bs = logits.shape[0]
+        odim = logits.shape[-1]
         loss = 0
         for b in range(bs):
-            soft_logit = soft_logits[b].view(-1, 31)
+            soft_logit = soft_logits[b].view(-1, odim)
             assert soft_logit.shape[0] >= hlens[b]
             loss += CXE((soft_logit[:hlens[b], :] / self.kd_temp).softmax(-1), logits[b, :hlens[b], :] / self.kd_temp)
         return loss / bs

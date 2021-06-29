@@ -537,7 +537,8 @@ def encoder_for(
                               freeze_finetune_updates=freeze_finetune_updates,
                               fine_tuned=is_fine_tuned,
                               mask_channel_prob=mask_channel_prob,
-                              subsample_output=args.w2v2_subsample)
+                              subsample_output=args.w2v2_subsample,
+                              subsample_mode=args.w2v2_subsample_mode)
 
     return Encoder(
         args.etype,
