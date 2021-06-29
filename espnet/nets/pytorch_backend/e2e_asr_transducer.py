@@ -502,7 +502,8 @@ class E2E(ASRInterface, torch.nn.Module):
             x (torch.Tensor): encoded features (T, D_enc)
 
         """
-        x = torch.as_tensor(x).unsqueeze(0)
+        p = next(self.parameters())
+        x = torch.as_tensor(x,device=p.device).unsqueeze(0)
         enc_output, _ = self.encoder(x, None)
 
         return enc_output.squeeze(0)
@@ -519,8 +520,12 @@ class E2E(ASRInterface, torch.nn.Module):
         """
         p = next(self.parameters())
 
-        ilens = [x.shape[0]]
-        x = x[:: self.subsample[0], :]
+        if len(x.shape) > 1:
+            ilens = [x.shape[0]]
+            x = x[:: self.subsample[0], :]
+        else:
+            ilens = [x.shape[0]]
+            x = x[:: self.subsample[0]]
 
         h = torch.as_tensor(x, device=p.device, dtype=p.dtype)
         hs = h.contiguous().unsqueeze(0)
