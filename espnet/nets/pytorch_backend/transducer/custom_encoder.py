@@ -6,7 +6,7 @@ from espnet.nets.pytorch_backend.transducer.blocks import build_blocks
 from espnet.nets.pytorch_backend.transducer.vgg2l import VGG2L
 
 from espnet.nets.pytorch_backend.transformer.layer_norm import LayerNorm
-from espnet.nets.pytorch_backend.transformer.subsampling import Conv2dSubsampling
+from espnet.nets.pytorch_backend.transformer.subsampling import Conv2dSubsampling, Conv2dSubsampling2
 
 
 class CustomEncoder(torch.nn.Module):
@@ -88,7 +88,7 @@ class CustomEncoder(torch.nn.Module):
             mask (torch.Tensor): position embedded mask
 
         """
-        if isinstance(self.embed, (Conv2dSubsampling, VGG2L)):
+        if isinstance(self.embed, (Conv2dSubsampling, Conv2dSubsampling2, VGG2L)):
             xs, masks = self.embed(xs, masks)
         else:
             xs = self.embed(xs)

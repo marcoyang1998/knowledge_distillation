@@ -32,7 +32,7 @@ from espnet.nets.pytorch_backend.transformer.positionwise_feed_forward import (
     PositionwiseFeedForward,  # noqa: H301
 )
 from espnet.nets.pytorch_backend.transformer.repeat import MultiSequential
-from espnet.nets.pytorch_backend.transformer.subsampling import Conv2dSubsampling
+from espnet.nets.pytorch_backend.transformer.subsampling import Conv2dSubsampling, Conv2dSubsampling2
 
 
 def check_and_prepare(net_part, blocks_arch, input_layer):
@@ -284,6 +284,8 @@ def build_input_layer(
         )
     elif input_layer == "conv2d":
         return Conv2dSubsampling(idim, odim, dropout_rate, pos_enc_class_subsampling), 4
+    elif input_layer == "conv2d2":
+        return Conv2dSubsampling2(idim, odim, dropout_rate, pos_enc_class_subsampling), 2
     elif input_layer == "vgg2l":
         return VGG2L(idim, odim, pos_enc_class_subsampling), 4
     elif input_layer == "embed":
@@ -303,7 +305,7 @@ def build_input_layer(
             1,
         )
     else:
-        raise NotImplementedError("Support: linear, conv2d, vgg2l and embed")
+        raise NotImplementedError("Support: linear, conv2d, conv2d2, vgg2l and embed")
 
 
 def build_transformer_block(net_part, block_arch, pw_layer_type, pw_activation_type):
