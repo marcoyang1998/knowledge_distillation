@@ -47,7 +47,7 @@ def add_arguments_w2v2_common(group):
     )
     group.add_argument(
         "--w2v2-subsample-mode",
-        type=strtobool,
-        default=False,
+        type=str,
+        default="avgpooling",
         help="concat, concat_relu, concat_tanh, avgpooling"
     )
