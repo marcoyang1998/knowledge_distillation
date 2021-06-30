@@ -519,6 +519,9 @@ class E2E(ASRInterface, torch.nn.Module):
 
         """
         p = next(self.parameters())
+        if self.etype == 'wav2vec':
+            self.enc.encoders.mask_channel_prob = 0
+            self.enc.encoders.mask_prob = 0
 
         if len(x.shape) > 1:
             ilens = [x.shape[0]]
