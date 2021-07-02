@@ -429,6 +429,9 @@ class E2E(ASRInterface, torch.nn.Module):
         else:
             hs, hlens = hs, ilens
 
+        if isinstance(self.enc, Wav2VecEncoder): # set probs to zero during inference
+            self.enc.encoders.mask_prob=0
+            self.enc.encoders.mask_channel_prob=0
         # 1. encoder
         hs, _, _ = self.enc(hs, hlens)
         return hs.squeeze(0)
