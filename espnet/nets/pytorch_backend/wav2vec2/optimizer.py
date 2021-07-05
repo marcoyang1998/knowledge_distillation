@@ -3,7 +3,7 @@ import logging
 
 class Tri_state_adam(object):
     # a tri-state adam optim, first phase warmup, second phase remain the same, third phase decay linearly
-    def __init__(self, phase, total_steps, init_lr, warmup_lr, end_lr, optim):
+    def __init__(self, phase, total_steps, init_lr, warmup_lr, end_lr, optim, enc_lr_ratio=1.0):
         self.optimizer = optim
         self._step = 0
         self._rate = init_lr
@@ -14,6 +14,8 @@ class Tri_state_adam(object):
         self.end_lr = end_lr
         self.warmup_factor = (warmup_lr-init_lr)/(phase[0]*total_steps)
         self.decay_factor = (warmup_lr-end_lr)/(phase[2]*total_steps)
+        self.enc_lr_ratio = enc_lr_ratio
+        assert self.enc_lr_ratio > 0, "lr ratio must be positive!!"
 
     @property
     def param_groups(self):
@@ -35,7 +37,10 @@ class Tri_state_adam(object):
         self._step += 1
         self._rate = rate
         for p in self.optimizer.param_groups:
-            p["lr"] = rate
+            if p['name'] == 'enc_param':
+                p["lr"] = rate * self.enc_lr_ratio
+            else:
+                p["lr"] = rate
         self.optimizer.step()
 
     def zero_grad(self):
@@ -64,7 +69,7 @@ class Tri_state_adam(object):
             else:
                 setattr(self, key, value)
 
-def get_opt(model_params, phase, total_steps, init_lr, warmup_lr, end_lr):
+def get_opt(model_params, phase, total_steps, init_lr, warmup_lr, end_lr, enc_lr_ratio):
     """Get standard NoamOpt."""
     base = torch.optim.Adam(model_params, lr=0, betas=(0.9, 0.98), eps=1e-08)
-    return Tri_state_adam(phase, total_steps, init_lr, warmup_lr, end_lr, base)
+    return Tri_state_adam(phase, total_steps, init_lr, warmup_lr, end_lr, base, enc_lr_ratio)

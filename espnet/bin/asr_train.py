@@ -302,28 +302,36 @@ def get_parser(parser=None, required=True):
     parser.add_argument(
         "--optim-phase",
         type=str,
-        help="Phase of the tri-state optim"
+        help="Phase of the tri-state optim in tri state adam"
     )
     parser.add_argument(
         "--optim-total-steps",
         type=int,
         default=13000,
-        help="how many updates shoule be made"
+        help="how many updates shoule be made in tri state adam"
     )
     parser.add_argument(
         "--init-lr",
         type=float,
-        default=5e-7
+        default=5e-7,
+        help = "tri state adam init lr"
     )
     parser.add_argument(
         "--warmup-lr",
         type=float,
-        default=5e-5
+        default=5e-5,
+        help="tri state adam warmup lr"
     )
     parser.add_argument(
         "--end-lr",
         type=float,
-        default=2.5e-06
+        default=2.5e-06,
+        help="tri state adam end lr"
+    )
+    parser.add_argument(
+        "--tri-state-adam-enc-lr-ratio",
+        type=float,
+        default=1.0
     )
     parser.add_argument(
         "--adam-lr",
