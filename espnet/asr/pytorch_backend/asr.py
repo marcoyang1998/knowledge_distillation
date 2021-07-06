@@ -648,10 +648,10 @@ def train(args):
     elif args.opt == "tri-state-adam":
         from espnet.nets.pytorch_backend.wav2vec2.optimizer import get_opt
         optim_phase = [float(num) for num in args.optim_phase.split()]
-        enc_params = {'params': [kv[1] for kv in model.named_parameters() if kv[0][:3] == 'enc'], 'name': 'enc_param'}
-        other_params = {'params': [kv[1] for kv in model.named_parameters() if kv[0][:3] != 'enc'], 'name': 'none_enc_param'}
-        params = [enc_params, other_params]
-        optimizer = get_opt(params, optim_phase, args.optim_total_steps, args.init_lr, args.warmup_lr, args.end_lr, args.tri_state_adam_enc_lr_ratio)
+        #enc_params = {'params': [kv[1] for kv in model.named_parameters() if kv[0][:3] == 'enc'], 'name': 'enc_param'}
+        #other_params = {'params': [kv[1] for kv in model.named_parameters() if kv[0][:3] != 'enc'], 'name': 'none_enc_param'}
+        #params = [enc_params, other_params]
+        optimizer = get_opt(model_params, optim_phase, args.optim_total_steps, args.init_lr, args.warmup_lr, args.end_lr, args.tri_state_adam_enc_lr_ratio)
         logging.info("Adopting tri-state-adam optimizer")
     else:
         raise NotImplementedError("unknown optimizer: " + args.opt)

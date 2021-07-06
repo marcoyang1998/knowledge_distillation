@@ -37,10 +37,10 @@ class Tri_state_adam(object):
         self._step += 1
         self._rate = rate
         for p in self.optimizer.param_groups:
-            if p['name'] == 'enc_param':
-                p["lr"] = rate * self.enc_lr_ratio
-            else:
-                p["lr"] = rate
+            #if p['name'] == 'enc_param':
+            #    p["lr"] = rate * self.enc_lr_ratio
+            #else:
+            p["lr"] = rate
         self.optimizer.step()
 
     def zero_grad(self):
