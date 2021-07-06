@@ -1642,7 +1642,7 @@ def collect_ctc_labels(args):
                 else load_inputs_and_targets(batch)
             )
             output_prob = model.generate_ctc_prob(feats)
-            assert output_prob.shape[1] == calculate_output_shape(feats[0].shape[0])
+            #assert output_prob.shape[1] == calculate_output_shape(feats[0].shape[0])
             spkr = '-'.join(name.split('-')[:-1])
             if not os.path.isdir(os.path.join(args.output_ctc_dir, spkr)):
                 os.makedirs(os.path.join(args.output_ctc_dir, spkr))
