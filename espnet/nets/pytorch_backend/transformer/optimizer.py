@@ -30,7 +30,8 @@ class NoamOpt(object):
         """Update parameters and rate."""
         self._step += 1
         rate = self.rate()
-        print(rate)
+        if self._step % 100 == 0:
+            print('Current learning rate: {} at step: {}'.format(rate, self._step))
         for p in self.optimizer.param_groups:
             p["lr"] = rate
         self._rate = rate

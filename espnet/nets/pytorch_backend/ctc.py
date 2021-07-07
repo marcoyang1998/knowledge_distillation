@@ -104,8 +104,10 @@ class CTC(torch.nn.Module):
         loss = 0
         for b in range(bs):
             soft_logit = soft_logits[b].view(-1, odim)
-            assert soft_logit.shape[0] >= hlens[b]
-            loss += CXE((soft_logit[:hlens[b], :] / self.kd_temp).softmax(-1), logits[b, :hlens[b], :] / self.kd_temp)
+            assert abs(soft_logit.shape[0] - hlens[b]) <= 1, "Softlabel: {}, logit: {}".format(soft_logit.shape[0], hlens[b])
+            #assert soft_logit.shape[0] >= hlens[b], "Softlabel: {}, logit: {}".format(soft_logit.shape[0], hlens[b])
+            l = min(hlens[b], soft_logit.shape[0])
+            loss += CXE((soft_logit[:l, :] / self.kd_temp).softmax(-1), logits[b, :l, :] / self.kd_temp)
         return loss / bs
 
 
