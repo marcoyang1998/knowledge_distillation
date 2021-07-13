@@ -423,7 +423,7 @@ class E2E(ASRInterface, torch.nn.Module):
         """
         initializer(self, args)
 
-    def kd_one_best_loss(self, z, pred_len, target_len, ys_pad_kd):
+    def kd_one_best_loss(self, z, pred_len, target_len, enc_T, ys_pad_kd):
         def CXE(target, predicted):
             return -(target * predicted.log_softmax(-1)).sum()
 
@@ -433,25 +433,39 @@ class E2E(ASRInterface, torch.nn.Module):
             cur_len = pred_len[b]
             cur_one_best_path = ys_pad_kd[b,:, 0]
             cur_one_best_path_pr = ys_pad_kd[b,:, 1:]
+
             mask = cur_one_best_path != self.ignore_id
+            soft_label_T = sum(cur_one_best_path == 0)
+            assert abs(soft_label_T - enc_T[b]) <= 1, print("Length differ by {}".format(abs(soft_label_T - z.shape[0])))
             cur_one_best_path = cur_one_best_path[mask].int()
             cur_one_best_path_pr = cur_one_best_path_pr[mask, :]
+            if soft_label_T > enc_T[b]:
+                cur_one_best_path = cur_one_best_path[:-1]
+                cur_one_best_path_pr = cur_one_best_path_pr[:-1, :]
+                #assert sum(cur_one_best_path ==0) == enc_T[b]
+
             u_list = []
             t_list = []
             u, t = 0, 0
             for i in range(cur_one_best_path.shape[0]):
                 cur_node = cur_one_best_path[i]
-
-                #kd_loss += CXE(torch.softmax(cur_one_best_path_pr[i]/self.kd_temperature, dim=-1), z[b, t, u, :]/self.kd_temperature)
+                #assert u <= target_len[b]
+                #assert t < enc_T[b]
+                if t >= enc_T[b]:
+                    break
+                if u > target_len[b]:
+                    break
                 u_list.append(u)
                 t_list.append(t)
+
                 if cur_node == 0:
                     t += 1
                 else:
                     u += 1
-            lattice_path = z[b,t_list, u_list,:]
-            kd_loss += CXE(torch.softmax(cur_one_best_path_pr / self.kd_temperature, dim=-1),
-                            lattice_path / self.kd_temperature)
+            lattice_path = z[b, t_list, u_list,:]
+            l = min(cur_one_best_path_pr.shape[0], lattice_path.shape[0])
+            kd_loss += CXE(torch.softmax(cur_one_best_path_pr[:l,:] / self.kd_temperature, dim=-1),
+                            lattice_path[:l,:] / self.kd_temperature)
         return kd_loss/bs
 
     def forward(self, xs_pad, ilens, ys_pad):
@@ -568,7 +582,8 @@ class E2E(ASRInterface, torch.nn.Module):
         """
         # 1. encoder
         xs_pad = xs_pad[:, : max(ilens)]
-
+        def cal_enc_T(ilens):
+            return [(((idim - 1) // 2 - 1) // 2) for idim in ilens]
         if "custom" in self.etype:
             src_mask = make_non_pad_mask(ilens.tolist()).to(xs_pad.device).unsqueeze(-2)
 
@@ -623,7 +638,10 @@ class E2E(ASRInterface, torch.nn.Module):
             loss_lm = 0.0
 
         if self.do_kd:
-            loss_kd = self.kd_mtl_factor * self.kd_loss(z, pred_len, target_len, ys_kd_pad)
+            if self.kd_mtl_factor > 0:
+                loss_kd = self.kd_mtl_factor * self.kd_loss(z, pred_len, target_len, cal_enc_T(ilens), ys_kd_pad)
+            else:
+                loss_kd = 0.0
         else:
             loss_kd = 0.0
 
