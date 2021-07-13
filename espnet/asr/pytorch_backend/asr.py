@@ -21,7 +21,7 @@ import torch
 from torch.nn.parallel import data_parallel
 
 from espnet.asr.asr_utils import adadelta_eps_decay
-from espnet.asr.asr_utils import add_results_to_json
+from espnet.asr.asr_utils import add_results_to_json, write_kd_json
 from espnet.asr.asr_utils import CompareValueTrigger
 from espnet.asr.asr_utils import format_mulenc_args
 from espnet.asr.asr_utils import get_model_conf
@@ -911,6 +911,7 @@ def train(args):
                     "validation/main/loss_aux_trans",
                     "main/loss_aux_symm_kl",
                     "validation/main/loss_aux_symm_kl",
+                    "main/loss_kd",
                 ],
                 "epoch",
                 file_name="loss.png",
@@ -1208,6 +1209,7 @@ def recog(args):
     with open(args.recog_json, "rb") as f:
         js = json.load(f)["utts"]
     new_js = {}
+    new_kd_js = {}
 
     load_inputs_and_targets = LoadInputsAndTargets(
         mode="asr",
@@ -1240,6 +1242,7 @@ def recog(args):
             nstep=args.nstep,
             prefix_alpha=args.prefix_alpha,
             score_norm=args.score_norm,
+            collect_kd_data=args.collect_rnnt_kd_data
         )
 
     if args.batchsize == 0:
@@ -1304,8 +1307,11 @@ def recog(args):
                         feat, args, train_args.char_list, rnnlm
                     )
                 new_js[name] = add_results_to_json(
-                    js[name], nbest_hyps, train_args.char_list
+                    js[name], nbest_hyps, train_args.char_list, args.collect_rnnt_kd_data
                 )
+                if args.collect_rnnt_kd_data:
+                    new_kd_js[name] = write_kd_json(js[name],name, nbest_hyps, train_args.char_list, args.collect_rnnt_kd_data, args.keep_gt_transcription, args.output_kd_dir)
+
 
     else:
 
@@ -1377,7 +1383,12 @@ def recog(args):
                 {"utts": new_js}, indent=4, ensure_ascii=False, sort_keys=True
             ).encode("utf_8")
         )
-
+    with open(os.path.join(args.output_kd_dir, "data_kd.json"), "wb") as f:
+        f.write(
+            json.dumps(
+                {"utts": new_kd_js}, indent=4, ensure_ascii=False, sort_keys=True
+            ).encode("utf_8")
+        )
 
 def enhance(args):
     """Dumping enhanced speech and mask.
@@ -1597,16 +1608,29 @@ def enhance(args):
                 logging.info("Breaking the process.")
                 break
 
-def collect_ctc_labels(args):
+def collect_soft_labels(args):
     print("----Starting collecting labels----")
     set_deterministic_pytorch(args)
     model, train_args = load_trained_model(args.model, training=False)
     assert isinstance(model, ASRInterface)
+    model.recog_args = args
+
+    if args.streaming_mode and "transformer" in train_args.model_module:
+        raise NotImplementedError("streaming mode for transformer is not implemented")
+    logging.info(
+        " Total parameter of the model = "
+        + str(sum(p.numel() for p in model.parameters()))
+    )
+    assert args.rnnlm == None, "Soft-label collection does not support rnnlm"
+    assert args.word_rnnlm == None, "Soft-label collection does not support word_rnnlm"
 
     if args.ngpu == 1:
         gpu_id = list(range(args.ngpu))
         logging.info("gpu id: " + str(gpu_id))
         model.cuda()
+        device = "cuda"
+    else:
+        device = "cpu"
 
     with open(args.recog_json, "rb") as f:
         js = json.load(f)["utts"]
@@ -1623,43 +1647,55 @@ def collect_ctc_labels(args):
         preprocess_args={"train": False},
     )
 
-    def calculate_output_shape(dim):
+    def calculate_w2v2_output_shape(dim):
         strides = [5,2,2,2,2,2,2]
         kernels = [10,3,3,3,3,2,2]
         for i in range(7):
             dim = int((dim-kernels[i])/strides[i])+1
         return dim
+    is_rnnt = hasattr(model, "joint_network")
+    if is_rnnt: # rnnt model
+        assert args.batchsize == 0, 'Only support collection with bs=0'
+        with torch.no_grad():
+            for idx, name in enumerate(js.keys(), 1):
+                logging.info("(%d/%d) decoding " + name, idx, len(js.keys()))
+                batch = [(name, js[name])]
+                feat = load_inputs_and_targets(batch)
+                feat = (
+                    feat[0][0]
+                    if args.num_encs == 1
+                    else [feat[idx][0] for idx in range(model.num_encs)]
+                )
+                #x = _recursive_to(batch, device)
+                nbest_hyps = model.collect_soft_label(feat)
 
-    #outputs = {}
-    keys = list(js.keys())
-    assert args.batchsize == 1
-    with torch.no_grad():
-        for name in keys:
-            batch = [(name, js[name])]
-            feats = (
-                load_inputs_and_targets(batch)[0]
-                if args.num_encs == 1
-                else load_inputs_and_targets(batch)
-            )
-            output_prob = model.generate_ctc_prob(feats)
-            #assert output_prob.shape[1] == calculate_output_shape(feats[0].shape[0])
-            spkr = '-'.join(name.split('-')[:-1])
-            if not os.path.isdir(os.path.join(args.output_ctc_dir, spkr)):
-                os.makedirs(os.path.join(args.output_ctc_dir, spkr))
-            with open(os.path.join(args.output_ctc_dir, spkr, name + ".npy"), 'wb') as f:
-                np.save(f, output_prob)
-            logging.info("Generated ctc prob for {}".format(name))
+                new_js[name] = add_results_to_json(
+                    js[name], nbest_hyps, train_args.char_list
+                )
+    else: # ctc model
+        keys = list(js.keys())
+        assert args.batchsize == 1
+        with torch.no_grad():
+            for name in keys:
+                batch = [(name, js[name])]
+                feats = (
+                    load_inputs_and_targets(batch)[0]
+                    if args.num_encs == 1
+                    else load_inputs_and_targets(batch)
+                )
+                output_prob = model.generate_ctc_prob(feats)
+                #assert output_prob.shape[1] == calculate_w2v2_output_shape(feats[0].shape[0])
+                spkr = '-'.join(name.split('-')[:-1])
+                if not os.path.isdir(os.path.join(args.output_kd_dir, spkr)):
+                    os.makedirs(os.path.join(args.output_kd_dir, spkr))
+                with open(os.path.join(args.output_kd_dir, spkr, name + ".npy"), 'wb') as f:
+                    np.save(f, output_prob)
+                logging.info("Generated ctc prob for {}".format(name))
+                del output_prob
+                torch.cuda.empty_cache()
+                gc.collect()
 
 
-    spkr = '-'.join(name.split('-')[:-1])
-    if not os.path.isdir(os.path.join(args.output_ctc_dir, spkr)):
-        os.makedirs(os.path.join(args.output_ctc_dir, spkr))
-    #with open(os.path.join(args.output_ctc_dir, spkr, name + ".npy"), 'wb') as f:
-    #    np.save(f, output_prob.cpu().numpy())
-
-    #del output_prob
-    torch.cuda.empty_cache()
-    gc.collect()
 
 
 

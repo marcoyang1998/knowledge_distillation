@@ -258,15 +258,27 @@ def get_parser():
         help="Threshold probability for CTC output",
     )
     parser.add_argument(
-        "--collect-ctc-label",
+        "--collect-soft-label",
         type=strtobool,
         default=False,
         help="If true, only collect ctc-labels and don't perform actual recognition"
     )
     parser.add_argument(
-        "--output-ctc-dir",
+        "--output-kd-dir",
         type=str,
-        help="Where to store the collected ctc label"
+        help="Where to store the collected kd label"
+    )
+    parser.add_argument(
+        "--collect-rnnt-kd-data",
+        type=strtobool,
+        default=False,
+        help="If true, collect distillation data for rnnt model while performing decoding"
+    )
+    parser.add_argument(
+        "--keep-gt-transcription",
+        type=strtobool,
+        default=False,
+        help="If true, pseudo transcription will be written. Only set this to true when using unlabelled data"
     )
 
     return parser
@@ -343,10 +355,10 @@ def main(args):
                     from espnet.asr.pytorch_backend.recog import recog_v2
 
                     recog_v2(args)
-                elif args.collect_ctc_label:
-                    from espnet.asr.pytorch_backend.asr import collect_ctc_labels
+                elif args.collect_soft_label:
+                    from espnet.asr.pytorch_backend.asr import collect_soft_labels
                     logging.info("Do ctc label collection")
-                    collect_ctc_labels(args)
+                    collect_soft_labels(args)
                 else:
                     from espnet.asr.pytorch_backend.asr import recog
 

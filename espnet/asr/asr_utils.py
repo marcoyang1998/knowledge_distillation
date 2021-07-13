@@ -863,7 +863,7 @@ def parse_hypothesis(hyp, char_list):
     return text, token, tokenid, score
 
 
-def add_results_to_json(js, nbest_hyps, char_list):
+def add_results_to_json(js, nbest_hyps, char_list, collect_rnnt_kd_data=False, keep_gt_transcription=False):
     """Add N-best results to json.
 
     Args:
@@ -900,6 +900,12 @@ def add_results_to_json(js, nbest_hyps, char_list):
         out_dic["rec_token"] = rec_token
         out_dic["rec_tokenid"] = rec_tokenid
         out_dic["score"] = score
+        if collect_rnnt_kd_data:
+            rec_token_with_blank_list = list(map(int, hyp['yseq_with_blank']))
+            rec_token_with_blank_str = " ".join([str(idx) for idx in rec_token_with_blank_list])
+            #kd_prob = np.asarray(hyp['yseq_with_blank_pr'])
+            out_dic["rec_tokenid_with_blank"] = rec_token_with_blank_str
+
 
         # add to list of N-best result dicts
         new_js["output"].append(out_dic)
@@ -912,6 +918,40 @@ def add_results_to_json(js, nbest_hyps, char_list):
 
     return new_js
 
+def write_kd_json(js, name, nbest_hyps, char_list, collect_rnnt_kd_data=False, keep_gt_transcription=True, kd_output_dir=None):
+    # copy old json info
+    new_js = dict()
+    new_js["utt2spk"] = js["utt2spk"]
+    new_js["output"] = []
+
+    for n, hyp in enumerate(nbest_hyps, 1):
+        rec_text, rec_token, rec_tokenid, score = parse_hypothesis(hyp, char_list)
+
+        rec_token_with_blank_list = list(map(float, hyp['yseq_with_blank']))[1:]
+        kd_prob = np.asarray(hyp['yseq_with_blank_pr'])
+        kd_matrix = np.hstack((np.asarray(rec_token_with_blank_list).reshape(-1,1),kd_prob))
+        #out_dic["rec_tokenid_with_blank"] = rec_token_with_blank_str
+        new_js['input'] = js['input']
+        if keep_gt_transcription == False:
+            new_js['output'].append({})
+            new_js['output'][0]["name"] = "target1"
+            new_js['output'][0]["shape"] = [len(hyp["yseq"]) - 1, len(char_list)]
+            new_js['output'][0]["text"] = rec_text
+            new_js['output'][0]["token"] = rec_token
+            new_js['output'][0]["tokenid"] = rec_tokenid
+            new_js['output'][0]["score"] = score
+
+        spkr = '-'.join(name.split('-')[:-1])
+        if not os.path.isdir(os.path.join(kd_output_dir, spkr)):
+            os.makedirs(os.path.join(kd_output_dir, spkr))
+        with open(os.path.join(kd_output_dir, spkr, name + ".npy"), 'wb') as f:
+            np.save(f, kd_matrix)
+        new_js['output'].append({"name": "target2",
+                            "feat": os.path.join(kd_output_dir, spkr, name + ".npy"),
+                            "shape": [kd_prob.shape[0], kd_prob.shape[1]],
+                            "filetype": "npy",
+                            })
+    return new_js
 
 def plot_spectrogram(
     plt,

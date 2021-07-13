@@ -34,6 +34,7 @@ class BeamSearchTransducer:
         prefix_alpha: int = 1,
         score_norm: bool = True,
         nbest: int = 1,
+        collect_kd_data = False,
     ):
         """Initialize transducer beam search.
 
@@ -90,6 +91,7 @@ class BeamSearchTransducer:
         self.score_norm = score_norm
 
         self.nbest = nbest
+        self.collect_kd_data = collect_kd_data
 
     def __call__(self, h: torch.Tensor) -> Union[List[Hypothesis], List[NSCHypothesis]]:
         """Perform beam search.
@@ -175,11 +177,11 @@ class BeamSearchTransducer:
 
         dec_state = self.decoder.init_state(1)
 
-        kept_hyps = [Hypothesis(score=0.0, yseq=[self.blank], dec_state=dec_state)]
+        kept_hyps = [Hypothesis(score=0.0, yseq=[self.blank], dec_state=dec_state, yseq_with_blank=[self.blank],yseq_with_blank_pr=[])] # B in the paper
         cache = {}
 
         for hi in h:
-            hyps = kept_hyps
+            hyps = kept_hyps # hyps: A in the paper
             kept_hyps = []
 
             while True:
@@ -187,16 +189,19 @@ class BeamSearchTransducer:
                 hyps.remove(max_hyp)
 
                 y, state, lm_tokens = self.decoder.score(max_hyp, cache)
-
+                if self.collect_kd_data:
+                    ytu_logit = self.joint_network(hi, y).cpu().numpy()
                 ytu = torch.log_softmax(self.joint_network(hi, y), dim=-1)
                 top_k = ytu[1:].topk(beam_k, dim=-1)
 
                 kept_hyps.append(
                     Hypothesis(
-                        score=(max_hyp.score + float(ytu[0:1])),
+                        score=(max_hyp.score + float(ytu[0:1])), # for blank symbol
                         yseq=max_hyp.yseq[:],
                         dec_state=max_hyp.dec_state,
                         lm_state=max_hyp.lm_state,
+                        yseq_with_blank=(max_hyp.yseq_with_blank + [self.blank]) if self.collect_kd_data else None,
+                        yseq_with_blank_pr = (max_hyp.yseq_with_blank_pr + [ytu_logit]) if self.collect_kd_data else None,
                     )
                 )
 
@@ -217,6 +222,8 @@ class BeamSearchTransducer:
                             yseq=max_hyp.yseq[:] + [int(k + 1)],
                             dec_state=state,
                             lm_state=lm_state,
+                            yseq_with_blank=(max_hyp.yseq_with_blank + [int(k + 1)]) if self.collect_kd_data else None,
+                            yseq_with_blank_pr=(max_hyp.yseq_with_blank_pr + [ytu_logit]) if self.collect_kd_data else None,
                         )
                     )
 

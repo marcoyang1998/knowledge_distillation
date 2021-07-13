@@ -21,6 +21,8 @@ class Hypothesis:
         Tuple[torch.Tensor, Optional[torch.Tensor]], List[torch.Tensor], torch.Tensor
     ]
     lm_state: Union[Dict[str, Any], List[Any]] = None
+    yseq_with_blank: List[int] = None
+    yseq_with_blank_pr: List[Any] = None
 
 
 @dataclass
