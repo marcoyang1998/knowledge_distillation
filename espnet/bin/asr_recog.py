@@ -280,6 +280,11 @@ def get_parser():
         default=False,
         help="If true, pseudo transcription will be written. Only set this to true when using unlabelled data"
     )
+    parser.add_argument(
+        "--kd-json-label",
+        type=str,
+        help="Name of the kd json file"
+    )
 
     return parser
 

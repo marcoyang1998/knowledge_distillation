@@ -1383,12 +1383,13 @@ def recog(args):
                 {"utts": new_js}, indent=4, ensure_ascii=False, sort_keys=True
             ).encode("utf_8")
         )
-    with open(os.path.join(args.output_kd_dir, "data_kd.json"), "wb") as f:
-        f.write(
-            json.dumps(
-                {"utts": new_kd_js}, indent=4, ensure_ascii=False, sort_keys=True
-            ).encode("utf_8")
-        )
+    if args.collect_rnnt_kd_data:
+        with open(args.kd_json_label, "wb") as f:
+            f.write(
+                json.dumps(
+                    {"utts": new_kd_js}, indent=4, ensure_ascii=False, sort_keys=True
+                ).encode("utf_8")
+            )
 
 def enhance(args):
     """Dumping enhanced speech and mask.
