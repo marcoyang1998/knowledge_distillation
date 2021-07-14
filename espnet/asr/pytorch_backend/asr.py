@@ -1667,7 +1667,7 @@ def collect_soft_labels(args):
                 logging.info("(%d/%d) decoding " + name, idx, len(js.keys()))
                 batch = [(name, js[name])]
                 feat = load_inputs_and_targets(batch)
-                feat = (torch.tensor(feat[0][0]).unsqueeze(0), torch.tensor([feat[0][0].shape[0]]), torch.tensor(feat[1][0]).view(1,-1))
+                feat = (torch.tensor(feat[0][0]).unsqueeze(0).float(), torch.tensor([feat[0][0].shape[0]]), torch.tensor(feat[1][0]).view(1,-1))
                 x = _recursive_to(feat, device)
 
                 nbest_hyps = model.collect_soft_label(*x)
