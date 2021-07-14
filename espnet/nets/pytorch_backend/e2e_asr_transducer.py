@@ -430,18 +430,17 @@ class E2E(ASRInterface, torch.nn.Module):
         bs = z.shape[0]
         kd_loss = 0.0
         for b in range(bs):
-            cur_len = pred_len[b]
             cur_one_best_path = ys_pad_kd[b,:, 0]
             cur_one_best_path_pr = ys_pad_kd[b,:, 1:]
 
             mask = cur_one_best_path != self.ignore_id
             soft_label_T = sum(cur_one_best_path == 0)
-            assert abs(soft_label_T - enc_T[b]) <= 1, print("Length differ by {}".format(abs(soft_label_T - z.shape[0])))
+            #assert abs(soft_label_T - enc_T[b]) <= 1, print("Length differ by {}".format(abs(soft_label_T - z.shape[0])))
             cur_one_best_path = cur_one_best_path[mask].int()
             cur_one_best_path_pr = cur_one_best_path_pr[mask, :]
-            if soft_label_T > enc_T[b]:
-                cur_one_best_path = cur_one_best_path[:-1]
-                cur_one_best_path_pr = cur_one_best_path_pr[:-1, :]
+            #if soft_label_T > enc_T[b]:
+            #    cur_one_best_path = cur_one_best_path[:-1]
+            #    cur_one_best_path_pr = cur_one_best_path_pr[:-1, :]
                 #assert sum(cur_one_best_path ==0) == enc_T[b]
 
             u_list = []
@@ -671,7 +670,7 @@ class E2E(ASRInterface, torch.nn.Module):
                 float(loss_lm),
                 float(loss_aux_trans),
                 float(loss_aux_symm_kl),
-                float(loss_kd/self.kd_temperature),
+                float(loss_kd),
                 cer,
                 wer,
             )
