@@ -362,7 +362,7 @@ def main(args):
                     recog_v2(args)
                 elif args.collect_soft_label:
                     from espnet.asr.pytorch_backend.asr import collect_soft_labels
-                    logging.info("Do ctc label collection")
+                    logging.info("Do label collection")
                     collect_soft_labels(args)
                 else:
                     from espnet.asr.pytorch_backend.asr import recog

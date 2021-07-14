@@ -746,17 +746,56 @@ class E2E(ASRInterface, torch.nn.Module):
 
         return [asdict(n) for n in nbest_hyps]
 
-    def collect_soft_label(self, xs_pad):
+    def collect_soft_label(self, xs_pad, ilens, ys_pad):
         self.eval()
-
-        #xs_pad = xs_pad[:, : max(ilens)]
+        xs_pad = xs_pad[:, : max(ilens)]
         if "custom" in self.etype:
-            h = self.encode_custom(xs_pad)
+            src_mask = make_non_pad_mask(ilens.tolist()).to(xs_pad.device).unsqueeze(-2)
+
+            _hs_pad, hs_mask = self.encoder(xs_pad, src_mask)
         else:
-            h = self.encode_rnn(xs_pad)
+            _hs_pad, hs_mask, _ = self.enc(xs_pad, ilens)
 
-        dec_state = self.decoder.init_state(1)
+        if self.use_aux_task:
+            hs_pad, aux_hs_pad = _hs_pad[0], _hs_pad[1]
+        else:
+            hs_pad, aux_hs_pad = _hs_pad, None
 
+        ys_in_pad, ys_out_pad, target, pred_len, target_len = prepare_loss_inputs(
+            ys_pad, hs_mask
+        )
+
+        if "custom" in self.dtype:
+            ys_mask = target_mask(ys_in_pad, self.blank_id)
+            pred_pad, _ = self.decoder(ys_in_pad, ys_mask, hs_pad)
+        else:
+            pred_pad = self.dec(hs_pad, ys_in_pad)
+        z = self.joint_network(hs_pad.unsqueeze(2), pred_pad.unsqueeze(1))
+        one_best_path = [0]
+        one_best_path_pr = []
+        u = 0
+        t = 0
+        score = 0.0
+        while True:
+            k = torch.argmax(z[0,t,u,:], dim=-1)
+            log_pr = torch.max(z[0,t,u,:].softmax(dim=-1), dim=-1)[0].log()
+            score += log_pr
+            one_best_path.append(k)
+            one_best_path_pr.append(z[0,t,u,:])
+            if k == 0:
+                t += 1
+            else:
+                u += 1
+            if t >= z.shape[1]:
+                break
+            if u >= z.shape[2]:
+                break
+            if t == z.shape[1] -1 and u == z.shape[2] -1:
+                break
+        one_best_path = torch.tensor(one_best_path)
+        one_best_path_pr = torch.stack(one_best_path_pr)
+        yseq = one_best_path[one_best_path > 0]
+        return [{'yseq': yseq.cpu().numpy(), 'yseq_with_blank': one_best_path.cpu().numpy(), 'yseq_with_blank_pr': one_best_path_pr.cpu().numpy(), 'score': score.cpu().numpy()}]
 
 
     def calculate_all_attentions(self, xs_pad, ilens, ys_pad):

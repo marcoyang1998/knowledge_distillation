@@ -929,6 +929,7 @@ def write_kd_json(js, name, nbest_hyps, char_list, collect_rnnt_kd_data=False, k
 
         rec_token_with_blank_list = list(map(float, hyp['yseq_with_blank']))[1:]
         kd_prob = np.asarray(hyp['yseq_with_blank_pr'])
+
         kd_matrix = np.hstack((np.asarray(rec_token_with_blank_list).reshape(-1,1),kd_prob))
         #out_dic["rec_tokenid_with_blank"] = rec_token_with_blank_str
         new_js['input'] = js['input']
@@ -940,6 +941,8 @@ def write_kd_json(js, name, nbest_hyps, char_list, collect_rnnt_kd_data=False, k
             new_js['output'][0]["token"] = rec_token
             new_js['output'][0]["tokenid"] = rec_tokenid
             new_js['output'][0]["score"] = score
+        else:
+            new_js['output'] = js['output']
 
         spkr = '-'.join(name.split('-')[:-1])
         if not os.path.isdir(os.path.join(kd_output_dir, spkr)):

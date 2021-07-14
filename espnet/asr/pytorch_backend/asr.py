@@ -1636,10 +1636,12 @@ def collect_soft_labels(args):
     with open(args.recog_json, "rb") as f:
         js = json.load(f)["utts"]
     new_js = {}
+    new_kd_js = {}
 
+    is_rnnt = hasattr(model, "joint_network")
     load_inputs_and_targets = LoadInputsAndTargets(
         mode="asr",
-        load_output=False,
+        load_output=False if not is_rnnt else True,
         sort_in_input_length=False,
         preprocess_conf=train_args.preprocess_conf
         if args.preprocess_conf is None
@@ -1654,24 +1656,35 @@ def collect_soft_labels(args):
         for i in range(7):
             dim = int((dim-kernels[i])/strides[i])+1
         return dim
-    is_rnnt = hasattr(model, "joint_network")
+
     if is_rnnt: # rnnt model
+        if args.collect_rnnt_kd_data:
+            kd_json_folder = '/'.join(args.kd_json_label.split('/')[:-1])
+            assert os.path.isdir(kd_json_folder), "Folder dose not exist: {}".format(kd_json_folder)
         assert args.batchsize == 0, 'Only support collection with bs=0'
         with torch.no_grad():
             for idx, name in enumerate(js.keys(), 1):
                 logging.info("(%d/%d) decoding " + name, idx, len(js.keys()))
                 batch = [(name, js[name])]
                 feat = load_inputs_and_targets(batch)
-                feat = (
-                    feat[0][0]
-                    if args.num_encs == 1
-                    else [feat[idx][0] for idx in range(model.num_encs)]
-                )
-                #x = _recursive_to(batch, device)
-                nbest_hyps = model.collect_soft_label(feat)
+                feat = (torch.tensor(feat[0][0]).unsqueeze(0), torch.tensor([feat[0][0].shape[0]]), torch.tensor(feat[1][0]).view(1,-1))
+                x = _recursive_to(feat, device)
 
-                new_js[name] = add_results_to_json(
-                    js[name], nbest_hyps, train_args.char_list
+                nbest_hyps = model.collect_soft_label(*x)
+
+                new_kd_js[name] = write_kd_json(js[name],
+                                                name,
+                                                nbest_hyps,
+                                                train_args.char_list,
+                                                args.collect_rnnt_kd_data,
+                                                args.keep_gt_transcription,
+                                                args.output_kd_dir)
+        if args.collect_rnnt_kd_data:
+            with open(args.kd_json_label, "wb") as f:
+                f.write(
+                    json.dumps(
+                        {"utts": new_kd_js}, indent=4, ensure_ascii=False, sort_keys=True
+                    ).encode("utf_8")
                 )
     else: # ctc model
         keys = list(js.keys())
@@ -1695,9 +1708,6 @@ def collect_soft_labels(args):
                 del output_prob
                 torch.cuda.empty_cache()
                 gc.collect()
-
-
-
 
 
 def ctc_align(args):
