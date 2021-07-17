@@ -318,5 +318,12 @@ def add_auxiliary_task_arguments(group):
         type=float,
         help="Weight of auxiliary task loss",
     )
+    group.add_argument(
+        "--transducer-kd-mode",
+        default="one_best_path",
+        type=str,
+        choices=["one_best_path", "reduced_latice"],
+        help="knowledge distillation mode",
+    )
 
     return group

@@ -944,13 +944,15 @@ def write_kd_json(js, name, nbest_hyps, char_list, collect_rnnt_kd_data=False, k
         else:
             new_js['output'] = js['output']
 
+        region = name.split('-')[0]
         spkr = '-'.join(name.split('-')[:-1])
-        if not os.path.isdir(os.path.join(kd_output_dir, spkr)):
-            os.makedirs(os.path.join(kd_output_dir, spkr))
-        with open(os.path.join(kd_output_dir, spkr, name + ".npy"), 'wb') as f:
+        output_dir = os.path.join(kd_output_dir, region, spkr)
+        if not os.path.isdir(output_dir):
+            os.makedirs(output_dir)
+        with open(os.path.join(output_dir, name + ".npy"), 'wb') as f:
             np.save(f, kd_matrix)
         new_js['output'].append({"name": "target2",
-                            "feat": os.path.join(kd_output_dir, spkr, name + ".npy"),
+                            "feat": os.path.join(output_dir, name + ".npy"),
                             "shape": [kd_prob.shape[0], kd_prob.shape[1]],
                             "filetype": "npy",
                             })

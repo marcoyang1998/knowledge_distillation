@@ -1669,8 +1669,28 @@ def collect_soft_labels(args):
                 feat = load_inputs_and_targets(batch)
                 feat = (torch.tensor(feat[0][0]).unsqueeze(0).float(), torch.tensor([feat[0][0].shape[0]]), torch.tensor(feat[1][0]).view(1,-1))
                 x = _recursive_to(feat, device)
-
-                nbest_hyps = model.collect_soft_label(*x)
+                if args.rnnt_kd_data_collection_mode == "one_best_lattice":
+                    nbest_hyps = model.collect_soft_label_one_best_lattice(*x)
+                elif args.rnnt_kd_data_collection_mode == "reduced_lattice":
+                    reduced_lattice = model.collect_soft_label_reduced_lattice(*x)
+                    assert reduced_lattice.shape[0] == 1
+                    reduced_lattice = np.squeeze(reduced_lattice, axis=0)
+                    region = name.split('-')[0]
+                    spkr = '-'.join(name.split('-')[:-1])
+                    output_dir = os.path.join(args.output_kd_dir, region, spkr)
+                    if not os.path.isdir(output_dir):
+                        os.makedirs(output_dir)
+                    with open(os.path.join(output_dir, name + ".npy"), 'wb') as f:
+                        np.save(f, reduced_lattice)
+                    new_kd_js[name] = js[name]
+                    new_kd_js[name]['output'].append({"name": "target2",
+                                                      "feat":os.path.join(output_dir, name + ".npy"),
+                                                      "filetype": "npy",
+                                                      "shape": list(reduced_lattice.shape)})
+                    logging.info("Generated reduced lattice for {}".format(name))
+                    continue
+                else:
+                    raise NotImplementedError("{} not implemented".format(args.rnnt_kd_data_collection_mode))
 
                 new_kd_js[name] = write_kd_json(js[name],
                                                 name,
@@ -1699,10 +1719,12 @@ def collect_soft_labels(args):
                 )
                 output_prob = model.generate_ctc_prob(feats)
                 #assert output_prob.shape[1] == calculate_w2v2_output_shape(feats[0].shape[0])
+                region = name.split('-')[0]
                 spkr = '-'.join(name.split('-')[:-1])
-                if not os.path.isdir(os.path.join(args.output_kd_dir, spkr)):
-                    os.makedirs(os.path.join(args.output_kd_dir, spkr))
-                with open(os.path.join(args.output_kd_dir, spkr, name + ".npy"), 'wb') as f:
+                output_dir = os.path.join(args.output_kd_dir, region, spkr)
+                if not os.path.isdir(output_dir):
+                    os.makedirs(output_dir)
+                with open(os.path.join(output_dir, name + ".npy"), 'wb') as f:
                     np.save(f, output_prob)
                 logging.info("Generated ctc prob for {}".format(name))
                 del output_prob

@@ -407,9 +407,15 @@ class E2E(ASRInterface, torch.nn.Module):
                 )
 
             if self.do_kd:
-                self.kd_loss = self.kd_one_best_loss
                 self.kd_mtl_factor = args.kd_mtl_factor
                 self.kd_temperature = args.kd_temperature
+                self.kd_mode = args.transducer_kd_mode
+                if self.kd_mode == "one_best_path":
+                    self.kd_loss = self.kd_one_best_loss
+                elif self.kd_mode == "reduced_latice":
+                    self.kd_loss = self.kd_reduced_lattice_loss
+                else:
+                    raise NotImplementedError("Not implemented {}".format(self.kd_mode))
 
         self.loss = None
         self.rnnlm = None
@@ -466,6 +472,17 @@ class E2E(ASRInterface, torch.nn.Module):
             kd_loss += CXE(torch.softmax(cur_one_best_path_pr[:l,:] / self.kd_temperature, dim=-1),
                             lattice_path[:l,:] / self.kd_temperature)
         return kd_loss/bs
+
+    def kd_reduced_lattice_loss(self, z, pred_len, target_len, enc_T, ys_pad_kd):
+        def CXE(target, predicted):
+            return -(target * predicted.log_softmax(-1)).sum()
+
+        bs = z.shape[0]
+        kd_loss = 0.0
+        for b in range(bs):
+            min_T = min(enc_T[b], ys_pad_kd[b].shape[0])
+            kd_loss += CXE(torch.softmax(z[bs,:min_T, :target_len[b],: ], dim=-1), ys_pad_kd[bs,:min_T,:target_len[b],:])
+        return kd_loss
 
     def forward(self, xs_pad, ilens, ys_pad):
         """E2E forward.
@@ -746,7 +763,7 @@ class E2E(ASRInterface, torch.nn.Module):
 
         return [asdict(n) for n in nbest_hyps]
 
-    def collect_soft_label(self, xs_pad, ilens, ys_pad):
+    def collect_soft_label_one_best_lattice(self, xs_pad, ilens, ys_pad):
         self.eval()
         xs_pad = xs_pad[:, : max(ilens)]
         if "custom" in self.etype:
@@ -796,6 +813,41 @@ class E2E(ASRInterface, torch.nn.Module):
         one_best_path_pr = torch.stack(one_best_path_pr)
         yseq = one_best_path[one_best_path > 0]
         return [{'yseq': yseq.cpu().numpy(), 'yseq_with_blank': one_best_path.cpu().numpy(), 'yseq_with_blank_pr': one_best_path_pr.cpu().numpy(), 'score': score.cpu().numpy()}]
+
+    def collect_soft_label_reduced_lattice(self, xs_pad, ilens, ys_pad):
+        self.eval()
+        xs_pad = xs_pad[:, : max(ilens)]
+        if "custom" in self.etype:
+            src_mask = make_non_pad_mask(ilens.tolist()).to(xs_pad.device).unsqueeze(-2)
+
+            _hs_pad, hs_mask = self.encoder(xs_pad, src_mask)
+        else:
+            _hs_pad, hs_mask, _ = self.enc(xs_pad, ilens)
+
+        if self.use_aux_task:
+            hs_pad, aux_hs_pad = _hs_pad[0], _hs_pad[1]
+        else:
+            hs_pad, aux_hs_pad = _hs_pad, None
+
+        ys_in_pad, ys_out_pad, target, pred_len, target_len = prepare_loss_inputs(
+            ys_pad, hs_mask
+        )
+
+        if "custom" in self.dtype:
+            ys_mask = target_mask(ys_in_pad, self.blank_id)
+            pred_pad, _ = self.decoder(ys_in_pad, ys_mask, hs_pad)
+        else:
+            pred_pad = self.dec(hs_pad, ys_in_pad)
+        z = self.joint_network(hs_pad.unsqueeze(2), pred_pad.unsqueeze(1))
+        pr = z.softmax(dim=-1).cpu().numpy()
+        assert z.shape[0] == 1
+        reduced_lattice = numpy.zeros((z.shape[0],z.shape[1], z.shape[2]-1, 3))
+        for u in range(0,z.shape[2]-1):
+            correct_symbol = ys_pad[0,u]
+            reduced_lattice[0, :, u, 0] = pr[0, :, u, 0]
+            reduced_lattice[0, :, u, 1] = pr[0, :, u, correct_symbol]
+            reduced_lattice[0, :, u, 2] = 1 - reduced_lattice[0, :, u, 0] - reduced_lattice[0, :, u, 1]
+        return reduced_lattice
 
 
     def calculate_all_attentions(self, xs_pad, ilens, ys_pad):

@@ -275,6 +275,14 @@ def get_parser():
         help="If true, collect distillation data for rnnt model while performing decoding"
     )
     parser.add_argument(
+        "--rnnt-kd-data-collection-mode",
+        type=str,
+        choices=["beam_search", "reduced_lattice", "one_best_lattice"],
+        default= "beam_search",
+        help="Beam search: using beam search to find the best sequence, Reduced lattice: paper's implementation, one best lattice: using ground truth to find best path"
+
+    )
+    parser.add_argument(
         "--keep-gt-transcription",
         type=strtobool,
         default=False,
