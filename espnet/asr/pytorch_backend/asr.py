@@ -286,10 +286,10 @@ class CustomConverter(object):
 
     """
 
-    def __init__(self, subsampling_factor=1, dtype=torch.float32, do_knowledge_distillation=False):
+    def __init__(self, subsampling_factor=1, dtype=torch.float32, do_knowledge_distillation=False, ignore_id=-1):
         """Construct a CustomConverter object."""
         self.subsampling_factor = subsampling_factor
-        self.ignore_id = -1
+        self.ignore_id = ignore_id
         self.dtype = dtype
         self.do_knowledge_distillation = do_knowledge_distillation
 
@@ -367,9 +367,9 @@ class CustomConverter(object):
 
 # A converter for knowledge distillation
 class CustomConverterKD(object):
-    def __init__(self, subsampling_factor=1, dtype=torch.float32):
+    def __init__(self, subsampling_factor=1, dtype=torch.float32, ignore_id=-1):
         self.subsampling_factor = subsampling_factor
-        self.ignore_id = -1
+        self.ignore_id = ignore_id
         self.dtype = dtype
 
     def __call__(self, batch, device=torch.device("cpu")):
@@ -436,10 +436,10 @@ class CustomConverterMulEnc(object):
 
     """
 
-    def __init__(self, subsamping_factors=[1, 1], dtype=torch.float32):
+    def __init__(self, subsamping_factors=[1, 1], dtype=torch.float32, ignore_id=-1):
         """Initialize the converter."""
         self.subsamping_factors = subsamping_factors
-        self.ignore_id = -1
+        self.ignore_id = ignore_id
         self.dtype = dtype
         self.num_encs = len(subsamping_factors)
 
@@ -550,7 +550,7 @@ def train(args):
     else:
         model_class = dynamic_import(args.model_module)
         model = model_class(
-            idim_list[0] if args.num_encs == 1 else idim_list, odim, args
+            idim_list[0] if args.num_encs == 1 else idim_list, odim, args, ignore_id=args.ignore_id
         )
     assert isinstance(model, ASRInterface)
 
@@ -691,15 +691,15 @@ def train(args):
     # Setup a converter
     if args.num_encs == 1:
         if args.do_knowledge_distillation:
-            converter = CustomConverterKD(subsampling_factor=model.subsample[0], dtype=dtype)
-            valid_converter = CustomConverter(subsampling_factor=model.subsample[0], dtype=dtype)
+            converter = CustomConverterKD(subsampling_factor=model.subsample[0], dtype=dtype, ignore_id=args.ignore_id)
+            valid_converter = CustomConverter(subsampling_factor=model.subsample[0], dtype=dtype, ignore_id=args.ignore_id)
         else:
-            converter = CustomConverter(subsampling_factor=model.subsample[0], dtype=dtype)
-            valid_converter = CustomConverter(subsampling_factor=model.subsample[0], dtype=dtype)
+            converter = CustomConverter(subsampling_factor=model.subsample[0], dtype=dtype, ignore_id=args.ignore_id)
+            valid_converter = CustomConverter(subsampling_factor=model.subsample[0], dtype=dtype, ignore_id=args.ignore_id)
 
     else:
         converter = CustomConverterMulEnc(
-            [i[0] for i in model.subsample_list], dtype=dtype
+            [i[0] for i in model.subsample_list], dtype=dtype, ignore_id=args.ignore_id
         )
     load_data_on_disk=False
     # read json data
@@ -1674,7 +1674,7 @@ def collect_soft_labels(args):
                 elif args.rnnt_kd_data_collection_mode == "reduced_lattice":
                     reduced_lattice = model.collect_soft_label_reduced_lattice(*x)
                     assert reduced_lattice.shape[0] == 1
-                    reduced_lattice = np.squeeze(reduced_lattice, axis=0)
+                    #reduced_lattice = np.squeeze(reduced_lattice, axis=0)
                     region = name.split('-')[0]
                     spkr = '-'.join(name.split('-')[:-1])
                     output_dir = os.path.join(args.output_kd_dir, region, spkr)
@@ -1686,7 +1686,7 @@ def collect_soft_labels(args):
                     new_kd_js[name]['output'].append({"name": "target2",
                                                       "feat":os.path.join(output_dir, name + ".npy"),
                                                       "filetype": "npy",
-                                                      "shape": list(reduced_lattice.shape)})
+                                                      "shape": list(reduced_lattice.shape[1:])})
                     logging.info("Generated reduced lattice for {}".format(name))
                     continue
                 else:

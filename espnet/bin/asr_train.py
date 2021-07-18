@@ -614,6 +614,11 @@ def get_parser(parser=None, required=True):
         default=0,
         help="start evaluation after xx epochs"
     )
+    parser.add_argument(
+        "--ignore-id",
+        type=int,
+        default=-1,
+    )
     return parser
 
 

@@ -52,13 +52,22 @@ def pad_list(xs, pad_value):
 
     """
     n_batch = len(xs)
-    max_len = max(x.size(0) for x in xs)
-    pad = xs[0].new(n_batch, max_len, *xs[0].size()[1:]).fill_(pad_value)
+    if len(xs[0].shape) == 3:
+        max_len_0 = max(x.size(0) for x in xs)
+        max_len_1 = max(x.size(1) for x in xs)
+        pad = xs[0].new(n_batch, max_len_0, max_len_1, *xs[0].size()[2:]).fill_(pad_value)
+        for i in range(n_batch):
+            pad[i,:xs[i].size(0), :xs[i].size(1)] = xs[i]
 
-    for i in range(n_batch):
-        pad[i, : xs[i].size(0)] = xs[i]
+        return pad
+    else:
+        max_len = max(x.size(0) for x in xs)
+        pad = xs[0].new(n_batch, max_len, *xs[0].size()[1:]).fill_(pad_value)
 
-    return pad
+        for i in range(n_batch):
+            pad[i, : xs[i].size(0)] = xs[i]
+
+        return pad
 
 
 def make_pad_mask(lengths, xs=None, length_dim=-1):

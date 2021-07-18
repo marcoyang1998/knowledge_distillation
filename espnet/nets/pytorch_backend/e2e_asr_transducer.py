@@ -429,7 +429,7 @@ class E2E(ASRInterface, torch.nn.Module):
         """
         initializer(self, args)
 
-    def kd_one_best_loss(self, z, pred_len, target_len, enc_T, ys_pad_kd):
+    def kd_one_best_loss(self, z, pred_len, target_len, enc_T, ys_pad, ys_pad_kd):
         def CXE(target, predicted):
             return -(target * predicted.log_softmax(-1)).sum()
 
@@ -473,16 +473,26 @@ class E2E(ASRInterface, torch.nn.Module):
                             lattice_path[:l,:] / self.kd_temperature)
         return kd_loss/bs
 
-    def kd_reduced_lattice_loss(self, z, pred_len, target_len, enc_T, ys_pad_kd):
+    def kd_reduced_lattice_loss(self, z, pred_len, target_len, enc_T, ys_pad, ys_pad_kd):
         def CXE(target, predicted):
             return -(target * predicted.log_softmax(-1)).sum()
 
+        output = []
+        ys = [y[y != self.ignore_id] for y in ys_pad]
         bs = z.shape[0]
+        pr = z.softmax(dim=-1)
         kd_loss = 0.0
         for b in range(bs):
-            min_T = min(enc_T[b], ys_pad_kd[b].shape[0])
-            kd_loss += CXE(torch.softmax(z[bs,:min_T, :target_len[b],: ], dim=-1), ys_pad_kd[bs,:min_T,:target_len[b],:])
-        return kd_loss
+            T = min(enc_T[b], ys[b].size(0))
+            for u in range(ys_pad.shape[1]):
+                correct_symbol = ys[b][u]
+                output.append(torch.cat((pr[b, :, u, 0].view(-1, 1), pr[b, :, u, correct_symbol].view(-1, 1),
+                                         (1 - pr[b, :, u, 0] - pr[b, :, u, correct_symbol]).view(-1, 1)), dim=-1))
+                # reduced_lattice[0, :, u, 0] = pr[b, :, u, 0]
+                # reduced_lattice[0, :, u, 1] = pr[b, :, u, correct_symbol]
+                # reduced_lattice[0, :, u, 2] = 1 - pr[b, :, u, 0] - pr[b, :, u, correct_symbol]
+
+        return kd_loss/bs
 
     def forward(self, xs_pad, ilens, ys_pad):
         """E2E forward.
@@ -655,7 +665,7 @@ class E2E(ASRInterface, torch.nn.Module):
 
         if self.do_kd:
             if self.kd_mtl_factor > 0:
-                loss_kd = self.kd_mtl_factor * self.kd_loss(z, pred_len, target_len, cal_enc_T(ilens), ys_kd_pad)
+                loss_kd = self.kd_mtl_factor * self.kd_loss(z, pred_len, target_len, cal_enc_T(ilens), ys_pad, ys_kd_pad)
             else:
                 loss_kd = 0.0
         else:
