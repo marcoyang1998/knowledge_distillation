@@ -145,7 +145,8 @@ class E2E(ASRInterface, torch.nn.Module):
                 reduce=True,
                 do_kd=args.do_knowledge_distillation,
                 kd_factor=args.kd_mtl_factor,
-                kd_temp=args.kd_temperature
+                kd_temp=args.kd_temperature,
+                ignore_id=self.ignore_id
             )
         else:
             self.ctc = None

@@ -19,7 +19,7 @@ class CTC(torch.nn.Module):
     :param bool reduce: reduce the CTC loss into a scalar
     """
 
-    def __init__(self, odim, eprojs, dropout_rate, ctc_type="warpctc", reduce=True, do_kd=False, kd_factor=1.0, kd_temp=1.0):
+    def __init__(self, odim, eprojs, dropout_rate, ctc_type="warpctc", reduce=True, ignore_id=-1, do_kd=False, kd_factor=1.0, kd_temp=1.0):
         super().__init__()
         self.dropout_rate = dropout_rate
         self.loss = None
@@ -72,7 +72,7 @@ class CTC(torch.nn.Module):
                 'ctc_type must be "builtin" or "warpctc": {}'.format(self.ctc_type)
             )
 
-        self.ignore_id = -1
+        self.ignore_id = ignore_id
         self.reduce = reduce
 
     def loss_fn(self, th_pred, th_target, th_ilen, th_olen):
