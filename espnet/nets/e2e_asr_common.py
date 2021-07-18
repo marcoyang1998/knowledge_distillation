@@ -110,7 +110,7 @@ class ErrorCalculator(object):
     """
 
     def __init__(
-        self, char_list, sym_space, sym_blank, report_cer=False, report_wer=False
+        self, char_list, sym_space, sym_blank, report_cer=False, report_wer=False, ignore_id=-1
     ):
         """Construct an ErrorCalculator object."""
         super(ErrorCalculator, self).__init__()
@@ -126,6 +126,7 @@ class ErrorCalculator(object):
             self.idx_space = self.char_list.index(self.space)
         else:
             self.idx_space = None
+        self.ignore_id = ignore_id
 
     def __call__(self, ys_hat, ys_pad, is_ctc=False):
         """Calculate sentence-level WER/CER score.
@@ -171,12 +172,12 @@ class ErrorCalculator(object):
             seq_hat, seq_true = [], []
             for idx in y_hat:
                 idx = int(idx)
-                if idx != -1 and idx != self.idx_blank and idx != self.idx_space:
+                if idx != self.ignore_id and idx != self.idx_blank and idx != self.idx_space:
                     seq_hat.append(self.char_list[int(idx)])
 
             for idx in y_true:
                 idx = int(idx)
-                if idx != -1 and idx != self.idx_blank and idx != self.idx_space:
+                if idx != self.ignore_id and idx != self.idx_blank and idx != self.idx_space:
                     seq_true.append(self.char_list[int(idx)])
 
             hyp_chars = "".join(seq_hat)
@@ -201,11 +202,11 @@ class ErrorCalculator(object):
         seqs_hat, seqs_true = [], []
         for i, y_hat in enumerate(ys_hat):
             y_true = ys_pad[i]
-            eos_true = np.where(y_true == -1)[0]
+            eos_true = np.where(y_true == self.ignore_id)[0]
             ymax = eos_true[0] if len(eos_true) > 0 else len(y_true)
             # NOTE: padding index (-1) in y_true is used to pad y_hat
             seq_hat = [self.char_list[int(idx)] for idx in y_hat[:ymax]]
-            seq_true = [self.char_list[int(idx)] for idx in y_true if int(idx) != -1]
+            seq_true = [self.char_list[int(idx)] for idx in y_true if int(idx) != self.ignore_id]
             seq_hat_text = "".join(seq_hat).replace(self.space, " ")
             seq_hat_text = seq_hat_text.replace(self.blank, "")
             seq_true_text = "".join(seq_true).replace(self.space, " ")
