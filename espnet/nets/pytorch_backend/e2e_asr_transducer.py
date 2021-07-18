@@ -324,6 +324,7 @@ class E2E(ASRInterface, torch.nn.Module):
                 args.dec_embed_dim,
                 args.dropout_rate_decoder,
                 args.dropout_rate_embed_decoder,
+                ignore_id=ignore_id
             )
             decoder_out = args.dunits
 
@@ -434,6 +435,8 @@ class E2E(ASRInterface, torch.nn.Module):
             return -(target * predicted.log_softmax(-1)).sum()
 
         bs = z.shape[0]
+        ys = [y[y != self.ignore_id] for y in ys_pad]
+        ys_kd = [y[y != self.ignore_id].view(-1,target_len[i], self.odim) for i,y in enumerate(ys_pad_kd)]
         kd_loss = 0.0
         for b in range(bs):
             cur_one_best_path = ys_pad_kd[b,:, 0]
@@ -479,12 +482,15 @@ class E2E(ASRInterface, torch.nn.Module):
 
         output = []
         ys = [y[y != self.ignore_id] for y in ys_pad]
+        #ys = [ys[i].view(-1,target_len[i]) for i in range(len(ys))]
+        ys_kd = [y[y != self.ignore_id].view(-1,target_len[i], 3) for i,y in enumerate(ys_pad_kd)]
+        min_len_T = [min(y.shape[0], enc_T[i]) for i,y in enumerate(ys_kd)]
         bs = z.shape[0]
+        reduced_lattice = [z[i, :min_len_T[i], :target_len[i],:] for i in range(bs)]
         pr = z.softmax(dim=-1)
         kd_loss = 0.0
         for b in range(bs):
-            T = min(enc_T[b], ys[b].size(0))
-            for u in range(ys_pad.shape[1]):
+            for u in range(target_len[b]):
                 correct_symbol = ys[b][u]
                 output.append(torch.cat((pr[b, :, u, 0].view(-1, 1), pr[b, :, u, correct_symbol].view(-1, 1),
                                          (1 - pr[b, :, u, 0] - pr[b, :, u, correct_symbol]).view(-1, 1)), dim=-1))
@@ -523,7 +529,7 @@ class E2E(ASRInterface, torch.nn.Module):
 
         # 1.5. transducer preparation related
         ys_in_pad, ys_out_pad, target, pred_len, target_len = prepare_loss_inputs(
-            ys_pad, hs_mask
+            ys_pad, hs_mask, ignore_id=self.ignore_id
         )
 
         # 2. decoder
@@ -624,7 +630,7 @@ class E2E(ASRInterface, torch.nn.Module):
 
         # 1.5. transducer preparation related
         ys_in_pad, ys_out_pad, target, pred_len, target_len = prepare_loss_inputs(
-            ys_pad, hs_mask
+            ys_pad, hs_mask,ignore_id=self.ignore_id
         )
 
         # 2. decoder
@@ -789,7 +795,7 @@ class E2E(ASRInterface, torch.nn.Module):
             hs_pad, aux_hs_pad = _hs_pad, None
 
         ys_in_pad, ys_out_pad, target, pred_len, target_len = prepare_loss_inputs(
-            ys_pad, hs_mask
+            ys_pad, hs_mask, ignore_id=self.ignore_id
         )
 
         if "custom" in self.dtype:
@@ -840,7 +846,7 @@ class E2E(ASRInterface, torch.nn.Module):
             hs_pad, aux_hs_pad = _hs_pad, None
 
         ys_in_pad, ys_out_pad, target, pred_len, target_len = prepare_loss_inputs(
-            ys_pad, hs_mask
+            ys_pad, hs_mask, ignore_id=self.ignore_id
         )
 
         if "custom" in self.dtype:

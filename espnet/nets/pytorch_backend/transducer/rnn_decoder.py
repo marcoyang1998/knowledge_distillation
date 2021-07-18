@@ -30,6 +30,7 @@ class DecoderRNNT(TransducerDecoderInterface, torch.nn.Module):
         embed_dim,
         dropout=0.0,
         dropout_embed=0.0,
+        ignore_id=-1
     ):
         """Transducer initializer."""
         super().__init__()
@@ -53,7 +54,7 @@ class DecoderRNNT(TransducerDecoderInterface, torch.nn.Module):
 
         self.odim = odim
 
-        self.ignore_id = -1
+        self.ignore_id = ignore_id
         self.blank = blank
 
         self.multi_gpus = torch.cuda.device_count() > 1

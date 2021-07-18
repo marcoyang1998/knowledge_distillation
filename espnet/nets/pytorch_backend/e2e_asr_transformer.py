@@ -166,6 +166,7 @@ class E2E(ASRInterface, torch.nn.Module):
                 args.sym_blank,
                 args.report_cer,
                 args.report_wer,
+                ignore_id=self.ignore_id,
             )
         else:
             self.error_calculator = None
