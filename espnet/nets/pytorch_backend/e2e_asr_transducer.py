@@ -431,16 +431,37 @@ class E2E(ASRInterface, torch.nn.Module):
         initializer(self, args)
 
     def kd_one_best_loss(self, z, pred_len, target_len, enc_T, ys_pad, ys_pad_kd):
+        # 0: t_list, 1: u_list， 2： y_seq_with_blank
         def CXE(target, predicted):
             return -(target * predicted.log_softmax(-1)).sum()
 
         bs = z.shape[0]
         ys = [y[y != self.ignore_id] for y in ys_pad]
-        ys_kd = [y[y != self.ignore_id].view(-1,target_len[i], self.odim) for i,y in enumerate(ys_pad_kd)]
+        t_list = [y[:, 0][y[:, 0] != self.ignore_id] for y in ys_pad_kd]
+        u_list = [y[:, 1][y[:, 1] != self.ignore_id] for y in ys_pad_kd]
+        kd_seq = [y[:, 2][y[:, 2] != self.ignore_id] for y in ys_pad_kd]
+        kd_seq_no_blank = [seq[seq > 0] for seq in kd_seq]
+        for i in range(bs): assert torch.equal(ys[i], kd_seq_no_blank[i]), "ys: {}, kd: {}".format(ys[i], kd_seq_no_blank[i])
+        kd_seq_no_blank_len = [seq.size(0) for seq in kd_seq_no_blank]
+        min_T = [min(enc_T[i], torch.max(t_list[i])+1) for i in range(bs)]
+        #for i in range(bs): assert target_len[i] == kd_seq_no_blank_len[i], "target: {}, kd: {}".format(ys[i], kd_seq_no_blank[i])
+        ys_kd = [y[y != self.ignore_id].view(-1, self.odim) for i,y in enumerate(ys_pad_kd[:,:,3:])]
+        ys_kd = [y[t_list[i] <= min_T[i] -1] for i,y in enumerate(ys_kd)]
+        u_list = [l[t_list[i] <= min_T[i] -1] for i, l in enumerate(u_list)]
+        t_list = [l[l <= min_T[i] -1] for i, l in enumerate(t_list)]
+        #assert max([max(l) for l in t_list]) < z.shape[1]
+        #assert max([max(l) for l in u_list]) < z.shape[2]
+
+        logits = [lattice[t_list[i].long(), u_list[i].long(), :] for i,lattice in enumerate(z)]
+
+        ys_kd = torch.cat(ys_kd, dim=0)
+        logits = torch.cat(logits, dim=0)
+        kd_loss = CXE(torch.softmax(ys_kd/self.kd_temperature, dim=-1), logits/self.kd_temperature)
+        '''
         kd_loss = 0.0
         for b in range(bs):
-            cur_one_best_path = ys_pad_kd[b,:, 0]
-            cur_one_best_path_pr = ys_pad_kd[b,:, 1:]
+            cur_one_best_path = ys_pad_kd[b,:, 2]
+            cur_one_best_path_pr = ys_pad_kd[b,:, 3:]
 
             mask = cur_one_best_path != self.ignore_id
             soft_label_T = sum(cur_one_best_path == 0)
@@ -474,6 +495,7 @@ class E2E(ASRInterface, torch.nn.Module):
             l = min(cur_one_best_path_pr.shape[0], lattice_path.shape[0])
             kd_loss += CXE(torch.softmax(cur_one_best_path_pr[:l,:] / self.kd_temperature, dim=-1),
                             lattice_path[:l,:] / self.kd_temperature)
+        '''
         return kd_loss/bs
 
     def kd_reduced_lattice_loss(self, z, pred_len, target_len, enc_T, ys_pad, ys_pad_kd):
