@@ -443,7 +443,7 @@ class E2E(ASRInterface, torch.nn.Module):
         u_list = [y[:, 1][y[:, 1] != self.ignore_id] for y in ys_pad_kd]
         kd_seq = [y[:, 2][y[:, 2] != self.ignore_id] for y in ys_pad_kd]
         kd_seq_no_blank = [seq[seq > 0] for seq in kd_seq]
-        for i in range(bs): assert torch.equal(ys[i], kd_seq_no_blank[i]), "ys: {}, kd: {}".format(ys[i], kd_seq_no_blank[i])
+        #for i in range(bs): assert torch.equal(ys[i], kd_seq_no_blank[i]), "ys: {}, kd: {}".format(ys[i], kd_seq_no_blank[i])
         kd_seq_no_blank_len = [seq.size(0) for seq in kd_seq_no_blank]
         min_T = [min(enc_T[i], torch.max(t_list[i])+1) for i in range(bs)]
         #for i in range(bs): assert target_len[i] == kd_seq_no_blank_len[i], "target: {}, kd: {}".format(ys[i], kd_seq_no_blank[i])
