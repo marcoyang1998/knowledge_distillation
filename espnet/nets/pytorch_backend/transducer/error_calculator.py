@@ -31,6 +31,7 @@ class ErrorCalculator(object):
         sym_blank,
         report_cer=False,
         report_wer=False,
+        ignore_id=-1,
     ):
         """Construct an ErrorCalculator object for transducer model."""
         super().__init__()
@@ -46,6 +47,7 @@ class ErrorCalculator(object):
         self.token_list = token_list
         self.space = sym_space
         self.blank = sym_blank
+        self.ignore_id = ignore_id
 
         self.report_cer = report_cer
         self.report_wer = report_wer
@@ -103,7 +105,7 @@ class ErrorCalculator(object):
             y_true = ys_pad[i]
 
             seq_hat = [self.token_list[int(idx)] for idx in y_hat]
-            seq_true = [self.token_list[int(idx)] for idx in y_true if int(idx) != -1]
+            seq_true = [self.token_list[int(idx)] for idx in y_true if int(idx) != self.ignore_id]
 
             seq_hat_text = "".join(seq_hat).replace(self.space, " ")
             seq_hat_text = seq_hat_text.replace(self.blank, "")

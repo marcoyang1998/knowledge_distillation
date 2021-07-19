@@ -349,6 +349,7 @@ class E2E(ASRInterface, torch.nn.Module):
         self.eos = odim - 1
         self.blank_id = blank_id
         self.ignore_id = ignore_id
+        print("Ignore_id: {}".format(self.ignore_id))
 
         self.space = args.sym_space
         self.blank = args.sym_blank
@@ -376,6 +377,7 @@ class E2E(ASRInterface, torch.nn.Module):
                     args.sym_blank,
                     args.report_cer,
                     args.report_wer,
+                    ignore_id=ignore_id
                 )
 
             if self.use_aux_task:
