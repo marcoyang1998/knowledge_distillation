@@ -415,7 +415,7 @@ class E2E(ASRInterface, torch.nn.Module):
                 self.kd_mode = args.transducer_kd_mode
                 if self.kd_mode == "one_best_path":
                     self.kd_loss = self.kd_one_best_loss
-                elif self.kd_mode == "reduced_latice":
+                elif self.kd_mode == "reduced_lattice":
                     self.kd_loss = self.kd_reduced_lattice_loss
                 else:
                     raise NotImplementedError("Not implemented {}".format(self.kd_mode))
@@ -515,23 +515,12 @@ class E2E(ASRInterface, torch.nn.Module):
         pr = z.softmax(dim=-1)
         pr = [pr[i, :min_len_T[i], :target_len[i],:] for i in range(bs)]
 
-        kd_loss = 0.0
-        la_list = []
         blank = torch.cat([lattice[:,:,0].reshape(-1) for lattice in pr]).view(-1,1)
         correct_list = []
         for b in range(bs):
-            #u_list = torch.cat([torch.ones(min_len_T[b]).long()*i for i in range(min_len_U[b])])
-            #t_list = torch.cat([torch.arange(0, min_len_T[b]) for i in range(min_len_U[b])])
-            #k_list = torch.cat([torch.tensor([0, ys[b][i]]).view(2,1).repeat(1,min_len_T[b]) for i in range(min_len_U[b])])
-            #la = pr[bs, t_list, u_list, k_list]
             correct_list.append(torch.cat([pr[b][:,i,ys[b][i]] for i in range(ys[b].size(0))]).reshape(-1))
-            #la = [torch.cat((pr[b][:, i, 0].view(-1,1, 1), pr[b][:, i, ys[b][i]].view(-1,1, 1)), dim=-1) for i in range(ys[b].size(0))]
-            #la_list.append(torch.cat(la, dim=1))
         correct = torch.cat(correct_list).view(-1,1)
-        #for i in range(bs): assert ys_kd[i].shape == la_list[i].shape
         ys_kd = torch.cat([y.view(-1,3) for y in ys_kd], dim=0)
-        #la_list = torch.cat([la.view(-1,2) for la in la_list], dim=0)
-        #la_list = torch.cat((la_list, 1-torch.sum(la_list, dim=-1).view(-1,1)), dim=-1)
         reduced_lattice = torch.cat((blank, correct, 1 - correct - blank), dim=-1)
 
         return reduced_CXE(ys_kd, reduced_lattice)/bs
