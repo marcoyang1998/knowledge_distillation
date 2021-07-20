@@ -435,7 +435,7 @@ class E2E(ASRInterface, torch.nn.Module):
     def kd_one_best_loss(self, z, pred_len, target_len, enc_T, ys_pad, ys_pad_kd):
         # 0: t_list, 1: u_list， 2： y_seq_with_blank
         def CXE(target, predicted):
-            return -(target * predicted.log_softmax(-1)).sum()
+            return -(torch.softmax(target, dim=-1) * predicted.log_softmax(-1)).sum()
 
         bs = z.shape[0]
         ys = [y[y != self.ignore_id] for y in ys_pad]
@@ -458,7 +458,7 @@ class E2E(ASRInterface, torch.nn.Module):
 
         ys_kd = torch.cat(ys_kd, dim=0)
         logits = torch.cat(logits, dim=0)
-        kd_loss = CXE(torch.softmax(ys_kd/self.kd_temperature, dim=-1), logits/self.kd_temperature)
+        kd_loss = CXE(ys_kd/self.kd_temperature, logits/self.kd_temperature)
         '''
         kd_loss = 0.0
         for b in range(bs):
@@ -501,28 +501,35 @@ class E2E(ASRInterface, torch.nn.Module):
         return kd_loss/bs
 
     def kd_reduced_lattice_loss(self, z, pred_len, target_len, enc_T, ys_pad, ys_pad_kd):
-        def CXE(target, predicted):
-            return -(target * predicted.log_softmax(-1)).sum()
+        def reduced_CXE(target, predicted):
+            # target is already probability
+            # predicted is already probability
+            return -(target * torch.log(predicted)).sum()
 
-        output = []
-        ys = [y[y != self.ignore_id] for y in ys_pad]
-        #ys = [ys[i].view(-1,target_len[i]) for i in range(len(ys))]
-        ys_kd = [y[y != self.ignore_id].view(-1,target_len[i], 3) for i,y in enumerate(ys_pad_kd)]
-        min_len_T = [min(y.shape[0], enc_T[i]) for i,y in enumerate(ys_kd)]
         bs = z.shape[0]
-        reduced_lattice = [z[i, :min_len_T[i], :target_len[i],:] for i in range(bs)]
+        ys = [y[y != self.ignore_id] for y in ys_pad]
+        ys_kd = [y[y != self.ignore_id].view(-1,target_len[i], 3) for i,y in enumerate(ys_pad_kd)]
+        min_len_T = [min(y.size(0), enc_T[i]) for i,y in enumerate(ys_kd)]
+        min_len_U = [min(ys[i].size(0), ys_kd[i].size(1)) for i in range(bs)]
+        ys_kd = [y[:min_len_T[i], :min_len_U[i],:] for i, y in enumerate(ys_kd)]
         pr = z.softmax(dim=-1)
-        kd_loss = 0.0
-        for b in range(bs):
-            for u in range(target_len[b]):
-                correct_symbol = ys[b][u]
-                output.append(torch.cat((pr[b, :, u, 0].view(-1, 1), pr[b, :, u, correct_symbol].view(-1, 1),
-                                         (1 - pr[b, :, u, 0] - pr[b, :, u, correct_symbol]).view(-1, 1)), dim=-1))
-                # reduced_lattice[0, :, u, 0] = pr[b, :, u, 0]
-                # reduced_lattice[0, :, u, 1] = pr[b, :, u, correct_symbol]
-                # reduced_lattice[0, :, u, 2] = 1 - pr[b, :, u, 0] - pr[b, :, u, correct_symbol]
+        pr = [pr[i, :min_len_T[i], :target_len[i],:] for i in range(bs)]
 
-        return kd_loss/bs
+        kd_loss = 0.0
+        la_list = []
+        for b in range(bs):
+            #u_list = torch.cat([torch.ones(min_len_T[b]).long()*i for i in range(min_len_U[b])])
+            #t_list = torch.cat([torch.arange(0, min_len_T[b]) for i in range(min_len_U[b])])
+            #k_list = torch.cat([torch.tensor([0, ys[b][i]]).view(2,1).repeat(1,min_len_T[b])] for i in range(min_len_U[b]))
+            #la = pr[bs, t_list, u_list, k_list]
+            la = [torch.cat((pr[b][:, i, 0].view(-1,1, 1), pr[b][:, i, ys[b][i]].view(-1,1, 1)), dim=-1) for i in range(ys[b].size(0))]
+            la_list.append(torch.cat(la, dim=1))
+        #for i in range(bs): assert ys_kd[i].shape == la_list[i].shape
+        ys_kd = torch.cat([y.view(-1,3) for y in ys_kd], dim=0)
+        la_list = torch.cat([la.view(-1,2) for la in la_list], dim=0)
+        la_list = torch.cat((la_list, 1-torch.sum(la_list, dim=-1).view(-1,1)), dim=-1)
+
+        return reduced_CXE(ys_kd, la_list)/bs
 
     def forward(self, xs_pad, ilens, ys_pad):
         """E2E forward.
