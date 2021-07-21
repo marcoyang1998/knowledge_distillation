@@ -505,7 +505,6 @@ class E2E(ASRInterface, torch.nn.Module):
         def reduced_CXE(target, predicted):
             # target is already probability
             # predicted is already probability
-            print(predicted.min())
             return -(target * torch.log(predicted)).sum()
 
         bs = z.shape[0]
@@ -518,16 +517,16 @@ class E2E(ASRInterface, torch.nn.Module):
         pr = [pr[i, :min_len_T[i], :min_len_U[i],:] for i in range(bs)]
 
         blank = torch.cat([lattice[:,:,0].transpose(0,1).reshape(-1) for lattice in pr]).view(-1,1)
-        correct_list = []
+        correct = []
         for b in range(bs):
-            correct_list.append(torch.cat([pr[b][:,i,ys[b][i]] for i in range(ys[b].size(0))]))
-        correct = torch.cat(correct_list).view(-1,1)
+            correct.append(torch.cat([pr[b][:,i,ys[b][i]] for i in range(ys[b].size(0))]))
+        correct = torch.cat(correct).view(-1,1)
         ys_kd = torch.cat([y.view(-1,3) for y in ys_kd], dim=0)
         reduced_lattice = torch.cat((blank, correct, 1.0 - correct - blank + 1e-7), dim=-1)
         if reduced_lattice.min() < 0:
             print(reduced_lattice.min())
-        return 0.0
-        #return reduced_CXE(ys_kd, reduced_lattice)/bs
+
+        return reduced_CXE(ys_kd, reduced_lattice)/bs
 
     def forward(self, xs_pad, ilens, ys_pad):
         """E2E forward.
