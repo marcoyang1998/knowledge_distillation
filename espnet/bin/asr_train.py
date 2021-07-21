@@ -619,6 +619,12 @@ def get_parser(parser=None, required=True):
         type=int,
         default=-1,
     )
+    parser.add_argument(
+        "--load-data-on-disk",
+        type=strtobool,
+        default=False,
+        help="load data on disk"
+    )
     return parser
 
 

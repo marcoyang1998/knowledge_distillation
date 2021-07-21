@@ -701,11 +701,11 @@ def train(args):
         converter = CustomConverterMulEnc(
             [i[0] for i in model.subsample_list], dtype=dtype, ignore_id=args.ignore_id
         )
-    load_data_on_disk=False
+    load_data_on_disk=args.load_data_on_disk
     # read json data
     with open(args.train_json, "rb") as f:
         train_json = json.load(f)["utts"]
-        if len(train_json)<10000:
+        if len(train_json)<30000:
             load_data_on_disk=True
             print('Data will be stored on disk')
         else:
