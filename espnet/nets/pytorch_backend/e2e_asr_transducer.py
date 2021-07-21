@@ -419,7 +419,7 @@ class E2E(ASRInterface, torch.nn.Module):
                     self.kd_loss = self.kd_reduced_lattice_loss
                 else:
                     raise NotImplementedError("Not implemented {}".format(self.kd_mode))
-
+                print("Distillation mode: {}, kd factor: {}".format(self.kd_mode, self.kd_mtl_factor))
         self.loss = None
         self.rnnlm = None
 
@@ -435,6 +435,7 @@ class E2E(ASRInterface, torch.nn.Module):
     def kd_one_best_loss(self, z, pred_len, target_len, enc_T, ys_pad, ys_pad_kd):
         # 0: t_list, 1: u_list， 2： y_seq_with_blank
         def CXE(target, predicted):
+            assert torch.min(predicted) > 0, torch.min(predicted)
             return -(torch.softmax(target, dim=-1) * predicted.log_softmax(-1)).sum()
 
         bs = z.shape[0]
@@ -504,26 +505,29 @@ class E2E(ASRInterface, torch.nn.Module):
         def reduced_CXE(target, predicted):
             # target is already probability
             # predicted is already probability
+            print(predicted.min())
             return -(target * torch.log(predicted)).sum()
 
         bs = z.shape[0]
         ys = [y[y != self.ignore_id] for y in ys_pad]
         ys_kd = [y[y != self.ignore_id].view(-1,target_len[i], 3) for i,y in enumerate(ys_pad_kd)]
-        min_len_T = [min(y.size(0), enc_T[i]) for i,y in enumerate(ys_kd)]
+        min_len_T = [min(ys_kd[i].size(0), enc_T[i]) for i in range(bs)]
         min_len_U = [min(ys[i].size(0), ys_kd[i].size(1)) for i in range(bs)]
-        ys_kd = [y[:min_len_T[i], :min_len_U[i],:] for i, y in enumerate(ys_kd)]
+        ys_kd = [ys_kd[i][:min_len_T[i], :min_len_U[i],:] for i in range(bs)]
         pr = z.softmax(dim=-1)
-        pr = [pr[i, :min_len_T[i], :target_len[i],:] for i in range(bs)]
+        pr = [pr[i, :min_len_T[i], :min_len_U[i],:] for i in range(bs)]
 
-        blank = torch.cat([lattice[:,:,0].reshape(-1) for lattice in pr]).view(-1,1)
+        blank = torch.cat([lattice[:,:,0].transpose(0,1).reshape(-1) for lattice in pr]).view(-1,1)
         correct_list = []
         for b in range(bs):
-            correct_list.append(torch.cat([pr[b][:,i,ys[b][i]] for i in range(ys[b].size(0))]).reshape(-1))
+            correct_list.append(torch.cat([pr[b][:,i,ys[b][i]] for i in range(ys[b].size(0))]))
         correct = torch.cat(correct_list).view(-1,1)
         ys_kd = torch.cat([y.view(-1,3) for y in ys_kd], dim=0)
-        reduced_lattice = torch.cat((blank, correct, 1 - correct - blank), dim=-1)
-
-        return reduced_CXE(ys_kd, reduced_lattice)/bs
+        reduced_lattice = torch.cat((blank, correct, 1.0 - correct - blank + 1e-7), dim=-1)
+        if reduced_lattice.min() < 0:
+            print(reduced_lattice.min())
+        return 0.0
+        #return reduced_CXE(ys_kd, reduced_lattice)/bs
 
     def forward(self, xs_pad, ilens, ys_pad):
         """E2E forward.
