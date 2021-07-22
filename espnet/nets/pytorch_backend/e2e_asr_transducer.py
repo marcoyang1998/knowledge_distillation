@@ -448,12 +448,13 @@ class E2E(ASRInterface, torch.nn.Module):
         min_T = [min(enc_T[i], torch.max(t_list[i]) + 1) for i in range(bs)]
         t_mask = [l <= min_T[i] -1 for i, l in enumerate(t_list)]
         u_mask = [l <= target_len[i] for i, l in enumerate(u_list)]
+        mask = [t_mask[i]*u_mask[i] for i in range(bs)]
         # for i in range(bs): assert target_len[i] == kd_seq_no_blank_len[i], "target: {}, kd: {}".format(ys[i], kd_seq_no_blank[i])
 
         ys_kd = [y[y != self.ignore_id].view(-1, self.odim) for i, y in enumerate(ys_pad_kd[:, :, 3:])]
-        ys_kd = [y[t_list[i] <= min_T[i] - 1] for i, y in enumerate(ys_kd)]
-        u_list = [l[t_list[i] <= min_T[i] - 1] for i, l in enumerate(u_list)]
-        t_list = [l[l <= min_T[i] - 1] for i, l in enumerate(t_list)]
+        ys_kd = [y[mask[i]] for i, y in enumerate(ys_kd)]
+        u_list = [l[mask[i]] for i, l in enumerate(u_list)]
+        t_list = [l[mask[i]] for i, l in enumerate(t_list)]
         assert max([max(l) for l in t_list]) < z.shape[1], print([max(l) for l in t_list], z.shape)
         assert max([max(l) for l in u_list]) < z.shape[2], print([max(l) for l in u_list], z.shape)
 
