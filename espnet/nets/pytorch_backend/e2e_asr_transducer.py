@@ -435,7 +435,7 @@ class E2E(ASRInterface, torch.nn.Module):
     def kd_one_best_loss(self, z, pred_len, target_len, enc_T, ys_pad, ys_pad_kd):
         # 0: t_list, 1: u_list， 2： y_seq_with_blank
         def CXE(target, predicted):
-            return -(torch.softmax(target, dim=-1) * predicted.log_softmax(-1)).sum()
+            return -(target * predicted.log_softmax(-1)).sum()
 
         bs = z.shape[0]
         ys = [y[y != self.ignore_id] for y in ys_pad]
@@ -443,22 +443,25 @@ class E2E(ASRInterface, torch.nn.Module):
         u_list = [y[:, 1][y[:, 1] != self.ignore_id] for y in ys_pad_kd]
         kd_seq = [y[:, 2][y[:, 2] != self.ignore_id] for y in ys_pad_kd]
         kd_seq_no_blank = [seq[seq > 0] for seq in kd_seq]
-        #for i in range(bs): assert torch.equal(ys[i], kd_seq_no_blank[i]), "ys: {}, kd: {}".format(ys[i], kd_seq_no_blank[i])
+        #for i in range(bs): assert torch.equal(ys[i], kd_seq_no_blank[i]), "ys: {}, kd: {}".format(ys[i],                                                                                                   kd_seq_no_blank[i])
         kd_seq_no_blank_len = [seq.size(0) for seq in kd_seq_no_blank]
-        min_T = [min(enc_T[i], torch.max(t_list[i])+1) for i in range(bs)]
-        #for i in range(bs): assert target_len[i] == kd_seq_no_blank_len[i], "target: {}, kd: {}".format(ys[i], kd_seq_no_blank[i])
-        ys_kd = [y[y != self.ignore_id].view(-1, self.odim) for i,y in enumerate(ys_pad_kd[:,:,3:])]
-        ys_kd = [y[t_list[i] <= min_T[i] -1] for i,y in enumerate(ys_kd)]
-        u_list = [l[t_list[i] <= min_T[i] -1] for i, l in enumerate(u_list)]
-        t_list = [l[l <= min_T[i] -1] for i, l in enumerate(t_list)]
-        #assert max([max(l) for l in t_list]) < z.shape[1]
-        #assert max([max(l) for l in u_list]) < z.shape[2]
+        min_T = [min(enc_T[i], torch.max(t_list[i]) + 1) for i in range(bs)]
+        t_mask = [l <= min_T[i] -1 for i, l in enumerate(t_list)]
+        u_mask = [l <= target_len[i] for i, l in enumerate(u_list)]
+        # for i in range(bs): assert target_len[i] == kd_seq_no_blank_len[i], "target: {}, kd: {}".format(ys[i], kd_seq_no_blank[i])
 
-        logits = [lattice[t_list[i].long(), u_list[i].long(), :] for i,lattice in enumerate(z)]
+        ys_kd = [y[y != self.ignore_id].view(-1, self.odim) for i, y in enumerate(ys_pad_kd[:, :, 3:])]
+        ys_kd = [y[t_list[i] <= min_T[i] - 1] for i, y in enumerate(ys_kd)]
+        u_list = [l[t_list[i] <= min_T[i] - 1] for i, l in enumerate(u_list)]
+        t_list = [l[l <= min_T[i] - 1] for i, l in enumerate(t_list)]
+        assert max([max(l) for l in t_list]) < z.shape[1], print([max(l) for l in t_list], z.shape)
+        assert max([max(l) for l in u_list]) < z.shape[2], print([max(l) for l in u_list], z.shape)
+
+        logits = [lattice[t_list[i].long(), u_list[i].long(), :] for i, lattice in enumerate(z)]
 
         ys_kd = torch.cat(ys_kd, dim=0)
         logits = torch.cat(logits, dim=0)
-        kd_loss = CXE(ys_kd/self.kd_temperature, logits/self.kd_temperature)
+        kd_loss = CXE(torch.softmax(ys_kd / self.kd_temperature, dim=-1), logits / self.kd_temperature)
         '''
         kd_loss = 0.0
         for b in range(bs):
