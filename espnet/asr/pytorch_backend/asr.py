@@ -706,10 +706,12 @@ def train(args):
     with open(args.train_json, "rb") as f:
         train_json = json.load(f)["utts"]
         if len(train_json)<30000:
-            load_data_on_disk=True
-            print('Data will be stored on disk')
+            pass
+            #print('Data will be stored on disk')
         else:
-            print("Data will NOT be stored on disk")
+            load_data_on_disk = False
+            #print("Data will NOT be stored on disk")
+    print("Load data on dist: {}".format(load_data_on_disk))
     with open(args.valid_json, "rb") as f:
         valid_json = json.load(f)["utts"]
 
