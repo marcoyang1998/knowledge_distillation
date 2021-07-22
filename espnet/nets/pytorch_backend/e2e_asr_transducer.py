@@ -435,7 +435,6 @@ class E2E(ASRInterface, torch.nn.Module):
     def kd_one_best_loss(self, z, pred_len, target_len, enc_T, ys_pad, ys_pad_kd):
         # 0: t_list, 1: u_list， 2： y_seq_with_blank
         def CXE(target, predicted):
-            assert torch.min(predicted) > 0, torch.min(predicted)
             return -(torch.softmax(target, dim=-1) * predicted.log_softmax(-1)).sum()
 
         bs = z.shape[0]
