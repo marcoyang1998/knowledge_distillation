@@ -521,11 +521,14 @@ class E2E(ASRInterface, torch.nn.Module):
 
         blank = torch.cat([lattice[:,:,0].transpose(0,1).reshape(-1) for lattice in pr]).view(-1,1)
         correct = []
+        rest = []
         for b in range(bs):
             correct.append(torch.cat([pr[b][:,i,ys[b][i]] for i in range(ys[b].size(0))]))
+            rest.append(torch.cat([pr[b][:,i,numpy.delete(numpy.arange(258), [0, ys[b][i]])].sum(-1) for i in range(ys[b].size(0))]))
         correct = torch.cat(correct).view(-1,1)
+        rest = torch.cat(rest).view(-1,1)
         ys_kd = torch.cat([y.view(-1,3) for y in ys_kd], dim=0)
-        reduced_lattice = torch.cat((blank, correct, 1.0 - correct - blank + 1e-7), dim=-1)
+        reduced_lattice = torch.cat((blank, correct, rest), dim=-1)
         if reduced_lattice.min() < 0:
             print(reduced_lattice.min())
 
