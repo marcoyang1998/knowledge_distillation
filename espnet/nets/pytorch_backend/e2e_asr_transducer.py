@@ -438,7 +438,7 @@ class E2E(ASRInterface, torch.nn.Module):
             return -(target * predicted.log_softmax(-1)).sum()
 
         bs = z.shape[0]
-        ys = [y[y != self.ignore_id] for y in ys_pad]
+        #ys = [y[y != self.ignore_id] for y in ys_pad]
         t_list = [y[:, 0][y[:, 0] != self.ignore_id] for y in ys_pad_kd]
         u_list = [y[:, 1][y[:, 1] != self.ignore_id] for y in ys_pad_kd]
         kd_seq = [y[:, 2][y[:, 2] != self.ignore_id] for y in ys_pad_kd]
@@ -455,8 +455,8 @@ class E2E(ASRInterface, torch.nn.Module):
         ys_kd = [y[mask[i]] for i, y in enumerate(ys_kd)]
         u_list = [l[mask[i]] for i, l in enumerate(u_list)]
         t_list = [l[mask[i]] for i, l in enumerate(t_list)]
-        assert max([max(l) for l in t_list]) < z.shape[1], print([max(l) for l in t_list], z.shape)
-        assert max([max(l) for l in u_list]) < z.shape[2], print([max(l) for l in u_list], z.shape)
+        #assert max([max(l) for l in t_list]) < z.shape[1], print([max(l) for l in t_list], z.shape)
+        #assert max([max(l) for l in u_list]) < z.shape[2], print([max(l) for l in u_list], z.shape)
 
         logits = [lattice[t_list[i].long(), u_list[i].long(), :] for i, lattice in enumerate(z)]
 
