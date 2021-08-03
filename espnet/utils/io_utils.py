@@ -93,6 +93,7 @@ class LoadInputsAndTargets(object):
             assert isinstance(preprocess_args, dict), type(preprocess_args)
             self.preprocess_args = dict(preprocess_args)
 
+        self._npy_loaders = {}
         self.keep_all_data_on_mem = keep_all_data_on_mem
 
     def __call__(self, batch, return_uttid=False):
@@ -584,8 +585,8 @@ class LoadInputsAndTargets(object):
             if not self.keep_all_data_on_mem:
                 return np.load(filepath)
             if filepath not in self._loaders:
-                self._loaders[filepath] = np.load(filepath)
-            return self._loaders[filepath]
+                self._npy_loaders[filepath] = np.load(filepath)
+            return self._npy_loaders[filepath]
         elif filetype in ["mat", "vec"]:
             # e.g.
             #    {"input": [{"feat": "some/path.ark:123",

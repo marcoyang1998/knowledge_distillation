@@ -900,6 +900,35 @@ class E2E(ASRInterface, torch.nn.Module):
             reduced_lattice[0, :, u, 2] = 1 - reduced_lattice[0, :, u, 0] - reduced_lattice[0, :, u, 1]
         return reduced_lattice
 
+    def collect_soft_label_full_lattice(self, xs_pad, ilens, ys_pad):
+        self.eval()
+        xs_pad = xs_pad[:, : max(ilens)]
+        if "custom" in self.etype:
+            src_mask = make_non_pad_mask(ilens.tolist()).to(xs_pad.device).unsqueeze(-2)
+
+            _hs_pad, hs_mask = self.encoder(xs_pad, src_mask)
+        else:
+            _hs_pad, hs_mask, _ = self.enc(xs_pad, ilens)
+
+        if self.use_aux_task:
+            hs_pad, aux_hs_pad = _hs_pad[0], _hs_pad[1]
+        else:
+            hs_pad, aux_hs_pad = _hs_pad, None
+
+        ys_in_pad, ys_out_pad, target, pred_len, target_len = prepare_loss_inputs(
+            ys_pad, hs_mask, ignore_id=self.ignore_id
+        )
+
+        if "custom" in self.dtype:
+            ys_mask = target_mask(ys_in_pad, self.blank_id)
+            pred_pad, _ = self.decoder(ys_in_pad, ys_mask, hs_pad)
+        else:
+            pred_pad = self.dec(hs_pad, ys_in_pad)
+        z = self.joint_network(hs_pad.unsqueeze(2), pred_pad.unsqueeze(1))
+        pr = z.softmax(dim=-1).cpu().numpy()
+        assert z.shape[0] == 1
+        return pr
+
 
     def calculate_all_attentions(self, xs_pad, ilens, ys_pad):
         """E2E attention calculation.

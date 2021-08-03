@@ -1674,6 +1674,7 @@ def collect_soft_labels(args):
                 if args.rnnt_kd_data_collection_mode == "one_best_lattice":
                     nbest_hyps = model.collect_soft_label_one_best_lattice(*x)
                 elif args.rnnt_kd_data_collection_mode == "reduced_lattice":
+                    print("Collecting reduced lattice")
                     reduced_lattice = model.collect_soft_label_reduced_lattice(*x)
                     assert reduced_lattice.shape[0] == 1
                     #reduced_lattice = np.squeeze(reduced_lattice, axis=0)
@@ -1691,6 +1692,18 @@ def collect_soft_labels(args):
                                                       "shape": list(reduced_lattice.shape[1:])})
                     logging.info("Generated reduced lattice for {}".format(name))
                     continue
+                elif args.rnnt_kd_data_collection_mode=="full_lattice":
+                    print("Collecting full lattice")
+                    full_lattice = model.collect_soft_label_full_lattice(*x)
+                    region = name.split('-')[0]
+                    spkr = '-'.join(name.split('-')[:-1])
+                    output_dir = os.path.join(args.output_kd_dir, region, spkr)
+                    if not os.path.isdir(output_dir):
+                        os.makedirs(output_dir)
+                    with open(os.path.join(output_dir, name + ".npy"), 'wb') as f:
+                        np.save(f, full_lattice)
+                    continue
+
                 else:
                     raise NotImplementedError("{} not implemented".format(args.rnnt_kd_data_collection_mode))
 

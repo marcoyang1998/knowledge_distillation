@@ -26,6 +26,7 @@ from espnet.nets.pytorch_backend.transformer.subsampling import Conv2dSubsamplin
 from espnet.nets.pytorch_backend.transformer.subsampling import Conv2dSubsampling2
 from espnet.nets.pytorch_backend.transformer.subsampling import Conv2dSubsampling6
 from espnet.nets.pytorch_backend.transformer.subsampling import Conv2dSubsampling8
+from espnet.nets.pytorch_backend.transformer.subsampling import causal_Conv2dSubsampling
 
 
 def _pre_hook(

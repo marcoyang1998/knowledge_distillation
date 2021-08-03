@@ -241,3 +241,31 @@ class Conv2dSubsampling2(torch.nn.Module):
         if x_mask is None:
             return x, None
         return x, x_mask[:, :, :-2:2]
+
+
+class causal_Conv2dSubsampling(torch.nn.Module):
+    def __init__(self, idim, odim, dropout_rate, pos_enc=None):
+        """Construct an Conv2dSubsampling object."""
+        super(causal_Conv2dSubsampling, self).__init__()
+        self.conv1 = torch.nn.Conv2d(1, odim, 3, 2)
+        self.conv2 = torch.nn.Conv2d(odim, odim, 3, 2),
+        self.out = torch.nn.Sequential(
+            torch.nn.Linear(odim * (((idim - 1) // 2 - 1) // 2), odim),
+            pos_enc if pos_enc is not None else PositionalEncoding(odim, dropout_rate),
+        )
+
+    def forward(self,x,x_mask):
+        x = x.unsqueeze(1)
+        T = x.size(2)
+        x = torch.nn.ReLU()(self.conv1)
+        if T%3 != 2:
+            x = x[:,:,-1,:]
+        T = x.size(2)
+        x = torch.nn.ReLU(self.conv2)(x)
+        if T%3 != 2:
+            x = x[:, :, -1, :]
+        b, c, t, f = x.size()
+        x = self.out(x.transpose(1, 2).contiguous().view(b, t, c * f))
+        if x_mask is None:
+            return x, None
+        return x, x_mask[:, :, :-2:2][:, :, :-2:2]
