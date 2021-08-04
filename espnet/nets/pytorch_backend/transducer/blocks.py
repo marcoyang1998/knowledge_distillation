@@ -398,7 +398,7 @@ def build_conformer_block(
     if use_conv_mod:
         conv_layer = ConvolutionModule
         conv_activation = get_activation(conv_mod_activation_type)
-        conv_layers_args = (d_hidden, block_arch["conv_mod_kernel"], conv_activation)
+        conv_layers_args = (d_hidden, block_arch["conv_mod_kernel"], conv_activation, True, zero_triu)
 
     return lambda: ConformerEncoderLayer(
         d_hidden,
