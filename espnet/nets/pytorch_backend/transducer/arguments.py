@@ -325,5 +325,10 @@ def add_auxiliary_task_arguments(group):
         choices=["one_best_path", "reduced_lattice"],
         help="knowledge distillation mode",
     )
-
+    group.add_argument(
+        "--streaming",
+        default=False,
+        type=strtobool,
+        help="Currently only support conformer as building block"
+    )
     return group

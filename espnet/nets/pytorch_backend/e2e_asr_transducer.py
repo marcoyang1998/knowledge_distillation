@@ -277,6 +277,7 @@ class E2E(ASRInterface, torch.nn.Module):
                 positionwise_activation_type=args.custom_enc_pw_activation_type,
                 conv_mod_activation_type=args.custom_enc_conv_mod_activation_type,
                 aux_task_layer_list=aux_task_layer_list,
+                streaming=args.streaming
             )
             encoder_out = self.encoder.enc_out
 

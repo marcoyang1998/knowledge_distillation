@@ -359,6 +359,7 @@ def build_conformer_block(
     pw_layer_type,
     pw_activation_type,
     conv_mod_activation_type,
+    zero_triu=False
 ):
     """Build function for conformer block.
 
@@ -401,7 +402,7 @@ def build_conformer_block(
 
     return lambda: ConformerEncoderLayer(
         d_hidden,
-        self_attn_class(heads, d_hidden, att_dropout_rate),
+        self_attn_class(heads, d_hidden, att_dropout_rate, zero_triu),
         pw_layer(*pw_layer_args),
         pw_layer(*pw_layer_args) if macaron_style else None,
         conv_layer(*conv_layers_args) if use_conv_mod else None,
@@ -474,6 +475,7 @@ def build_blocks(
     conv_mod_activation_type="relu",
     dropout_rate_embed=0.0,
     padding_idx=-1,
+    zero_triu=False
 ):
     """Build block for customizable architecture.
 
@@ -541,6 +543,7 @@ def build_blocks(
                 positionwise_layer_type,
                 positionwise_activation_type,
                 conv_mod_activation_type,
+                zero_triu
             )
         elif block_type == "causal-conv1d":
             module = build_causal_conv1d_block(blocks_arch[i])

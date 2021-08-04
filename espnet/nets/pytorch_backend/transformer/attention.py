@@ -23,7 +23,7 @@ class MultiHeadedAttention(nn.Module):
 
     """
 
-    def __init__(self, n_head, n_feat, dropout_rate):
+    def __init__(self, n_head, n_feat, dropout_rate, zero_triu=False):
         """Construct an MultiHeadedAttention object."""
         super(MultiHeadedAttention, self).__init__()
         assert n_feat % n_head == 0
@@ -36,6 +36,7 @@ class MultiHeadedAttention(nn.Module):
         self.linear_out = nn.Linear(n_feat, n_feat)
         self.attn = None
         self.dropout = nn.Dropout(p=dropout_rate)
+        self.streaming = zero_triu
 
     def forward_qkv(self, query, key, value):
         """Transform query, key and value.
@@ -80,6 +81,20 @@ class MultiHeadedAttention(nn.Module):
             min_value = float(
                 numpy.finfo(torch.tensor(0, dtype=scores.dtype).numpy().dtype).min
             )
+            #assert torch.sum(mask == True) == 0, mask
+
+            if self.streaming:
+                lens = [torch.sum(m==False) for m in mask]
+                if min(lens) != max(lens):
+                    mask = torch.ones(n_batch, 1, *scores.shape[-2:],dtype=torch.bool)
+                    for b in range(n_batch):
+                        mask[b,0,:lens[b],:lens[b]] = ~torch.tril(torch.ones(lens[b],lens[b], dtype=torch.bool))
+                else:
+                    l = lens[0]
+                    mask = torch.ones(1, 1, *scores.shape[-2:],dtype=torch.bool)
+                    mask[0,0,:,:] = ~torch.tril(torch.ones(l, l, dtype=torch.bool))
+                mask = mask.to(scores.device)
+
             scores = scores.masked_fill(mask, min_value)
             self.attn = torch.softmax(scores, dim=-1).masked_fill(
                 mask, 0.0
@@ -226,7 +241,7 @@ class RelPositionMultiHeadedAttention(MultiHeadedAttention):
 
     def __init__(self, n_head, n_feat, dropout_rate, zero_triu=False):
         """Construct an RelPositionMultiHeadedAttention object."""
-        super().__init__(n_head, n_feat, dropout_rate)
+        super().__init__(n_head, n_feat, dropout_rate, zero_triu)
         self.zero_triu = zero_triu
         # linear transformation for positional encoding
         self.linear_pos = nn.Linear(n_feat, n_feat, bias=False)

@@ -42,6 +42,7 @@ class CustomEncoder(torch.nn.Module):
         normalize_before=True,
         aux_task_layer_list=[],
         padding_idx=-1,
+        streaming=False
     ):
         """Construct an CustomEncoder object."""
         super().__init__()
@@ -63,6 +64,7 @@ class CustomEncoder(torch.nn.Module):
             positionwise_activation_type=positionwise_activation_type,
             conv_mod_activation_type=conv_mod_activation_type,
             padding_idx=padding_idx,
+            zero_triu=streaming
         )
 
         self.normalize_before = normalize_before
