@@ -322,8 +322,13 @@ def add_auxiliary_task_arguments(group):
         "--transducer-kd-mode",
         default="one_best_path",
         type=str,
-        choices=["one_best_path", "reduced_lattice"],
+        choices=["one_best_path", "reduced_lattice", "shifted_one_best_path"],
         help="knowledge distillation mode",
+    )
+    group.add_argument(
+        "--shift-step",
+        type=int,
+        help="Used with shifted_one_best_path, number of right shift of the teacher one best path"
     )
     group.add_argument(
         "--streaming",
