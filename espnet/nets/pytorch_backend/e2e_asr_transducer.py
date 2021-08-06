@@ -423,6 +423,8 @@ class E2E(ASRInterface, torch.nn.Module):
                 print("Distillation mode: {}, kd factor: {}".format(self.kd_mode, self.kd_mtl_factor))
         self.loss = None
         self.rnnlm = None
+        if args.streaming:
+            print("This is a streaming transducer!")
 
     def default_parameters(self, args):
         """Initialize/reset parameters for transducer.
