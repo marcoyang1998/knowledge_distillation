@@ -322,7 +322,7 @@ def add_auxiliary_task_arguments(group):
         "--transducer-kd-mode",
         default="one_best_path",
         type=str,
-        choices=["one_best_path", "reduced_lattice", "shifted_one_best_path"],
+        choices=["one_best_path", "reduced_lattice", "shifted_one_best_path", "min_shifted_one_best_path"],
         help="knowledge distillation mode",
     )
     group.add_argument(
@@ -336,4 +336,17 @@ def add_auxiliary_task_arguments(group):
         type=strtobool,
         help="Currently only support conformer as building block"
     )
+    group.add_argument(
+        "--modify-first-block",
+        default=False,
+        type=strtobool,
+        help="Whether to modify the first encoder block to incorporate more future context"
+    )
+    group.add_argument(
+        "--first-block-future-context",
+        default=0,
+        type=int,
+        help="Only used when modify-first-block is set True. How many future frames are used in the first encoder block"
+    )
+
     return group

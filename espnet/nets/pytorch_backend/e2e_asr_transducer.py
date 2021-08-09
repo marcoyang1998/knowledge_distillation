@@ -292,6 +292,13 @@ class E2E(ASRInterface, torch.nn.Module):
                 aux_task_layer_list=aux_task_layer_list,
             )
             encoder_out = args.eprojs
+        if args.modify_first_block and args.streaming: # modify the first encoder block to allow for furture context, only used when streaming
+            if args.first_block_future_context > 0:
+                n_head = args.enc_block_arch[0]['heads']
+                n_feat = args.enc_block_arch[0]['d_hidden']
+                att_dropout = args.enc_block_arch[0]['att-dropout-rate']
+                self.encoder.encoders[0].self_attn = RelPositionMultiHeadedAttention(n_head=n_head, n_feat=n_feat, dropout_rate= att_dropout, zero_triu=args.streaming, future_context=args.first_block_future_context)
+                #self.encoder.encoders[0].conv_module = None
 
         if "custom" in args.dtype:
             if args.dec_block_arch is None:
@@ -421,6 +428,8 @@ class E2E(ASRInterface, torch.nn.Module):
                 elif self.kd_mode == "shifted_one_best_path":
                     self.kd_loss = self.kd_shifted_one_best_loss
                     self.shift_step = args.shift_step
+                elif self.kd_mode == "min_shifted_one_best_path":
+                    self.kd_loss = self
                 else:
                     raise NotImplementedError("Not implemented {}".format(self.kd_mode))
                 print("Distillation mode: {}, kd factor: {}".format(self.kd_mode, self.kd_mtl_factor))
@@ -533,6 +542,50 @@ class E2E(ASRInterface, torch.nn.Module):
 
         return kd_loss/bs
 
+    def kd_min_shifted_one_best_loss(self, z, pred_len, target_len, enc_T, ys_pad, ys_pad_kd):
+        def CXE(target, predicted):
+            return -(target * predicted.log_softmax(-1)).sum()
+
+        bs = z.shape[0]
+        # ys = [y[y != self.ignore_id] for y in ys_pad]
+        t_list = [y[:, 0][y[:, 0] != self.ignore_id] + self.shift_step for y in ys_pad_kd]
+        t_list_left = [y[:, 0][y[:, 0] != self.ignore_id] + self.shift_step - 1 for y in ys_pad_kd]
+        t_list_right = [y[:, 0][y[:, 0] != self.ignore_id] + self.shift_step + 1 for y in ys_pad_kd]
+
+        u_list = [y[:, 1][y[:, 1] != self.ignore_id] for y in ys_pad_kd]
+        kd_seq = [y[:, 2][y[:, 2] != self.ignore_id] for y in ys_pad_kd]
+        kd_seq_no_blank = [seq[seq > 0] for seq in kd_seq]
+        # for i in range(bs): assert torch.equal(ys[i], kd_seq_no_blank[i]), "ys: {}, kd: {}".format(ys[i],                                                                                                   kd_seq_no_blank[i])
+        #kd_seq_no_blank_len = [seq.size(0) for seq in kd_seq_no_blank]
+        min_T = [min(enc_T[i], torch.max(t_list[i]) + 1) for i in range(bs)]
+        t_mask = [l <= min_T[i] - 1 for i, l in enumerate(t_list)]
+        t_mask_left = [l <= min_T[i] - 1 for i, l in enumerate(t_list_left)]
+        t_mask_right = [l <= min_T[i] - 1 for i, l in enumerate(t_list_left)]
+
+        u_mask = [l <= target_len[i] for i, l in enumerate(u_list)]
+        mask = [t_mask[i] * u_mask[i] for i in range(bs)]
+        mask_left = [t_mask_left[i] * u_mask[i] for i in range(bs)]
+        mask_right = [t_mask_right[i] * u_mask[i] for i in range(bs)]
+        # for i in range(bs): assert target_len[i] == kd_seq_no_blank_len[i], "target: {}, kd: {}".format(ys[i], kd_seq_no_blank[i])
+
+        ys_kd = [y[y != self.ignore_id].view(-1, self.odim) for i, y in enumerate(ys_pad_kd[:, :, 3:])]
+        ys_kd = [y[mask[i]] for i, y in enumerate(ys_kd)]
+        ys_kd_left = [y[mask_left[i]] for i, y in enumerate(ys_kd)]
+        ys_kd_right = [y[mask_right[i]] for i, y in enumerate(ys_kd)]
+        u_list = [l[mask[i]] for i, l in enumerate(u_list)]
+        u_list_left = [l[mask_left[i]] for i, l in enumerate(u_list)]
+        u_list_right = [l[mask_right[i]] for i, l in enumerate(u_list)]
+        t_list = [l[mask[i]] for i, l in enumerate(t_list)]
+        t_list_left = [l[mask_left[i]] for i, l in enumerate(t_list)]
+        t_list_right = [l[mask_right[i]] for i, l in enumerate(t_list)]
+
+        for i in range(3):
+            logits = [lattice[t_list[i].long(), u_list[i].long(), :] for i, lattice in enumerate(z)]
+            ys_kd = torch.cat(ys_kd, dim=0)
+            logits = torch.cat(logits, dim=0)
+
+        kd_loss = CXE(torch.softmax(ys_kd / self.kd_temperature, dim=-1), logits / self.kd_temperature)
+        return
     def forward(self, xs_pad, ilens, ys_pad):
         """E2E forward.
 

@@ -23,7 +23,7 @@ class MultiHeadedAttention(nn.Module):
 
     """
 
-    def __init__(self, n_head, n_feat, dropout_rate, zero_triu=False):
+    def __init__(self, n_head, n_feat, dropout_rate, zero_triu=False, future_context=0):
         """Construct an MultiHeadedAttention object."""
         super(MultiHeadedAttention, self).__init__()
         assert n_feat % n_head == 0
@@ -37,6 +37,8 @@ class MultiHeadedAttention(nn.Module):
         self.attn = None
         self.dropout = nn.Dropout(p=dropout_rate)
         self.streaming = zero_triu
+        self.future_context = future_context
+
 
     def forward_qkv(self, query, key, value):
         """Transform query, key and value.
@@ -84,15 +86,17 @@ class MultiHeadedAttention(nn.Module):
             #assert torch.sum(mask == True) == 0, mask
 
             if self.streaming:
-                lens = [torch.sum(m==False) for m in mask]
+                assert self.future_context >= 0
+                cont = self.future_context
+                lens = [torch.sum(m == False) for m in mask]
                 if min(lens) != max(lens):
-                    mask = torch.ones(n_batch, 1, *scores.shape[-2:],dtype=torch.bool)
+                    mask = torch.ones(n_batch, 1, *scores.shape[-2:], dtype=torch.bool)
                     for b in range(n_batch):
-                        mask[b,0,:lens[b],:lens[b]] = ~torch.tril(torch.ones(lens[b],lens[b], dtype=torch.bool))
+                        mask[b, 0, :lens[b], :lens[b]] = ~torch.tril(torch.ones(lens[b], lens[b], dtype=torch.bool), diagonal=cont)
                 else:
                     l = lens[0]
-                    mask = torch.ones(1, 1, *scores.shape[-2:],dtype=torch.bool)
-                    mask[0,0,:,:] = ~torch.tril(torch.ones(l, l, dtype=torch.bool))
+                    mask = torch.ones(1, 1, *scores.shape[-2:], dtype=torch.bool)
+                    mask[0, 0, :, :] = ~torch.tril(torch.ones(l, l, dtype=torch.bool), diagonal=cont)
                 mask = mask.to(scores.device)
 
             scores = scores.masked_fill(mask, min_value)
@@ -239,10 +243,11 @@ class RelPositionMultiHeadedAttention(MultiHeadedAttention):
 
     """
 
-    def __init__(self, n_head, n_feat, dropout_rate, zero_triu=False):
+    def __init__(self, n_head, n_feat, dropout_rate, zero_triu=False, future_context=0):
         """Construct an RelPositionMultiHeadedAttention object."""
-        super().__init__(n_head, n_feat, dropout_rate, zero_triu)
+        super().__init__(n_head, n_feat, dropout_rate, zero_triu, future_context)
         self.zero_triu = zero_triu
+        self.future_context = future_context
         # linear transformation for positional encoding
         self.linear_pos = nn.Linear(n_feat, n_feat, bias=False)
         # these two learnable bias are used in matrix c and matrix d
