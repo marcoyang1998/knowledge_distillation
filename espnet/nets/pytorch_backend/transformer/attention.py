@@ -278,7 +278,7 @@ class RelPositionMultiHeadedAttention(MultiHeadedAttention):
 
         if self.zero_triu:
             ones = torch.ones((x.size(2), x.size(3)), device=x.device)
-            x = x * torch.tril(ones, x.size(3) - x.size(2))[None, None, :, :]
+            x = x * torch.tril(ones, x.size(3) - x.size(2) +self.future_context)[None, None, :, :]
 
         return x
 

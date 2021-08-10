@@ -322,7 +322,7 @@ def add_auxiliary_task_arguments(group):
         "--transducer-kd-mode",
         default="one_best_path",
         type=str,
-        choices=["one_best_path", "reduced_lattice", "shifted_one_best_path", "min_shifted_one_best_path"],
+        choices=["one_best_path", "reduced_lattice", "shifted_one_best_path", "window_shifted_one_best_path"],
         help="knowledge distillation mode",
     )
     group.add_argument(
