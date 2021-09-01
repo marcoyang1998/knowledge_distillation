@@ -430,6 +430,7 @@ class E2E(ASRInterface, torch.nn.Module):
                     self.shift_step = args.shift_step
                 elif self.kd_mode == "window_shifted_one_best_path":
                     self.kd_loss = self.kd_window_shifted_one_best_loss
+                    #self.kd_loss = self.shifted_one_best_path_loss
                     self.shift_step = args.shift_step
                 else:
                     raise NotImplementedError("Not implemented {}".format(self.kd_mode))
@@ -546,61 +547,100 @@ class E2E(ASRInterface, torch.nn.Module):
     def kd_window_shifted_one_best_loss(self, z, pred_len, target_len, enc_T, ys_pad, ys_pad_kd):
         def CXE(target, predicted):
             return -(target * predicted.log_softmax(-1)).sum()
-        def CE(target, predicted):
+        def CEX_no_sum(target, predicted):
             return -(target * predicted.log_softmax(-1))
 
         bs = z.shape[0]
         # ys = [y[y != self.ignore_id] for y in ys_pad]
         t_list = [y[:, 0][y[:, 0] != self.ignore_id] + self.shift_step for y in ys_pad_kd]
-        t_list_left = [y[:, 0][y[:, 0] != self.ignore_id] + self.shift_step - 1 for y in ys_pad_kd]
-        t_list_right = [y[:, 0][y[:, 0] != self.ignore_id] + self.shift_step + 1 for y in ys_pad_kd]
-
         u_list = [y[:, 1][y[:, 1] != self.ignore_id] for y in ys_pad_kd]
         kd_seq = [y[:, 2][y[:, 2] != self.ignore_id] for y in ys_pad_kd]
         kd_seq_no_blank = [seq[seq > 0] for seq in kd_seq]
         # for i in range(bs): assert torch.equal(ys[i], kd_seq_no_blank[i]), "ys: {}, kd: {}".format(ys[i],                                                                                                   kd_seq_no_blank[i])
-        #kd_seq_no_blank_len = [seq.size(0) for seq in kd_seq_no_blank]
+        # kd_seq_no_blank_len = [seq.size(0) for seq in kd_seq_no_blank]
         min_T = [min(enc_T[i], torch.max(t_list[i]) + 1) for i in range(bs)]
         t_mask = [l <= min_T[i] - 1 for i, l in enumerate(t_list)]
-        t_mask_left = [l <= min_T[i] - 1 for i, l in enumerate(t_list_left)]
-        t_mask_right = [l <= min_T[i] - 1 for i, l in enumerate(t_list_right)]
-
         u_mask = [l <= target_len[i] for i, l in enumerate(u_list)]
         mask = [t_mask[i] * u_mask[i] for i in range(bs)]
-        mask_left = [t_mask_left[i] * u_mask[i] for i in range(bs)]
-        mask_right = [t_mask_right[i] * u_mask[i] for i in range(bs)]
         # for i in range(bs): assert target_len[i] == kd_seq_no_blank_len[i], "target: {}, kd: {}".format(ys[i], kd_seq_no_blank[i])
 
-        # select from distillation label
-        ys_kd_orig = [y[y != self.ignore_id].view(-1, self.odim) for i, y in enumerate(ys_pad_kd[:, :, 3:])]
-        ys_kd = [y[mask[i]] for i, y in enumerate(ys_kd_orig)]
-        ys_kd_left = [y[mask_left[i]] for i, y in enumerate(ys_kd_orig)]
-        ys_kd_right = [y[mask_right[i]] for i, y in enumerate(ys_kd_orig)]
-        ys_kd_list = [ys_kd_left, ys_kd_right, ys_kd_right]
+        ys_kd = [y[y != self.ignore_id].view(-1, self.odim) for i, y in enumerate(ys_pad_kd[:, :, 3:])]
+        ys_kd = [y[mask[i]] for i, y in enumerate(ys_kd)]
+        u_list = [l[mask[i]] for i, l in enumerate(u_list)]
+        t_list = [l[mask[i]] for i, l in enumerate(t_list)]
+        t_list_left = [l - 2 for l in t_list]
+        t_list_middle = [l - 1 for l in t_list]
 
-        u_list_orig = u_list.copy()
-        u_list = [l[mask[i]] for i, l in enumerate(u_list_orig)]
-        u_list_left = [l[mask_left[i]] for i, l in enumerate(u_list_orig)]
-        u_list_right = [l[mask_right[i]] for i, l in enumerate(u_list_orig)]
-        u_list_all = [u_list_left,u_list,u_list_right]
+        logits = [lattice[t_list[i].long(), u_list[i].long(), :] for i, lattice in enumerate(z)]
+        logits_left = [lattice[t_list_left[i].long(), u_list[i].long(), :] for i, lattice in enumerate(z)]
+        logits_middle = [lattice[t_list_middle[i].long(), u_list[i].long(), :] for i, lattice in enumerate(z)]
+        full_logits = [logits_left, logits_middle, logits]
 
-        t_list_orig = t_list.copy()
-        t_list = [l[mask[i]] for i, l in enumerate(t_list_orig)]
-        t_list_left = [l[mask_left[i]] for i, l in enumerate(t_list_orig)]
-        t_list_right = [l[mask_right[i]] for i, l in enumerate(t_list_orig)]
-        t_list_all = [t_list_left,t_list, t_list_right]
+        ys_kd = torch.cat(ys_kd, dim=0)
+        kd_loss_list = []
+        for l in full_logits:
+            l = torch.cat(l, dim=0)
+            kd_loss_list.append(CEX_no_sum(torch.softmax(ys_kd / self.kd_temperature, dim=-1), l / self.kd_temperature).sum(1))
 
-        ce_list = []
-        for k in range(3):
-            logits = [lattice[t_list_all[k][i].long(), u_list_all[k][i].long(), :] for i, lattice in enumerate(z)]
-            logits = torch.cat(logits, dim=0)
-            ys_kd = torch.cat(ys_kd_list[k], dim=0)
-            ce_vec = CE(torch.softmax(ys_kd / self.kd_temperature, dim=-1), logits / self.kd_temperature)
-            ce_list.append(ce_vec)
+        kd_loss_list = torch.cat(kd_loss_list).reshape(-1, 3)
+        kd_loss = torch.min(kd_loss_list, dim=1)[0].sum()
+        #kd_loss = CEX_no_sum(torch.softmax(ys_kd / self.kd_temperature, dim=-1), logits / self.kd_temperature).sum(1)
+        #kd_loss = CXE(torch.softmax(ys_kd / self.kd_temperature, dim=-1), logits / self.kd_temperature)
 
+        return kd_loss / bs
 
-        kd_loss = CXE(torch.softmax(ys_kd / self.kd_temperature, dim=-1), logits / self.kd_temperature)
+    def shifted_one_best_path(self, z, pred_len, target_len, enc_T, ys_pad, ys_pad_kd, shift_step):
+        # return the list of one best path, with target
+        bs = z.shape[0]
+        # ys = [y[y != self.ignore_id] for y in ys_pad]
+        t_list = [y[:, 0][y[:, 0] != self.ignore_id] + shift_step for y in ys_pad_kd]
+        u_list = [y[:, 1][y[:, 1] != self.ignore_id] for y in ys_pad_kd]
+        kd_seq = [y[:, 2][y[:, 2] != self.ignore_id] for y in ys_pad_kd]
+        kd_seq_no_blank = [seq[seq > 0] for seq in kd_seq]
+        # for i in range(bs): assert torch.equal(ys[i], kd_seq_no_blank[i]), "ys: {}, kd: {}".format(ys[i],                                                                                                   kd_seq_no_blank[i])
+        # kd_seq_no_blank_len = [seq.size(0) for seq in kd_seq_no_blank]
+        min_T = [min(enc_T[i], torch.max(t_list[i]) + 1) for i in range(bs)]
+        t_mask = [l <= min_T[i] - 1 for i, l in enumerate(t_list)]
+        u_mask = [l <= target_len[i] for i, l in enumerate(u_list)]
+        mask = [t_mask[i] * u_mask[i] for i in range(bs)]
+        # for i in range(bs): assert target_len[i] == kd_seq_no_blank_len[i], "target: {}, kd: {}".format(ys[i], kd_seq_no_blank[i])
+
+        ys_kd = [y[y != self.ignore_id].view(-1, self.odim) for i, y in enumerate(ys_pad_kd[:, :, 3:])]
+        ys_kd = [y[mask[i]] for i, y in enumerate(ys_kd)]
+        u_list = [l[mask[i]] for i, l in enumerate(u_list)]
+        t_list = [l[mask[i]] for i, l in enumerate(t_list)]
+
+        logits = [lattice[t_list[i].long(), u_list[i].long(), :] for i, lattice in enumerate(z)]
+        #ys_kd = torch.cat(ys_kd, dim=0)
+        #logits = torch.cat(logits, dim=0)
+
+        return ys_kd, logits
+
+    def shifted_one_best_path_loss(self, z, pred_len, target_len, enc_T, ys_pad, ys_pad_kd):
+        # currently only supports window size 3
+        bs = z.size(0)
+
+        ys_kd_list = []
+        logits_list = []
+        shift_steps = [self.shift_step - 1, self.shift_step, self.shift_step + 1]
+        for shift_step in shift_steps:
+            ys_kd, logits = self.shifted_one_best_path(z, pred_len, target_len, enc_T, ys_pad, ys_pad_kd, shift_step)
+            ys_kd_list.append(ys_kd)
+            logits_list.append(logits)
+        print("Checking")
+        min_kd_len = [ys_kd_list[-1][b].size(0) for b in range(bs)]
+        for b in range(bs):
+            ys_kd_list[0][b] = ys_kd_list[0][b][2:]
+            ys_kd_list[1][b] = ys_kd_list[1][b][1:]
+        length_diff = [ys_kd_list[0][b].size(0) - ys_kd_list[-1][b].size(0) for b in range(bs)]
+        truncate_end = [l-2 for l in length_diff]
+        min_len = [min(ys_kd_list[0][b].size(0),ys_kd_list[1][b].size(0),ys_kd_list[2][b].size(0)) for b in range(bs)]
+        #for i in range()
+
         return
+
+
+
     def forward(self, xs_pad, ilens, ys_pad):
         """E2E forward.
 
