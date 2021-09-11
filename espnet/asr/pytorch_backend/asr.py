@@ -1155,19 +1155,31 @@ def recog(args):
     if args.rnnlm:
         rnnlm_args = get_model_conf(args.rnnlm, args.rnnlm_conf)
         if getattr(rnnlm_args, "model_module", "default") != "default":
-            raise ValueError(
-                "use '--api v2' option to decode with non-default language model"
+            from espnet.nets.lm_interface import dynamic_import_lm
+            lm_model_module = getattr(rnnlm_args, "model_module", "default")
+            lm_class = dynamic_import_lm(lm_model_module, rnnlm_args.backend)
+            lm = lm_class(len(train_args.char_list), rnnlm_args)
+            torch_load(args.rnnlm, lm)
+            rnnlm = lm_pytorch.ClassifierWithState(
+                lm
             )
-        rnnlm = lm_pytorch.ClassifierWithState(
-            lm_pytorch.RNNLM(
-                len(train_args.char_list),
-                rnnlm_args.layer,
-                rnnlm_args.unit,
-                getattr(rnnlm_args, "embed_unit", None),  # for backward compatibility
+            #torch_load(args.rnnlm, lm)
+            rnnlm.eval()
+
+            #raise ValueError(
+            #    "use '--api v2' option to decode with non-default language model"
+            #)
+        else:
+            rnnlm = lm_pytorch.ClassifierWithState(
+                lm_pytorch.RNNLM(
+                    len(train_args.char_list),
+                    rnnlm_args.layer,
+                    rnnlm_args.unit,
+                    getattr(rnnlm_args, "embed_unit", None),  # for backward compatibility
+                )
             )
-        )
-        torch_load(args.rnnlm, rnnlm)
-        rnnlm.eval()
+            torch_load(args.rnnlm, rnnlm)
+            rnnlm.eval()
     else:
         rnnlm = None
 
@@ -1244,7 +1256,8 @@ def recog(args):
             nstep=args.nstep,
             prefix_alpha=args.prefix_alpha,
             score_norm=args.score_norm,
-            collect_kd_data=args.collect_rnnt_kd_data
+            collect_kd_data=args.collect_rnnt_kd_data,
+            lm_fusion_kd=args.lm_fusion_kd
         )
 
     if args.batchsize == 0:
@@ -1624,13 +1637,31 @@ def collect_soft_labels(args):
         " Total parameter of the model = "
         + str(sum(p.numel() for p in model.parameters()))
     )
-    assert args.rnnlm == None, "Soft-label collection does not support rnnlm"
+    #assert args.rnnlm == None, "Soft-label collection does not support rnnlm"
     assert args.word_rnnlm == None, "Soft-label collection does not support word_rnnlm"
+    if args.rnnlm:
+        lm_weight = args.lm_weight
+        rnnlm_args = get_model_conf(args.rnnlm, args.rnnlm_conf)
+        rnnlm = lm_pytorch.ClassifierWithState(
+            lm_pytorch.RNNLM(
+                len(train_args.char_list),
+                rnnlm_args.layer,
+                rnnlm_args.unit,
+                getattr(rnnlm_args, "embed_unit", None),  # for backward compatibility
+            )
+        )
+        torch_load(args.rnnlm, rnnlm)
+        rnnlm.eval()
+    else:
+        rnnlm=None
+        lm_weight = 0
 
     if args.ngpu == 1:
         gpu_id = list(range(args.ngpu))
         logging.info("gpu id: " + str(gpu_id))
         model.cuda()
+        if rnnlm:
+            rnnlm.cuda()
         device = "cuda"
     else:
         device = "cpu"
@@ -1672,7 +1703,7 @@ def collect_soft_labels(args):
                 feat = (torch.tensor(feat[0][0]).unsqueeze(0).float(), torch.tensor([feat[0][0].shape[0]]), torch.tensor(feat[1][0]).view(1,-1))
                 x = _recursive_to(feat, device)
                 if args.rnnt_kd_data_collection_mode == "one_best_lattice":
-                    nbest_hyps = model.collect_soft_label_one_best_lattice(*x)
+                    nbest_hyps = model.collect_soft_label_one_best_lattice(*x, rnnlm, lm_weight)
                 elif args.rnnt_kd_data_collection_mode == "reduced_lattice":
                     print("Collecting reduced lattice")
                     reduced_lattice = model.collect_soft_label_reduced_lattice(*x)

@@ -289,6 +289,12 @@ def get_parser():
         help="If true, pseudo transcription will be written. Only set this to true when using unlabelled data"
     )
     parser.add_argument(
+        "--lm-fusion-kd",
+        type=strtobool,
+        default=False,
+        help="If true, store shallow fused prob with LM integration"
+    )
+    parser.add_argument(
         "--kd-json-label",
         type=str,
         help="Name of the kd json file"

@@ -35,6 +35,7 @@ class BeamSearchTransducer:
         score_norm: bool = True,
         nbest: int = 1,
         collect_kd_data = False,
+        lm_fusion_kd=False,
     ):
         """Initialize transducer beam search.
 
@@ -80,7 +81,7 @@ class BeamSearchTransducer:
             self.use_lm = True
             self.is_wordlm = True if hasattr(lm.predictor, "wordlm") else False
             self.lm_predictor = lm.predictor.wordlm if self.is_wordlm else lm.predictor
-            self.lm_layers = len(self.lm_predictor.rnn)
+            self.lm_layers = len(self.lm_predictor.rnn) if hasattr(lm.predictor, "rnn") else None
         else:
             self.use_lm = False
 
@@ -92,6 +93,10 @@ class BeamSearchTransducer:
 
         self.nbest = nbest
         self.collect_kd_data = collect_kd_data
+        self.lm_fusion_kd = lm_fusion_kd
+        if self.lm_fusion_kd:
+            assert self.collect_kd_data == True, "lm fusion kd should only be used when collecting kd data"
+
 
     def __call__(self, h: torch.Tensor) -> Union[List[Hypothesis], List[NSCHypothesis]]:
         """Perform beam search.
@@ -190,7 +195,9 @@ class BeamSearchTransducer:
 
                 y, state, lm_tokens = self.decoder.score(max_hyp, cache)
                 if self.collect_kd_data:
-                    ytu_logit = self.joint_network(hi, y).cpu().numpy()
+                    ytu_logit = self.joint_network(hi, y)#.cpu().numpy()
+                    if self.lm_fusion_kd:
+                        ytu_logit = self.joint_network(hi, y).softmax(0)#.cpu().numpy() # when using lm_fusion_kd, store the probability instead of logits
                 ytu = torch.log_softmax(self.joint_network(hi, y), dim=-1)
                 top_k = ytu[1:].topk(beam_k, dim=-1)
 
@@ -201,7 +208,7 @@ class BeamSearchTransducer:
                         dec_state=max_hyp.dec_state,
                         lm_state=max_hyp.lm_state,
                         yseq_with_blank=(max_hyp.yseq_with_blank + [self.blank]) if self.collect_kd_data else None,
-                        yseq_with_blank_pr = (max_hyp.yseq_with_blank_pr + [ytu_logit]) if self.collect_kd_data else None,
+                        yseq_with_blank_pr = (max_hyp.yseq_with_blank_pr + [ytu_logit.cpu().numpy()]) if self.collect_kd_data else None,
                     )
                 )
 
@@ -210,11 +217,18 @@ class BeamSearchTransducer:
                 else:
                     lm_state = max_hyp.lm_state
 
+
                 for logp, k in zip(*top_k):
                     score = max_hyp.score + float(logp)
 
                     if self.use_lm:
-                        score += self.lm_weight * lm_scores[0][k + 1]
+                        score += self.lm_weight * lm_scores[0][k + 1] # lm scores are log probability!!
+                    if self.lm_fusion_kd:
+                        #ytu_logit = torch.from_numpy(ytu_logit).float()
+                        current_pr = ytu_logit + self.lm_weight * torch.softmax(lm_scores[0],0)
+                        current_pr = (current_pr/(1.0+self.lm_weight)).cpu().numpy() # renormalise
+                    else:
+                        current_pr = ytu_logit
 
                     hyps.append(
                         Hypothesis(
@@ -223,7 +237,7 @@ class BeamSearchTransducer:
                             dec_state=state,
                             lm_state=lm_state,
                             yseq_with_blank=(max_hyp.yseq_with_blank + [int(k + 1)]) if self.collect_kd_data else None,
-                            yseq_with_blank_pr=(max_hyp.yseq_with_blank_pr + [ytu_logit]) if self.collect_kd_data else None,
+                            yseq_with_blank_pr=(max_hyp.yseq_with_blank_pr + [current_pr]) if self.collect_kd_data else None,
                         )
                     )
 

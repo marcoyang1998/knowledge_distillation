@@ -421,6 +421,7 @@ class E2E(ASRInterface, torch.nn.Module):
                 self.kd_mtl_factor = args.kd_mtl_factor
                 self.kd_temperature = args.kd_temperature
                 self.kd_mode = args.transducer_kd_mode
+                self.kd_prob_label = args.kd_prob_label
                 if self.kd_mode == "one_best_path":
                     self.kd_loss = self.kd_one_best_loss
                 elif self.kd_mode == "reduced_lattice":
@@ -454,6 +455,9 @@ class E2E(ASRInterface, torch.nn.Module):
         def CXE(target, predicted):
             return -(target * predicted.log_softmax(-1)).sum()
 
+        def CXE_prob(target, predicted):
+            return -(target * predicted.log(-1)).sum()
+
         bs = z.shape[0]
         #ys = [y[y != self.ignore_id] for y in ys_pad]
         t_list = [y[:, 0][y[:, 0] != self.ignore_id] for y in ys_pad_kd]
@@ -479,7 +483,10 @@ class E2E(ASRInterface, torch.nn.Module):
 
         ys_kd = torch.cat(ys_kd, dim=0)
         logits = torch.cat(logits, dim=0)
-        kd_loss = CXE(torch.softmax(ys_kd / self.kd_temperature, dim=-1), logits / self.kd_temperature)
+        if self.kd_prob_label:
+            kd_loss = CXE(ys_kd, logits)
+        else:
+            kd_loss = CXE(torch.softmax(ys_kd / self.kd_temperature, dim=-1), logits / self.kd_temperature)
 
         return kd_loss/bs
 
@@ -588,58 +595,6 @@ class E2E(ASRInterface, torch.nn.Module):
         #kd_loss = CXE(torch.softmax(ys_kd / self.kd_temperature, dim=-1), logits / self.kd_temperature)
 
         return kd_loss / bs
-
-    def shifted_one_best_path(self, z, pred_len, target_len, enc_T, ys_pad, ys_pad_kd, shift_step):
-        # return the list of one best path, with target
-        bs = z.shape[0]
-        # ys = [y[y != self.ignore_id] for y in ys_pad]
-        t_list = [y[:, 0][y[:, 0] != self.ignore_id] + shift_step for y in ys_pad_kd]
-        u_list = [y[:, 1][y[:, 1] != self.ignore_id] for y in ys_pad_kd]
-        kd_seq = [y[:, 2][y[:, 2] != self.ignore_id] for y in ys_pad_kd]
-        kd_seq_no_blank = [seq[seq > 0] for seq in kd_seq]
-        # for i in range(bs): assert torch.equal(ys[i], kd_seq_no_blank[i]), "ys: {}, kd: {}".format(ys[i],                                                                                                   kd_seq_no_blank[i])
-        # kd_seq_no_blank_len = [seq.size(0) for seq in kd_seq_no_blank]
-        min_T = [min(enc_T[i], torch.max(t_list[i]) + 1) for i in range(bs)]
-        t_mask = [l <= min_T[i] - 1 for i, l in enumerate(t_list)]
-        u_mask = [l <= target_len[i] for i, l in enumerate(u_list)]
-        mask = [t_mask[i] * u_mask[i] for i in range(bs)]
-        # for i in range(bs): assert target_len[i] == kd_seq_no_blank_len[i], "target: {}, kd: {}".format(ys[i], kd_seq_no_blank[i])
-
-        ys_kd = [y[y != self.ignore_id].view(-1, self.odim) for i, y in enumerate(ys_pad_kd[:, :, 3:])]
-        ys_kd = [y[mask[i]] for i, y in enumerate(ys_kd)]
-        u_list = [l[mask[i]] for i, l in enumerate(u_list)]
-        t_list = [l[mask[i]] for i, l in enumerate(t_list)]
-
-        logits = [lattice[t_list[i].long(), u_list[i].long(), :] for i, lattice in enumerate(z)]
-        #ys_kd = torch.cat(ys_kd, dim=0)
-        #logits = torch.cat(logits, dim=0)
-
-        return ys_kd, logits
-
-    def shifted_one_best_path_loss(self, z, pred_len, target_len, enc_T, ys_pad, ys_pad_kd):
-        # currently only supports window size 3
-        bs = z.size(0)
-
-        ys_kd_list = []
-        logits_list = []
-        shift_steps = [self.shift_step - 1, self.shift_step, self.shift_step + 1]
-        for shift_step in shift_steps:
-            ys_kd, logits = self.shifted_one_best_path(z, pred_len, target_len, enc_T, ys_pad, ys_pad_kd, shift_step)
-            ys_kd_list.append(ys_kd)
-            logits_list.append(logits)
-        print("Checking")
-        min_kd_len = [ys_kd_list[-1][b].size(0) for b in range(bs)]
-        for b in range(bs):
-            ys_kd_list[0][b] = ys_kd_list[0][b][2:]
-            ys_kd_list[1][b] = ys_kd_list[1][b][1:]
-        length_diff = [ys_kd_list[0][b].size(0) - ys_kd_list[-1][b].size(0) for b in range(bs)]
-        truncate_end = [l-2 for l in length_diff]
-        min_len = [min(ys_kd_list[0][b].size(0),ys_kd_list[1][b].size(0),ys_kd_list[2][b].size(0)) for b in range(bs)]
-        #for i in range()
-
-        return
-
-
 
     def forward(self, xs_pad, ilens, ys_pad):
         """E2E forward.
@@ -920,8 +875,12 @@ class E2E(ASRInterface, torch.nn.Module):
 
         return [asdict(n) for n in nbest_hyps]
 
-    def collect_soft_label_one_best_lattice(self, xs_pad, ilens, ys_pad):
+    def collect_soft_label_one_best_lattice(self, xs_pad, ilens, ys_pad, lm=None, lm_weight=0.0):
         self.eval()
+        if lm is not None:
+            use_lm = True
+        else:
+            use_lm = False
         xs_pad = xs_pad[:, : max(ilens)]
         if "custom" in self.etype:
             src_mask = make_non_pad_mask(ilens.tolist()).to(xs_pad.device).unsqueeze(-2)
@@ -950,15 +909,32 @@ class E2E(ASRInterface, torch.nn.Module):
         u = 0
         t = 0
         score = 0.0
+        lm_state = None
+        i = 0
+        prev_token = torch.full((1, ), 0, dtype=torch.long, device=xs_pad.device)
+        lm_state, lm_scores = lm.predict(lm_state, prev_token)
         while True:
             k = torch.argmax(z[0,t,u,:], dim=-1)
             log_pr = torch.max(z[0,t,u,:].softmax(dim=-1), dim=-1)[0].log()
             score += log_pr
             one_best_path.append(k)
-            one_best_path_pr.append(z[0,t,u,:])
-            if k == 0:
-                t += 1
+            if use_lm:
+                if k == 0: # blank symbol
+                    pass # no change of lm_state and lm_score
+                else: # update lm score
+                    lm_state, lm_scores = lm.predict(lm_state, prev_token)
+                    prev_token = torch.full((1, ), k, dtype=torch.long, device=xs_pad.device)
+                if i > 0:
+                    normalised = (z[0, t, u, :].softmax(0) + lm_weight*lm_scores[0].softmax(0)) / (1 +lm_weight)
+                else:
+                    normalised = z[0, t, u, :].softmax(0)
+                    i += 1
+                one_best_path_pr.append(normalised)
             else:
+                one_best_path_pr.append(z[0, t, u, :])
+            if k == 0: # output a blank symbol
+                t += 1
+            else: # output one symbol
                 u += 1
             if t >= z.shape[1]:
                 break

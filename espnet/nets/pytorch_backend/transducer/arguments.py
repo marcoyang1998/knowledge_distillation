@@ -326,6 +326,12 @@ def add_auxiliary_task_arguments(group):
         help="knowledge distillation mode",
     )
     group.add_argument(
+        "--kd-prob-label",
+        default=False,
+        type=strtobool,
+        help="kd label in logits form or prob form"
+    )
+    group.add_argument(
         "--shift-step",
         type=int,
         help="Used with shifted_one_best_path, number of right shift of the teacher one best path"
