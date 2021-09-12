@@ -223,12 +223,12 @@ class BeamSearchTransducer:
 
                     if self.use_lm:
                         score += self.lm_weight * lm_scores[0][k + 1] # lm scores are log probability!!
-                    if self.lm_fusion_kd:
-                        #ytu_logit = torch.from_numpy(ytu_logit).float()
-                        current_pr = ytu_logit + self.lm_weight * torch.softmax(lm_scores[0],0)
-                        current_pr = (current_pr/(1.0+self.lm_weight)).cpu().numpy() # renormalise
-                    else:
-                        current_pr = ytu_logit
+                        if self.lm_fusion_kd:
+                            #ytu_logit = torch.from_numpy(ytu_logit).float()
+                            current_pr = ytu_logit + self.lm_weight * torch.softmax(lm_scores[0],0)
+                            current_pr = (current_pr/(1.0+self.lm_weight)).cpu().numpy() # renormalise
+                        else:
+                            current_pr = ytu_logit
 
                     hyps.append(
                         Hypothesis(
