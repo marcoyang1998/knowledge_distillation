@@ -208,7 +208,7 @@ class BeamSearchTransducer:
                         dec_state=max_hyp.dec_state,
                         lm_state=max_hyp.lm_state,
                         yseq_with_blank=(max_hyp.yseq_with_blank + [self.blank]) if self.collect_kd_data else None,
-                        yseq_with_blank_pr = (max_hyp.yseq_with_blank_pr + [ytu_logit.cpu().numpy()]) if self.collect_kd_data else None,
+                        yseq_with_blank_pr = (max_hyp.yseq_with_blank_pr + [ytu.cpu().numpy()]) if self.collect_kd_data else None,
                     )
                 )
 
@@ -223,12 +223,12 @@ class BeamSearchTransducer:
 
                     if self.use_lm:
                         score += self.lm_weight * lm_scores[0][k + 1] # lm scores are log probability!!
-                        if self.lm_fusion_kd:
-                            #ytu_logit = torch.from_numpy(ytu_logit).float()
-                            current_pr = ytu_logit + self.lm_weight * torch.softmax(lm_scores[0],0)
-                            current_pr = (current_pr/(1.0+self.lm_weight)).cpu().numpy() # renormalise
-                        else:
-                            current_pr = ytu_logit
+                        #if self.lm_fusion_kd:
+                        #    #ytu_logit = torch.from_numpy(ytu_logit).float()
+                        #    current_pr = ytu_logit + self.lm_weight * torch.softmax(lm_scores[0],0)
+                        #    current_pr = (current_pr/(1.0+self.lm_weight)).cpu().numpy() # renormalise
+                        #else:
+                        #    current_pr = ytu_logit
 
                     hyps.append(
                         Hypothesis(
@@ -237,7 +237,7 @@ class BeamSearchTransducer:
                             dec_state=state,
                             lm_state=lm_state,
                             yseq_with_blank=(max_hyp.yseq_with_blank + [int(k + 1)]) if self.collect_kd_data else None,
-                            yseq_with_blank_pr=(max_hyp.yseq_with_blank_pr + [current_pr]) if self.collect_kd_data else None,
+                            yseq_with_blank_pr=(max_hyp.yseq_with_blank_pr + [(ytu+self.lm_weight*lm_scores[0]).cpu().numpy()]) if self.collect_kd_data else None,
                         )
                     )
 
