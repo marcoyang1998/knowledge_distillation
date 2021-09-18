@@ -925,9 +925,9 @@ class E2E(ASRInterface, torch.nn.Module):
                     lm_state, lm_scores = lm.predict(lm_state, prev_token)
                     prev_token = torch.full((1, ), k, dtype=torch.long, device=xs_pad.device)
                 if i > 0:
-                    normalised = (z[0, t, u, :].softmax(0) + lm_weight*lm_scores[0].softmax(0)) / (1 +lm_weight)
+                    normalised = (z[0, t, u, :].log_softmax(0) + lm_weight*lm_scores[0]) / (1 +lm_weight)
                 else:
-                    normalised = z[0, t, u, :].softmax(0)
+                    normalised = z[0, t, u, :].log_softmax(0)
                     i += 1
                 one_best_path_pr.append(normalised)
             else:
