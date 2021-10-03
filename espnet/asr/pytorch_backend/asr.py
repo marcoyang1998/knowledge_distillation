@@ -226,10 +226,10 @@ class CustomUpdater(StandardUpdater):
                 loss = self.model(*x).mean() / self.accum_grad
         elif self.ngpu == 1:
             if self.do_kd:
-                #loss = self.model.forward_kd(*x).mean() / self.accum_grad
-                loss = (
-                        data_parallel(self.model, x, range(self.ngpu)).mean() / self.accum_grad
-                )
+                loss = self.model.forward_kd(*x).mean() / self.accum_grad
+                #loss = (
+                #        data_parallel(self.model, x, range(self.ngpu)).mean() / self.accum_grad
+                #)
             else:
                 loss = self.model(*x).mean() / self.accum_grad
         else:
