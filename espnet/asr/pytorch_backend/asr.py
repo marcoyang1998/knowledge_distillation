@@ -226,13 +226,16 @@ class CustomUpdater(StandardUpdater):
                 loss = self.model(*x).mean() / self.accum_grad
         elif self.ngpu == 1:
             if self.do_kd:
-                loss = self.model.forward_kd(*x).mean() / self.accum_grad
+                #loss = self.model.forward_kd(*x).mean() / self.accum_grad
+                loss = (
+                        data_parallel(self.model, x, range(self.ngpu)).mean() / self.accum_grad
+                )
             else:
                 loss = self.model(*x).mean() / self.accum_grad
         else:
             # apex does not support torch.nn.DataParallel
-            if self.do_kd:
-                raise NotImplementedError("KD does not support multi gpu!")
+            #if self.do_kd:
+            #    raise NotImplementedError("KD does not support multi gpu!")
             loss = (
                 data_parallel(self.model, x, range(self.ngpu)).mean() / self.accum_grad
             )
@@ -1777,6 +1780,149 @@ def collect_soft_labels(args):
                 torch.cuda.empty_cache()
                 gc.collect()
 
+def collect_rnnlm_blank_logit(args):
+    print("----Starting collecting rnnlm blank logit----")
+    set_deterministic_pytorch(args)
+    assert args.word_rnnlm == None, "Soft-label collection does not support word_rnnlm"
+    model, train_args = load_trained_model(args.model, training=False)
+    assert args.rnnlm is not None
+    lm_weight = args.lm_weight
+    rnnlm_args = get_model_conf(args.rnnlm, args.rnnlm_conf)
+    rnnlm = lm_pytorch.ClassifierWithState(
+        lm_pytorch.RNNLM(
+            len(train_args.char_list),
+            rnnlm_args.layer,
+            rnnlm_args.unit,
+            getattr(rnnlm_args, "embed_unit", None),  # for backward compatibility
+        )
+    )
+    torch_load(args.rnnlm, rnnlm)
+    rnnlm.eval()
+
+    if args.ngpu == 1:
+        gpu_id = list(range(args.ngpu))
+        logging.info("gpu id: " + str(gpu_id))
+        model.cuda()
+        if rnnlm:
+            rnnlm.cuda()
+        device = "cuda"
+    else:
+        device = "cpu"
+    with open(args.recog_json, "rb") as f:
+        js = json.load(f)["utts"]
+
+    is_rnnt = hasattr(model, "joint_network")
+    load_inputs_and_targets = LoadInputsAndTargets(
+        mode="asr_kd",
+        load_output=True,
+        sort_in_input_length=False,
+        preprocess_conf=train_args.preprocess_conf
+        if args.preprocess_conf is None
+        else args.preprocess_conf,
+        keep_all_data_on_mem=False,
+        preprocess_args={"train": False},
+    )
+    assert args.batchsize == 0, 'Only support collection with bs=0'
+    with torch.no_grad():
+        for idx, name in enumerate(js.keys(), 1):
+            region = name.split('-')[0]
+            spkr = '-'.join(name.split('-')[:-1])
+            output_dir = os.path.join(args.rnnlm_blank_logit_dir, region, spkr)
+            if not os.path.isdir(output_dir):
+                os.makedirs(output_dir)
+            batch = [(name, js[name])]
+            feat = load_inputs_and_targets(batch)
+            yseq = feat[1][0]
+            npy_file = js[name]['output'][1]['feat']
+            d = np.load(npy_file)
+            if d.shape[-1] == 261:
+                token_list = d[:, 2]
+            else:
+                token_list = d[:, 0]
+            lm_state = None
+            total_len = token_list.shape[0]
+            prev_token = torch.full((1, ), 0, dtype=torch.long, device=device)
+            lm_state, lm_scores = rnnlm.predict(lm_state, prev_token)
+            blank_logit = []
+            for i in range(total_len):
+                if token_list[i] == 0:
+                    blank_logit.append(lm_scores[0][0].cpu().numpy())
+                else:
+                    prev_token = torch.full((1, ), token_list[i], dtype=torch.long, device=device)
+                    blank_logit.append(lm_scores[0][0].cpu().numpy())
+                    lm_state, lm_scores = rnnlm.predict(lm_state, prev_token)
+            with open(os.path.join(output_dir, name+'.npy'), 'wb') as f:
+                np.save(f, np.array(blank_logit))
+            del d
+            #print(blank_logit)
+
+def collect_rnnlm_logit(args):
+    print("----Starting collecting rnnlm logit----")
+    set_deterministic_pytorch(args)
+    assert args.word_rnnlm == None, "Soft-label collection does not support word_rnnlm"
+    model, train_args = load_trained_model(args.model, training=False)
+    assert args.rnnlm is not None
+    lm_weight = args.lm_weight
+    rnnlm_args = get_model_conf(args.rnnlm, args.rnnlm_conf)
+    rnnlm = lm_pytorch.ClassifierWithState(
+        lm_pytorch.RNNLM(
+            len(train_args.char_list),
+            rnnlm_args.layer,
+            rnnlm_args.unit,
+            getattr(rnnlm_args, "embed_unit", None),  # for backward compatibility
+        )
+    )
+    torch_load(args.rnnlm, rnnlm)
+    rnnlm.eval()
+
+    if args.ngpu == 1:
+        gpu_id = list(range(args.ngpu))
+        logging.info("gpu id: " + str(gpu_id))
+        model.cuda()
+        if rnnlm:
+            rnnlm.cuda()
+        device = "cuda"
+    else:
+        device = "cpu"
+    with open(args.recog_json, "rb") as f:
+        js = json.load(f)["utts"]
+
+    is_rnnt = hasattr(model, "joint_network")
+    load_inputs_and_targets = LoadInputsAndTargets(
+        mode="asr_kd",
+        load_output=True,
+        sort_in_input_length=False,
+        preprocess_conf=train_args.preprocess_conf
+        if args.preprocess_conf is None
+        else args.preprocess_conf,
+        keep_all_data_on_mem=False,
+        preprocess_args={"train": False},
+    )
+    assert args.batchsize == 0, 'Only support collection with bs=0'
+    with torch.no_grad():
+        for idx, name in enumerate(js.keys(), 1):
+            region = name.split('-')[0]
+            spkr = '-'.join(name.split('-')[:-1])
+            output_dir = os.path.join(args.rnnlm_logit_dir, region, spkr)
+            if not os.path.isdir(output_dir):
+                os.makedirs(output_dir)
+            batch = [(name, js[name])]
+            feat = load_inputs_and_targets(batch)
+            yseq = feat[1][0]
+            #npy_file = js[name]['output'][1]['feat']
+
+            lm_state = None
+            #total_len = token_list.shape[0]
+            prev_token = torch.full((1, ), 0, dtype=torch.long, device=device)
+            lm_state, lm_scores = rnnlm.predict(lm_state, prev_token)
+            logits = []
+            logits.append(lm_scores[0].cpu().numpy())
+            for token in yseq:
+                prev_token = torch.full((1,), token, dtype=torch.long, device=device)
+                lm_state, lm_scores = rnnlm.predict(lm_state, prev_token)
+                logits.append(lm_scores[0].cpu().numpy())
+            with open(os.path.join(output_dir, name+'.npy'), 'wb') as f:
+                np.save(f, np.array(logits))
 
 def ctc_align(args):
     """CTC forced alignments with the given args.

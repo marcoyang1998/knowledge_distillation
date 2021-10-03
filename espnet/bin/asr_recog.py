@@ -289,6 +289,28 @@ def get_parser():
         help="If true, pseudo transcription will be written. Only set this to true when using unlabelled data"
     )
     parser.add_argument(
+        "--collect-rnnlm-blank",
+        type=strtobool,
+        default=False,
+        help="collect rnnlm blank logit"
+    )
+    parser.add_argument(
+        "--rnnlm-blank-logit-dir",
+        type=str,
+        help="where to store the blank logit"
+    )
+    parser.add_argument(
+        "--collect-rnnlm-logit",
+        type=strtobool,
+        default=False,
+        help="collect rnnlm logit"
+    )
+    parser.add_argument(
+        "--rnnlm-logit-dir",
+        type=str,
+        help="where to store the blank logit"
+    )
+    parser.add_argument(
         "--lm-fusion-kd",
         type=strtobool,
         default=False,
@@ -378,6 +400,14 @@ def main(args):
                     from espnet.asr.pytorch_backend.asr import collect_soft_labels
                     logging.info("Do label collection")
                     collect_soft_labels(args)
+                elif args.collect_rnnlm_blank:
+                    from espnet.asr.pytorch_backend.asr import collect_rnnlm_blank_logit
+                    logging.info("Do rnnlm blank logit collection")
+                    collect_rnnlm_blank_logit(args)
+                elif args.collect_rnnlm_logit:
+                    from espnet.asr.pytorch_backend.asr import collect_rnnlm_logit
+                    logging.info("Do rnnlm logit collection")
+                    collect_rnnlm_logit(args)
                 else:
                     from espnet.asr.pytorch_backend.asr import recog
 
