@@ -76,3 +76,5 @@ tools/speech_tools*
 tools/phonemizer*
 
 ci/*
+tools/fairseq
+tools/installers/install*.sh

@@ -63,6 +63,7 @@ predefined_lms = {
         "default": "espnet.nets.pytorch_backend.lm.default:DefaultRNNLM",
         "seq_rnn": "espnet.nets.pytorch_backend.lm.seq_rnn:SequentialRNNLM",
         "transformer": "espnet.nets.pytorch_backend.lm.transformer:TransformerLM",
+        "GPT2": "espnet.nets.pytorch_backend.lm.gpt:GPT2LM"
     },
     "chainer": {"default": "espnet.lm.chainer_backend.lm:DefaultRNNLM"},
 }

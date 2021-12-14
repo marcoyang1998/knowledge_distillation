@@ -1,0 +1,23 @@
+# GPT2 LM
+
+# network architecture
+model-module: GPT2
+pretrained-gpt2-path: /home/seekingeta/marcoyang/gpt-2-Pytorch
+pos-enc: none
+
+
+# minibatch related
+batchsize: 32
+maxlen: 40
+
+# optimization related
+opt: adam
+schedulers: lr=cosine
+dropout-rate: 0.0
+epoch: 50
+gradclip: 1.0
+lr: 1e-4
+lr-cosine-total: 100000
+lr-cosine-warmup: 1000
+patience: 0
+sortagrad: 0
