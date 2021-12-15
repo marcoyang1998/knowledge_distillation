@@ -78,7 +78,8 @@ class GPT2LM(nn.Module, LMInterface):
         
     def forward(
         self, x: torch.Tensor, t: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    ):
+        # output typing -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]
         #print(x.shape)
         xm = x != 0
         if self.embed_drop is not None:
@@ -103,7 +104,19 @@ class GPT2LM(nn.Module, LMInterface):
         
         return logp / count, logp, count
 
-    def score(self, y: torch.Tensor, state: Any, x: torch.Tensor) -> Tuple[torch.Tensor, Any]:
+    def forward_LM_with_state(self, state, x):
+        # state: pats_key_value
+        # x: next_token
+        #output_dict = {}
+        transformer_outputs = self.encoder(input_ids=x, past_key_values=state)
+        hidden_states = transformer_outputs[0]
+        lm_logits = self.decoder(hidden_states)
+        #loss = 0
+        #output_dict['past_key_values'] = transformer_outputs.past_key_values
+        return transformer_outputs.past_key_values, lm_logits[-1].unsqueeze(0)       
+    
+    def score(self, y: torch.Tensor, state: Any, x: torch.Tensor):
+        # output:  -> Tuple[torch.Tensor, Any]
         return super().score(y, state, x)
     
     def batch_score(self):

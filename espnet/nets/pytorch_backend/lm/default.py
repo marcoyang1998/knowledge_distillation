@@ -169,21 +169,21 @@ class DefaultRNNLM(BatchScorerInterface, LMInterface, nn.Module):
     # batch beam search API (see BatchScorerInterface)
     def batch_score(
         self, ys: torch.Tensor, states: List[Any], xs: torch.Tensor
-    ) -> Tuple[torch.Tensor, List[Any]]:
-        """Score new token batch.
+):
+        
+        # Score new token batch.
+        # return  -> Tuple[torch.Tensor, List[Any]]    
+        # Args:
+        #    ys (torch.Tensor): torch.int64 prefix tokens (n_batch, ylen).
+        #    states (List[Any]): Scorer states for prefix tokens.
+        #    xs (torch.Tensor):
+        #        The encoder feature that generates ys (n_batch, xlen, n_feat).
 
-        Args:
-            ys (torch.Tensor): torch.int64 prefix tokens (n_batch, ylen).
-            states (List[Any]): Scorer states for prefix tokens.
-            xs (torch.Tensor):
-                The encoder feature that generates ys (n_batch, xlen, n_feat).
-
-        Returns:
-            tuple[torch.Tensor, List[Any]]: Tuple of
-                batchfied scores for next token with shape of `(n_batch, n_vocab)`
-                and next state list for ys.
-
-        """
+        #Returns:
+        #    tuple[torch.Tensor, List[Any]]: Tuple of
+        #        batchfied scores for next token with shape of `(n_batch, n_vocab)`
+        #        and next state list for ys.
+        #'''
         # merge states
         n_batch = len(ys)
         n_layers = self.model.predictor.n_layers
@@ -290,7 +290,10 @@ class ClassifierWithState(nn.Module):
         if hasattr(self.predictor, "normalized") and self.predictor.normalized:
             return self.predictor(state, x)
         else:
-            state, z = self.predictor(state, x)
+            if hasattr(self.predictor, "forward_LM_with_state"):
+                state, z = self.predictor.forward_LM_with_state(state, x)
+            else:
+                state, z = self.predictor(state, x)
             return state, F.log_softmax(z, dim=1)
 
     def buff_predict(self, state, x, n):
@@ -429,3 +432,9 @@ class RNNLM(nn.Module):
             state = {"h": h}
         y = self.lo(self.dropout[-1](h[-1]))
         return state, y
+
+
+class GPT2LMpredictor(nn.Module):
+    def __init__(self):
+        super().__init__()
+        pass

@@ -875,12 +875,7 @@ class E2E(ASRInterface, torch.nn.Module):
 
         return [asdict(n) for n in nbest_hyps]
 
-    def collect_soft_label_one_best_lattice(self, xs_pad, ilens, ys_pad, lm=None, lm_weight=0.0):
-        self.eval()
-        if lm is not None:
-            use_lm = True
-        else:
-            use_lm = False
+    def get_joint_network_output(self, xs_pad, ys_pad, ilens):
         xs_pad = xs_pad[:, : max(ilens)]
         if "custom" in self.etype:
             src_mask = make_non_pad_mask(ilens.tolist()).to(xs_pad.device).unsqueeze(-2)
@@ -904,6 +899,15 @@ class E2E(ASRInterface, torch.nn.Module):
         else:
             pred_pad = self.dec(hs_pad, ys_in_pad)
         z = self.joint_network(hs_pad.unsqueeze(2), pred_pad.unsqueeze(1))
+        return z
+
+    def collect_soft_label_one_best_lattice(self, xs_pad, ilens, ys_pad, lm=None, lm_weight=0.0):
+        self.eval()
+        if lm is not None:
+            use_lm = True
+        else:
+            use_lm = False
+        z = self.get_joint_network_output(xs_pad, ys_pad, ilens)
         one_best_path = [0]
         one_best_path_pr = []
         u = 0
@@ -911,7 +915,8 @@ class E2E(ASRInterface, torch.nn.Module):
         score = 0.0
         lm_state = None
         i = 0
-        prev_token = torch.full((1, ), 0, dtype=torch.long, device=xs_pad.device)
+        #prev_token = torch.full((1, ), 0, dtype=torch.long, device=xs_pad.device)
+        prev_token = torch.full((1, ), self.sos, dtype=torch.long, device=xs_pad.device)
         lm_state, lm_scores = lm.predict(lm_state, prev_token)
         while True:
             k = torch.argmax(z[0,t,u,:], dim=-1)
@@ -925,7 +930,7 @@ class E2E(ASRInterface, torch.nn.Module):
                     lm_state, lm_scores = lm.predict(lm_state, prev_token)
                     prev_token = torch.full((1, ), k, dtype=torch.long, device=xs_pad.device)
                 if i > 0:
-                    normalised = (z[0, t, u, :].log_softmax(0) + lm_weight*lm_scores[0]) / (1 +lm_weight)
+                    normalised = (z[0, t, u, :].log_softmax(0) + lm_weight*lm_scores[0])
                 else:
                     normalised = z[0, t, u, :].log_softmax(0)
                     i += 1
