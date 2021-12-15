@@ -925,16 +925,20 @@ class E2E(ASRInterface, torch.nn.Module):
             one_best_path.append(k)
             if use_lm:
                 if k == 0: # blank symbol
+                    lm_fused_logit = z[0, t, u, :].log_softmax(0) + lm_weight*lm_scores[0]
+                    one_best_path_pr.append(lm_fused_logit)
                     pass # no change of lm_state and lm_score
                 else: # update lm score
-                    lm_state, lm_scores = lm.predict(lm_state, prev_token)
+                    lm_fused_logit = z[0, t, u, :].log_softmax(0) + lm_weight*lm_scores[0]
+                    one_best_path_pr.append(lm_fused_logit)
                     prev_token = torch.full((1, ), k, dtype=torch.long, device=xs_pad.device)
-                if i > 0:
-                    normalised = (z[0, t, u, :].log_softmax(0) + lm_weight*lm_scores[0])
-                else:
-                    normalised = z[0, t, u, :].log_softmax(0)
-                    i += 1
-                one_best_path_pr.append(normalised)
+                    lm_state, lm_scores = lm.predict(lm_state, prev_token)
+                #if i > 0:
+                #normalised = (z[0, t, u, :].log_softmax(0) + lm_weight*lm_scores[0])
+                #else:
+                #    normalised = z[0, t, u, :].log_softmax(0)
+                #    i += 1
+                #one_best_path_pr.append(normalised)
             else:
                 one_best_path_pr.append(z[0, t, u, :])
             if k == 0: # output a blank symbol
