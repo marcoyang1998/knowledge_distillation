@@ -1648,12 +1648,24 @@ def collect_soft_labels(args):
         
         from espnet.nets.lm_interface import dynamic_import_lm
         lm_model_module = getattr(rnnlm_args, "model_module", "default")
-        lm_class = dynamic_import_lm(lm_model_module, rnnlm_args.backend)
-        lm = lm_class(len(train_args.char_list), rnnlm_args)
-        torch_load(args.rnnlm, lm)
-        rnnlm = lm_pytorch.ClassifierWithState(lm)
+        if lm_model_module != "default":
+            lm_class = dynamic_import_lm(lm_model_module, rnnlm_args.backend)
+            lm = lm_class(len(train_args.char_list), rnnlm_args)
+            torch_load(args.rnnlm, lm)
+            rnnlm = lm_pytorch.ClassifierWithState(lm)
             #torch_load(args.rnnlm, lm)
-        rnnlm.eval()
+            rnnlm.eval()
+        else:
+            rnnlm = lm_pytorch.ClassifierWithState(
+                lm_pytorch.RNNLM(
+                    len(train_args.char_list),
+                    rnnlm_args.layer,
+                    rnnlm_args.unit,
+                    getattr(rnnlm_args, "embed_unit", None),  # for backward compatibility
+                )
+            )
+            torch_load(args.rnnlm, rnnlm)
+            rnnlm.eval()
     else:
         rnnlm=None
         lm_weight = 0
