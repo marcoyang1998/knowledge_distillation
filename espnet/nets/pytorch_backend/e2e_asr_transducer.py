@@ -916,8 +916,9 @@ class E2E(ASRInterface, torch.nn.Module):
         lm_state = None
         i = 0
         #prev_token = torch.full((1, ), 0, dtype=torch.long, device=xs_pad.device)
-        prev_token = torch.full((1, ), self.sos, dtype=torch.long, device=xs_pad.device)
-        lm_state, lm_scores = lm.predict(lm_state, prev_token)
+        prev_token = torch.full((1, ), 0, dtype=torch.long, device=xs_pad.device)
+        if use_lm:
+            lm_state, lm_scores = lm.predict(lm_state, prev_token)
         while True:
             k = torch.argmax(z[0,t,u,:], dim=-1)
             log_pr = torch.max(z[0,t,u,:].softmax(dim=-1), dim=-1)[0].log()
@@ -940,7 +941,7 @@ class E2E(ASRInterface, torch.nn.Module):
                 #    i += 1
                 #one_best_path_pr.append(normalised)
             else:
-                one_best_path_pr.append(z[0, t, u, :])
+                one_best_path_pr.append(z[0, t, u, :].log_softmax(0))
             if k == 0: # output a blank symbol
                 t += 1
             else: # output one symbol
