@@ -184,6 +184,12 @@ def get_parser(parser=None, required=True):
         help="model defined module "
         "(default: espnet.nets.xxx_backend.lm.default:DefaultRNNLM)",
     )
+    parser.add_argument(
+        "--save-interval-iters",
+        default=0,
+        type=int,
+        help="Save snapshot interval iterations",
+    )
     return parser
 
 

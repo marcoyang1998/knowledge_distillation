@@ -368,6 +368,11 @@ def train(args):
     # Save best models
     trainer.extend(torch_snapshot(filename="snapshot.ep.{.updater.epoch}"))
     trainer.extend(snapshot_object(model, "rnnlm.model.{.updater.epoch}"))
+    if args.save_interval_iters > 0:
+        trainer.extend(
+            torch_snapshot(filename="snapshot.iter.{.updater.iteration}"),
+            trigger=(args.save_interval_iters, "iteration"),
+        )
     # T.Hori: MinValueTrigger should be used, but it fails when resuming
     trainer.extend(MakeSymlinkToBestModel("validation/main/loss", "rnnlm.model"))
 
