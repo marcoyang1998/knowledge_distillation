@@ -64,7 +64,7 @@ class SchedulerInterface:
         args = fill_missing_args(args, add)
         return cls(key, args)
 
-    def scale(self, n_iter: int) -> float:
+    def scale(self, n_iter: int): # -> float:
         """Scale at `n_iter`.
 
         Args:
@@ -104,6 +104,26 @@ def dynamic_import_scheduler(module):
 
 
 @register_scheduler
+class LinearScheduler(SchedulerInterface):
+    alias = "linear"
+    
+    def _add_arguments(parser: _PrefixParser):
+        """Add scheduler args."""
+        parser.add_argument(
+            "--minscale", type=float, default=1e-3
+        )
+        parser.add_argument(
+            "--total", type=int, default=500000
+        )
+
+    def scale(self, n_iter):
+        return max(1 - n_iter/self.total, self.minscale)
+        
+    
+ 
+
+
+@register_scheduler
 class NoScheduler(SchedulerInterface):
     """Scheduler which does nothing."""
 
@@ -140,6 +160,8 @@ class NoamScheduler(SchedulerInterface):
     def scale(self, step):
         """Scale of lr."""
         step += 1  # because step starts from 0
+        lr = self.normalize * min(step ** -0.5, step * self.warmup ** -1.5)
+        print(f"lr scale at step {step}: {lr}")
         return self.normalize * min(step ** -0.5, step * self.warmup ** -1.5)
 
 
@@ -178,3 +200,6 @@ class CyclicCosineScheduler(SchedulerInterface):
         import math
 
         return 0.5 * (math.cos(math.pi * (n_iter - self.warmup) / self.total) + 1)
+
+
+   
