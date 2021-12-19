@@ -119,9 +119,6 @@ class LinearScheduler(SchedulerInterface):
     def scale(self, n_iter):
         return max(1 - n_iter/self.total, self.minscale)
         
-    
- 
-
 
 @register_scheduler
 class NoScheduler(SchedulerInterface):

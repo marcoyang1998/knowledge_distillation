@@ -901,6 +901,36 @@ class E2E(ASRInterface, torch.nn.Module):
         z = self.joint_network(hs_pad.unsqueeze(2), pred_pad.unsqueeze(1))
         return z
 
+    def get_one_best_lm_logits(self, ys_pad, lm):
+        prev_token = torch.full((1, ), self.sos, dtype=torch.long, device=ys_pad.device)
+        lm_states = None
+        lm_score_list = []
+        
+        lm_states , lm_scores = lm.predict(lm_states, prev_token)
+        lm_score_list.append(lm_scores[0])
+        
+        ys_pad = ys_pad.unsqueeze()
+        for token in ys_pad:
+            lm_score = lm.predict(lm_states, prev_token)
+            prev_token = token
+        
+        lm_score_list = lm_score_list[:-1]
+        
+        return torch.tensor(lm_score_list)
+    
+    def viterbi_decoding(self, xs_pad, ilens, ys_pad, lm=None, lm_weight=0.0):
+        self.eval()
+        if lm is not None:
+            use_lm = True
+        else:
+            use_lm = False
+        z = self.get_joint_network_output(xs_pad, ys_pad, ilens)
+        if use_lm:
+            lm_score = self.get_one_best_lm_logits(ys_pad, lm)*lm_weight
+            z = z + lm_score
+        
+         
+    
     def collect_soft_label_one_best_lattice(self, xs_pad, ilens, ys_pad, lm=None, lm_weight=0.0):
         self.eval()
         if lm is not None:
@@ -916,7 +946,7 @@ class E2E(ASRInterface, torch.nn.Module):
         lm_state = None
         i = 0
         #prev_token = torch.full((1, ), 0, dtype=torch.long, device=xs_pad.device)
-        prev_token = torch.full((1, ), 0, dtype=torch.long, device=xs_pad.device)
+        prev_token = torch.full((1, ), self.sos, dtype=torch.long, device=xs_pad.device)
         if use_lm:
             lm_state, lm_scores = lm.predict(lm_state, prev_token)
         while True:
