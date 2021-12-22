@@ -117,6 +117,8 @@ class LinearScheduler(SchedulerInterface):
         )
 
     def scale(self, n_iter):
+        if n_iter%100==0:
+            print(f'Scale: {max(1 - n_iter/self.total, self.minscale)} at {n_iter}')
         return max(1 - n_iter/self.total, self.minscale)
         
 

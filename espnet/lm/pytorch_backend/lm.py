@@ -383,7 +383,7 @@ def train(args):
         )
     if args.resume:
         logging.info("resumed from %s" % args.resume)
-        torch_resume(args.resume, trainer)
+        torch_resume(args.resume, trainer, load_trainer=True)
 
     set_early_stop(trainer, args, is_lm=True)
     if args.tensorboard_dir is not None and args.tensorboard_dir != "":
