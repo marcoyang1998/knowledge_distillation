@@ -21,6 +21,7 @@ from espnet import __version__
 from espnet.nets.lm_interface import dynamic_import_lm
 from espnet.optimizer.factory import dynamic_import_optimizer
 from espnet.scheduler.scheduler import dynamic_import_scheduler
+from espnet.utils.cli_utils import strtobool
 
 
 # NOTE: you need this func to generate our sphinx doc
@@ -196,6 +197,17 @@ def get_parser(parser=None, required=True):
         type=int,
         help="Save snapshot interval iterations",
     )
+    parser.add_argument(
+        "--evaluate-lm",
+        default=False,
+        type=strtobool,
+        help="Evaluate a trained LM",
+    )
+    parser.add_argument(
+        "--evaluate-lm-dir",
+        type=str,
+        help="Path to the LM to be evaluated",
+    )
     return parser
 
 
@@ -282,6 +294,11 @@ def main(cmd_args):
     args.char_list_dict = {x: i for i, x in enumerate(char_list)}
     args.n_vocab = len(char_list)
 
+    if args.evaluate_lm:
+        from espnet.lm.pytorch_backend.lm import evaluate
+        
+        evaluate(args)
+        return
     # train
     logging.info("backend = " + args.backend)
     if args.backend == "chainer":
