@@ -40,6 +40,9 @@ class GPT2LM(nn.Module, LMInterface):
         parser.add_argument(
             "--dropout-rate", type=float, default=0.5, help="dropout probability"
         )
+        parser.add_argument(
+            "--gpt2-seperate-finetuning", type=strtobool, default=False, help="a lower lr of lm head"
+        )
         return parser
     
     def __init__(self, n_vocab, args):

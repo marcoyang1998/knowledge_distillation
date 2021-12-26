@@ -94,6 +94,12 @@ def get_parser(parser=None, required=True):
         type=int,
         help="Report interval iterations",
     )
+    parser.add_argument(
+        "--report-val-ppl-iters",
+        default=100,
+        type=int,
+        help="Calc val ppl iterations",
+    )
     # task related
     parser.add_argument(
         "--train-label",

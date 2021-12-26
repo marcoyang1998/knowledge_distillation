@@ -58,7 +58,10 @@ def compute_perplexity(result):
         result["val_perplexity"] = np.exp(
             result["validation/main/nll"] / result["validation/main/count"]
         )
-
+    elif "validation_1/main/nll" in result:
+        result["val_1_perplexity"] = np.exp(
+            result["validation_1/main/nll"] / result["validation_1/main/count"]
+        )
 
 class Reporter(Chain):
     """Dummy module to use chainer's trainer."""
@@ -306,7 +309,18 @@ def train(args):
 
     # Set up an optimizer
     opt_class = dynamic_import_optimizer(args.opt, args.backend)
-    optimizer = opt_class.from_args(model.parameters(), args)
+    gpt2_seperate_finetuning = getattr(args, "gpt2_seperate_finetuning", False)
+    if gpt2_seperate_finetuning:
+        encoder_weights = [{'params': model.encoder.h.parameters(), 'lr': args.lr*0.1},
+                           {'params': model.encoder.wpe.parameters(), 'lr': args.lr*0.1},
+                           {'params': model.encoder.ln_f.parameters(), 'lr': args.lr*0.1},
+                           #{'params': model.encoder.wte.parameters(), 'lr': args.lr},
+                           ]
+        decoder_weights = [{'params': model.decoder.parameters(), 'lr': args.lr}]
+        weights = encoder_weights + decoder_weights
+        optimizer = opt_class.from_args(weights, args)
+    else:
+        optimizer = opt_class.from_args(model.parameters(), args)
     if args.schedulers is None:
         schedulers = []
     else:
@@ -345,6 +359,14 @@ def train(args):
     )
     trainer = training.Trainer(updater, (args.epoch, "epoch"), out=args.outdir)
     trainer.extend(LMEvaluator(val_iter, model, reporter, device=gpu_id))
+    if args.report_val_ppl_iters > 0:    
+        trainer.extend(LMEvaluator(val_iter, model, reporter, device=gpu_id), trigger=(args.report_val_ppl_iters, "iteration"))
+        trainer.extend(
+            extensions.LogReport(
+                postprocess=compute_perplexity,
+                trigger=(args.report_val_ppl_iters, "iteration"),
+            )
+        )
     trainer.extend(
         extensions.LogReport(
             postprocess=compute_perplexity,
