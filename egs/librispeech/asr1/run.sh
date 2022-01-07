@@ -67,13 +67,13 @@ set -u
 set -o pipefail
 
 train_set=train_960
-train_sp=train_sp
+#train_sp=train_sp
 train_dev=dev
-recog_set="test_clean test_other dev_clean dev_other"
+recog_set="test_clean test_other dev_clean dev_other train_clean_100"
 
 if [ ${stage} -le -1 ] && [ ${stop_stage} -ge -1 ]; then
     echo "stage -1: Data Download"
-    for part in train-clean-360 train-other-500; do
+    for part in dev-clean test-clean dev-other test-other train-clean-100 train-clean-360 train-other-500; do
         local/download_and_untar.sh ${datadir} ${data_url} ${part}
     done
 fi
@@ -82,7 +82,7 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
     ### Task dependent. You have to make data the following preparation part by yourself.
     ### But you can utilize Kaldi recipes in most cases
     echo "stage 0: Data preparation"
-    for part in train-clean-360 train-other-500; do
+    for part in dev-clean test-clean dev-other test-other train-clean-100 train-clean-360 train-other-500; do
         # use underscore-separated names in data directories.
         local/data_prep.sh ${datadir}/LibriSpeech/${part} data/${part//-/_}
     done
@@ -97,14 +97,14 @@ if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
     echo "stage 1: Feature Generation"
     fbankdir=fbank
     # Generate the fbank features; by default 80-dimensional fbanks with pitch on each frame
-    #for x in dev_clean test_clean dev_other test_other train_clean_100; do
-    #    steps/make_fbank_pitch.sh --cmd "$train_cmd" --nj ${nj} --write_utt2num_frames true \
-    #        data/${x} exp/make_fbank/${x} ${fbankdir}
-    #    utils/fix_data_dir.sh data/${x}
-    #done
+    for x in dev_clean test_clean dev_other test_other train_clean_100 train_clean_360 train_other_500; do
+        steps/make_fbank_pitch.sh --cmd "$train_cmd" --nj ${nj} --write_utt2num_frames true \
+            data/${x} exp/make_fbank/${x} ${fbankdir}
+        utils/fix_data_dir.sh data/${x}
+    done
 
-    utils/combine_data.sh --extra_files utt2num_frames data/${train_set} data/train_clean_100 data/train_clean_360 data/train_other_500
-    #utils/combine_data.sh --extra_files utt2num_frames data/${train_dev}_org data/dev_clean data/dev_other
+    utils/combine_data.sh --extra_files utt2num_frames data/${train_set}_org data/train_clean_100 data/train_clean_360 data/train_other_500
+    utils/combine_data.sh --extra_files utt2num_frames data/${train_dev}_org data/dev_clean data/dev_other
     #utils/perturb_data_dir_speed.sh 0.9  data/${train_set}_org  data/temp1
     #utils/perturb_data_dir_speed.sh 1.0  data/${train_set}_org  data/temp2
     #utils/perturb_data_dir_speed.sh 1.1  data/${train_set}_org  data/temp3
@@ -113,19 +113,21 @@ if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
 
     # remove utt having more than 3000 frames
     # remove utt having more than 400 characters
-    #remove_longshortdata.sh --maxframes 3000 --maxchars 400 data/${train_set}_org data/${train_set}
+    remove_longshortdata.sh --maxframes 3000 --maxchars 400 data/${train_set}_org data/${train_set}
     #remove_longshortdata.sh --maxframes 3000 --maxchars 400 data/${train_sp}_org data/${train_sp}
-    #remove_longshortdata.sh --maxframes 3000 --maxchars 400 data/${train_dev}_org data/${train_dev}
-    #steps/make_fbank_pitch.sh --cmd "$train_cmd" --nj $nj  --write_utt2num_frames true \
-    #        data/${train_set}  exp/make_fbank/${train_set}  ${fbankdir}
-    #utils/fix_data_dir.sh data/${train_set}
+    remove_longshortdata.sh --maxframes 3000 --maxchars 400 data/${train_dev}_org data/${train_dev}
+    steps/make_fbank_pitch.sh --cmd "$train_cmd" --nj $nj  --write_utt2num_frames true \
+            data/${train_set}  exp/make_fbank/${train_set}  ${fbankdir}
+    utils/fix_data_dir.sh data/${train_set}
     # compute global CMVN
     compute-cmvn-stats scp:data/${train_set}/feats.scp data/${train_set}/cmvn.ark
 
+    # dump features for training
     dump.sh --cmd "$train_cmd" --nj ${nj} --do_delta ${do_delta} \
         data/${train_set}/feats.scp data/${train_set}/cmvn.ark exp/dump_feats/train ${feat_tr_dir}
     dump.sh --cmd "$train_cmd" --nj ${nj} --do_delta ${do_delta} \
         data/${train_dev}/feats.scp data/${train_set}/cmvn.ark exp/dump_feats/dev ${feat_dt_dir}
+    
     for rtask in ${recog_set}; do
         feat_recog_dir=${dumpdir}/${rtask}/delta${do_delta}; mkdir -p ${feat_recog_dir}
         dump.sh --cmd "$train_cmd" --nj ${nj} --do_delta ${do_delta} \
@@ -134,13 +136,13 @@ if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
     done
 fi
 
-dict=data/lang_char/${train_set}_${bpemode}${nbpe}_units.txt
-bpemodel=data/lang_char/${train_set}_${bpemode}${nbpe}
+dict=data/lang_char/train_clean_100_unigram256_units.txt
+bpemodel=data/lang_char/train_clean_100_unigram256
 echo "dictionary: ${dict}"
 if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     ### Task dependent. You have to check non-linguistic symbols used in the corpus.
     echo "stage 2: Dictionary and Json Data Preparation"
-    mkdir -p data/lang_char/
+    #mkdir -p data/lang_char/
     #echo "<unk> 1" > ${dict} # <unk> must be 1, 0 will be used for "blank" in CTC
     #cut -f 2- -d" " data/${train_set}/text > data/lang_char/input.txt
     #spm_train --input=data/lang_char/input.txt --vocab_size=${nbpe} --model_type=${bpemode} --model_prefix=${bpemodel} --input_sentence_size=100000000
@@ -164,7 +166,7 @@ fi
 if [ -z ${lmtag} ]; then
     lmtag=$(basename ${lm_config%.*})
 fi
-lmexpname=train_lm_${backend}_${lmtag}_${bpemode}${nbpe}_ngpu${ngpu}
+lmexpname=train_rnnlm_${backend}_${lmtag}_${bpemode}${nbpe}_ngpu${ngpu}
 lmexpdir=exp/${lmexpname}
 mkdir -p ${lmexpdir}
 
@@ -192,7 +194,7 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
         --verbose 1 \
         --outdir ${lmexpdir} \
         --tensorboard-dir tensorboard/${lmexpname} \
-        --train-label ${lmdatadir}/train_shortened.txt \
+        --train-label ${lmdatadir}/train.txt \
         --valid-label ${lmdatadir}/valid.txt \
         --resume ${lm_resume} \
         --dict ${dict} \
