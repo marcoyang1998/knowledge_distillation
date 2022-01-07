@@ -46,13 +46,13 @@ use_lm_valbest_average=false # if true, the validation `lm_n_average`-best langu
 # Set this to somewhere where you want to put your data, or where
 # someone else has already put it.  You'll want to change this
 # if you're not on the CLSP grid.
-datadir=
+datadir=downloads
 
 # base url for downloads.
 data_url=www.openslr.org/resources/12
 
 # bpemode (unigram or bpe)
-nbpe=5000
+nbpe=256
 bpemode=unigram
 
 # exp tag
@@ -67,9 +67,9 @@ set -u
 set -o pipefail
 
 train_set=train_960
-train_sp=train_sp
+#train_sp=train_sp
 train_dev=dev
-recog_set="test_clean test_other dev_clean dev_other"
+recog_set="test_clean test_other dev_clean dev_other train_clean_100"
 
 if [ ${stage} -le -1 ] && [ ${stop_stage} -ge -1 ]; then
     echo "stage -1: Data Download"
@@ -89,7 +89,7 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
 fi
 
 feat_tr_dir=${dumpdir}/${train_set}/delta${do_delta}; mkdir -p ${feat_tr_dir}
-feat_sp_dir=${dumpdir}/${train_sp}/delta${do_delta}; mkdir -p ${feat_sp_dir}
+#feat_sp_dir=${dumpdir}/${train_sp}/delta${do_delta}; mkdir -p ${feat_sp_dir}
 feat_dt_dir=${dumpdir}/${train_dev}/delta${do_delta}; mkdir -p ${feat_dt_dir}
 if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
     ### Task dependent. You have to design training and dev sets by yourself.
@@ -105,62 +105,53 @@ if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
 
     utils/combine_data.sh --extra_files utt2num_frames data/${train_set}_org data/train_clean_100 data/train_clean_360 data/train_other_500
     utils/combine_data.sh --extra_files utt2num_frames data/${train_dev}_org data/dev_clean data/dev_other
-    utils/perturb_data_dir_speed.sh 0.9  data/${train_set}_org  data/temp1
-    utils/perturb_data_dir_speed.sh 1.0  data/${train_set}_org  data/temp2
-    utils/perturb_data_dir_speed.sh 1.1  data/${train_set}_org  data/temp3
+    #utils/perturb_data_dir_speed.sh 0.9  data/${train_set}_org  data/temp1
+    #utils/perturb_data_dir_speed.sh 1.0  data/${train_set}_org  data/temp2
+    #utils/perturb_data_dir_speed.sh 1.1  data/${train_set}_org  data/temp3
 
-    utils/combine_data.sh --extra-files utt2uniq data/${train_sp}_org data/temp1 data/temp2 data/temp3
+    #utils/combine_data.sh --extra-files utt2uniq data/${train_sp}_org data/temp1 data/temp2 data/temp3
 
     # remove utt having more than 3000 frames
     # remove utt having more than 400 characters
     remove_longshortdata.sh --maxframes 3000 --maxchars 400 data/${train_set}_org data/${train_set}
-    remove_longshortdata.sh --maxframes 3000 --maxchars 400 data/${train_sp}_org data/${train_sp}
+    #remove_longshortdata.sh --maxframes 3000 --maxchars 400 data/${train_sp}_org data/${train_sp}
     remove_longshortdata.sh --maxframes 3000 --maxchars 400 data/${train_dev}_org data/${train_dev}
     steps/make_fbank_pitch.sh --cmd "$train_cmd" --nj $nj  --write_utt2num_frames true \
-            data/train_sp  exp/make_fbank/train_sp  ${fbankdir}
-    utils/fix_data_dir.sh data/train_sp
+            data/${train_set}  exp/make_fbank/${train_set}  ${fbankdir}
+    utils/fix_data_dir.sh data/${train_set}
     # compute global CMVN
-    compute-cmvn-stats scp:data/${train_sp}/feats.scp data/${train_sp}/cmvn.ark
+    compute-cmvn-stats scp:data/${train_set}/feats.scp data/${train_set}/cmvn.ark
 
     # dump features for training
-    if [[ $(hostname -f) == *.clsp.jhu.edu ]] && [ ! -d ${feat_tr_dir}/storage ]; then
-    utils/create_split_dir.pl \
-        /export/b{14,15,16,17}/${USER}/espnet-data/egs/librispeech/asr1/dump/${train_set}/delta${do_delta}/storage \
-        ${feat_tr_dir}/storage
-    fi
-    if [[ $(hostname -f) == *.clsp.jhu.edu ]] && [ ! -d ${feat_dt_dir}/storage ]; then
-    utils/create_split_dir.pl \
-        /export/b{14,15,16,17}/${USER}/espnet-data/egs/librispeech/asr1/dump/${train_dev}/delta${do_delta}/storage \
-        ${feat_dt_dir}/storage
-    fi
     dump.sh --cmd "$train_cmd" --nj ${nj} --do_delta ${do_delta} \
-        data/${train_sp}/feats.scp data/${train_sp}/cmvn.ark exp/dump_feats/train ${feat_sp_dir}
+        data/${train_set}/feats.scp data/${train_set}/cmvn.ark exp/dump_feats/train ${feat_tr_dir}
     dump.sh --cmd "$train_cmd" --nj ${nj} --do_delta ${do_delta} \
-        data/${train_dev}/feats.scp data/${train_sp}/cmvn.ark exp/dump_feats/dev ${feat_dt_dir}
+        data/${train_dev}/feats.scp data/${train_set}/cmvn.ark exp/dump_feats/dev ${feat_dt_dir}
+    
     for rtask in ${recog_set}; do
         feat_recog_dir=${dumpdir}/${rtask}/delta${do_delta}; mkdir -p ${feat_recog_dir}
         dump.sh --cmd "$train_cmd" --nj ${nj} --do_delta ${do_delta} \
-            data/${rtask}/feats.scp data/${train_sp}/cmvn.ark exp/dump_feats/recog/${rtask} \
+            data/${rtask}/feats.scp data/${train_set}/cmvn.ark exp/dump_feats/recog/${rtask} \
             ${feat_recog_dir}
     done
 fi
 
-dict=data/lang_char/${train_set}_${bpemode}${nbpe}_units.txt
-bpemodel=data/lang_char/${train_set}_${bpemode}${nbpe}
+dict=data/lang_char/train_clean_100_unigram256_units.txt
+bpemodel=data/lang_char/train_clean_100_unigram256
 echo "dictionary: ${dict}"
 if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     ### Task dependent. You have to check non-linguistic symbols used in the corpus.
     echo "stage 2: Dictionary and Json Data Preparation"
-    mkdir -p data/lang_char/
-    echo "<unk> 1" > ${dict} # <unk> must be 1, 0 will be used for "blank" in CTC
-    cut -f 2- -d" " data/${train_set}/text > data/lang_char/input.txt
-    spm_train --input=data/lang_char/input.txt --vocab_size=${nbpe} --model_type=${bpemode} --model_prefix=${bpemodel} --input_sentence_size=100000000
-    spm_encode --model=${bpemodel}.model --output_format=piece < data/lang_char/input.txt | tr ' ' '\n' | sort | uniq | awk '{print $0 " " NR+1}' >> ${dict}
-    wc -l ${dict}
+    #mkdir -p data/lang_char/
+    #echo "<unk> 1" > ${dict} # <unk> must be 1, 0 will be used for "blank" in CTC
+    #cut -f 2- -d" " data/${train_set}/text > data/lang_char/input.txt
+    #spm_train --input=data/lang_char/input.txt --vocab_size=${nbpe} --model_type=${bpemode} --model_prefix=${bpemodel} --input_sentence_size=100000000
+    #spm_encode --model=${bpemodel}.model --output_format=piece < data/lang_char/input.txt | tr ' ' '\n' | sort | uniq | awk '{print $0 " " NR+1}' >> ${dict}
+    #wc -l ${dict}
 
     # make json labels
-    data2json.sh --nj ${nj} --feat ${feat_sp_dir}/feats.scp --bpecode ${bpemodel}.model \
-        data/${train_sp} ${dict} > ${feat_sp_dir}/data_${bpemode}${nbpe}.json
+    data2json.sh --nj ${nj} --feat ${feat_tr_dir}/feats.scp --bpecode ${bpemodel}.model \
+        data/${train_set} ${dict} > ${feat_tr_dir}/data_${bpemode}${nbpe}.json
     data2json.sh --nj ${nj} --feat ${feat_dt_dir}/feats.scp --bpecode ${bpemodel}.model \
         data/${train_dev} ${dict} > ${feat_dt_dir}/data_${bpemode}${nbpe}.json
 
