@@ -13,6 +13,8 @@ from espnet.nets.lm_interface import LMInterface
 from espnet.nets.pytorch_backend.e2e_asr import to_device
 from espnet.nets.scorer_interface import BatchScorerInterface
 from espnet.utils.cli_utils import strtobool
+from espnet.nets.pytorch_backend.lm.transformer import TransformerLM
+from espnet.nets.pytorch_backend.lm.gpt import GPT2LM
 
 
 class DefaultRNNLM(BatchScorerInterface, LMInterface, nn.Module):
@@ -290,8 +292,11 @@ class ClassifierWithState(nn.Module):
         if hasattr(self.predictor, "normalized") and self.predictor.normalized:
             return self.predictor(state, x)
         else:
-            if hasattr(self.predictor, "forward_LM_with_state"):
+            if isinstance(self.predictor, GPT2LM):
                 state, z = self.predictor.forward_LM_with_state(state, x)
+            elif isinstance(self.predictor, TransformerLM):
+                z, state = self.predictor.score(x, state, x)
+                z = z.unsqueeze(0)
             else:
                 state, z = self.predictor(state, x)
             return state, F.log_softmax(z, dim=1)

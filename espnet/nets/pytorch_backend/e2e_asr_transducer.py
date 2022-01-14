@@ -929,8 +929,6 @@ class E2E(ASRInterface, torch.nn.Module):
             lm_score = self.get_one_best_lm_logits(ys_pad, lm)*lm_weight
             z = z + lm_score
         
-         
-    
     def collect_soft_label_one_best_lattice(self, xs_pad, ilens, ys_pad, lm=None, lm_weight=0.0):
         self.eval()
         if lm is not None:
@@ -956,10 +954,12 @@ class E2E(ASRInterface, torch.nn.Module):
             one_best_path.append(k)
             if use_lm:
                 if k == 0: # blank symbol
+                    lm_scores[0,0] = 0.0 # set the blank symbol score to zero
                     lm_fused_logit = z[0, t, u, :].log_softmax(0) + lm_weight*lm_scores[0]
                     one_best_path_pr.append(lm_fused_logit)
                     pass # no change of lm_state and lm_score
                 else: # update lm score
+                    lm_scores[0,0] = min(lm_scores[0]) # set the blank symbol score to the smallest value
                     lm_fused_logit = z[0, t, u, :].log_softmax(0) + lm_weight*lm_scores[0]
                     one_best_path_pr.append(lm_fused_logit)
                     prev_token = torch.full((1, ), k, dtype=torch.long, device=xs_pad.device)

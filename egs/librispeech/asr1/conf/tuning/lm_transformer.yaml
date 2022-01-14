@@ -14,7 +14,8 @@ unit: 2048
 
 # minibatch related
 batchsize: 32
-maxlen: 40
+maxlen: 80
+accum-grad: 4
 
 # optimization related
 opt: adam
@@ -27,3 +28,6 @@ lr-cosine-total: 100000
 lr-cosine-warmup: 1000
 patience: 0
 sortagrad: 0
+
+save-interval-iters: 10000
+report-val-ppl-iters: 10000

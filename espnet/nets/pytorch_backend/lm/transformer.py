@@ -141,8 +141,10 @@ class TransformerLM(nn.Module, LMInterface, BatchScorerInterface):
 
     def forward(
         self, x: torch.Tensor, t: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-        """Compute LM loss value from buffer sequences.
+    ):
+        # -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]
+        """
+        Compute LM loss value from buffer sequences.
 
         Args:
             x (torch.Tensor): Input ids. (batch, len)
@@ -177,7 +179,8 @@ class TransformerLM(nn.Module, LMInterface, BatchScorerInterface):
 
     def score(
         self, y: torch.Tensor, state: Any, x: torch.Tensor
-    ) -> Tuple[torch.Tensor, Any]:
+    ):
+        # -> Tuple[torch.Tensor, Any]
         """Score new token.
 
         Args:
@@ -208,7 +211,8 @@ class TransformerLM(nn.Module, LMInterface, BatchScorerInterface):
     # batch beam search API (see BatchScorerInterface)
     def batch_score(
         self, ys: torch.Tensor, states: List[Any], xs: torch.Tensor
-    ) -> Tuple[torch.Tensor, List[Any]]:
+    ):
+        # -> Tuple[torch.Tensor, List[Any]]
         """Score new token batch (required).
 
         Args:
