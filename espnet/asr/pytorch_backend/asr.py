@@ -1260,7 +1260,8 @@ def recog(args):
             prefix_alpha=args.prefix_alpha,
             score_norm=args.score_norm,
             collect_kd_data=args.collect_rnnt_kd_data,
-            lm_fusion_kd=args.lm_fusion_kd
+            lm_fusion_kd=args.lm_fusion_kd,
+            internal_lm_weight=args.internal_lm_weight
         )
 
     if args.batchsize == 0:
@@ -1748,7 +1749,8 @@ def collect_soft_labels(args):
                     with open(os.path.join(output_dir, name + ".npy"), 'wb') as f:
                         np.save(f, full_lattice)
                     continue
-
+                elif args.rnnt_kd_data_collection_mode == "decoder_logits":
+                    print("Collecting decoder logits")
                 else:
                     raise NotImplementedError("{} not implemented".format(args.rnnt_kd_data_collection_mode))
 

@@ -54,3 +54,21 @@ class JointNetwork(torch.nn.Module):
         z = self.lin_out(z)
 
         return z
+    
+    def forward_ILM(
+        self, h_dec: torch.Tensor
+    ) -> torch.Tensor:
+        """Forward using only the decoder representation for ILME
+
+        Args:
+            h_dec (torch.Tensor): Batch of decode hidden states (B, 1, U, D_dec)
+
+        Returns:
+            z : Decoder logits with blank 
+        """
+        z = self.joint_activation(self.lin_dec(h_dec))
+        z = self.lin_out(z)
+        
+        return z
+        
+        

@@ -36,6 +36,7 @@ class BeamSearchTransducer:
         nbest: int = 1,
         collect_kd_data = False,
         lm_fusion_kd=False,
+        internal_lm_weight=0.0
     ):
         """Initialize transducer beam search.
 
@@ -71,14 +72,23 @@ class BeamSearchTransducer:
             self.search_algorithm = self.align_length_sync_decoding
         elif search_type == "nsc":
             self.search_algorithm = self.nsc_beam_search
+        elif search_type == "ILME":
+            self.search_algorithm = self.default_beam_search_with_ILME
         else:
             raise NotImplementedError
 
         self.lm = lm
         self.lm_weight = lm_weight
+        self.internal_lm_weight = internal_lm_weight
+        if self.internal_lm_weight >= 0:
+            self.use_ILME = True
+        else:
+            self.use_ILME = False
+            self.search_algorithm = self.default_beam_search
+            print("Fall back to default beam search as internal LM weight is 0!")
 
         if lm is not None:
-            self.use_lm = True
+            self.use_lm = True if self.lm_weight > 0 else False
             self.is_wordlm = True if hasattr(lm.predictor, "wordlm") else False
             self.lm_predictor = lm.predictor.wordlm if self.is_wordlm else lm.predictor
             self.lm_layers = len(self.lm_predictor.rnn) if hasattr(lm.predictor, "rnn") else None
@@ -223,6 +233,91 @@ class BeamSearchTransducer:
 
                     if self.use_lm:
                         score += self.lm_weight * lm_scores[0][k + 1] # lm scores are log probability!!
+                        #if self.lm_fusion_kd:
+                        #    #ytu_logit = torch.from_numpy(ytu_logit).float()
+                        #    current_pr = ytu_logit + self.lm_weight * torch.softmax(lm_scores[0],0)
+                        #    current_pr = (current_pr/(1.0+self.lm_weight)).cpu().numpy() # renormalise
+                        #else:
+                        #    current_pr = ytu_logit
+
+                    hyps.append(
+                        Hypothesis(
+                            score=score,
+                            yseq=max_hyp.yseq[:] + [int(k + 1)],
+                            dec_state=state,
+                            lm_state=lm_state,
+                            yseq_with_blank=(max_hyp.yseq_with_blank + [int(k + 1)]) if self.collect_kd_data else None,
+                            yseq_with_blank_pr=(max_hyp.yseq_with_blank_pr + [(ytu+self.lm_weight*lm_scores[0]).cpu().numpy()]) if self.collect_kd_data else None,
+                        )
+                    )
+
+                hyps_max = float(max(hyps, key=lambda x: x.score).score)
+                kept_most_prob = sorted(
+                    [hyp for hyp in kept_hyps if hyp.score > hyps_max],
+                    key=lambda x: x.score,
+                )
+                if len(kept_most_prob) >= beam:
+                    kept_hyps = kept_most_prob
+                    break
+
+        return self.sort_nbest(kept_hyps)
+    
+    def default_beam_search_with_ILME(self, enc_out: torch.Tensor) -> List[Hypothesis]:
+        """Beam search implementation.
+        Modified from https://arxiv.org/pdf/1211.3711.pdf
+        Args:
+            enc_out: Encoder output sequence. (T, D)
+        Returns:
+            nbest_hyps: N-best hypothesis.
+        """
+        beam = min(self.beam_size, self.vocab_size)
+        beam_k = min(beam, (self.vocab_size - 1))
+
+        dec_state = self.decoder.init_state(1)
+
+        kept_hyps = [Hypothesis(score=0.0, yseq=[self.blank], dec_state=dec_state, yseq_with_blank=[self.blank],yseq_with_blank_pr=[])] # B in the paper
+        cache = {}
+
+        for hi in enc_out:
+            hyps = kept_hyps # hyps: A in the paper
+            kept_hyps = []
+
+            while True:
+                max_hyp = max(hyps, key=lambda x: x.score)
+                hyps.remove(max_hyp)
+
+                y, state, lm_tokens = self.decoder.score(max_hyp, cache)
+
+                ytu = torch.log_softmax(self.joint_network(hi, y), dim=-1)
+                if self.use_ILME:
+                    ilm_scores = torch.log_softmax(self.joint_network.forward_ILM(y), dim=-1)
+                    ytu[1:] = ytu[1:] - self.internal_lm_weight*ilm_scores[1:]
+                top_k = ytu[1:].topk(beam_k, dim=-1)
+
+                kept_hyps.append(
+                    Hypothesis(
+                        score=(max_hyp.score + float(ytu[0:1])), # for blank symbol
+                        yseq=max_hyp.yseq[:],
+                        dec_state=max_hyp.dec_state,
+                        lm_state=max_hyp.lm_state,
+                        yseq_with_blank=(max_hyp.yseq_with_blank + [self.blank]) if self.collect_kd_data else None,
+                        yseq_with_blank_pr = (max_hyp.yseq_with_blank_pr + [ytu.cpu().numpy()]) if self.collect_kd_data else None,
+                    )
+                )
+
+                if self.use_lm:
+                    lm_state, lm_scores = self.lm.predict(max_hyp.lm_state, lm_tokens)
+                else:
+                    lm_state = max_hyp.lm_state
+
+
+
+                for logp, k in zip(*top_k):
+                    score = max_hyp.score + float(logp)
+
+                    if self.use_lm:
+                        score += self.lm_weight * lm_scores[0][k + 1] # lm scores are log probability!!
+
                         #if self.lm_fusion_kd:
                         #    #ytu_logit = torch.from_numpy(ytu_logit).float()
                         #    current_pr = ytu_logit + self.lm_weight * torch.softmax(lm_scores[0],0)
@@ -648,3 +743,6 @@ class BeamSearchTransducer:
             kept_hyps = sorted((S + V), key=lambda x: x.score, reverse=True)[:beam]
 
         return self.sort_nbest(kept_hyps)
+
+    def score_internal_LM(self, token):
+        return

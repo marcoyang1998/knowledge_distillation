@@ -148,7 +148,7 @@ def get_parser():
         "--search-type",
         type=str,
         default="default",
-        choices=["default", "nsc", "tsd", "alsd"],
+        choices=["default", "nsc", "tsd", "alsd", "ILME"],
         help="""Type of beam search implementation to use during inference.
         Can be either: default beam search, n-step constrained beam search ("nsc"),
         time-synchronous decoding ("tsd") or alignment-length synchronous decoding
@@ -320,6 +320,12 @@ def get_parser():
         "--kd-json-label",
         type=str,
         help="Name of the kd json file"
+    )
+    parser.add_argument(
+        "--internal-lm-weight",
+        type=float,
+        default=0.0,
+        help="If 0, ILME is deactivated. Otherwise the ILM score is subtracted from the original score"
     )
 
     return parser
