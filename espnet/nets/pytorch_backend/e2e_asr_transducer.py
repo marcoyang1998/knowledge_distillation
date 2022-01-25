@@ -433,6 +433,8 @@ class E2E(ASRInterface, torch.nn.Module):
                     self.kd_loss = self.kd_window_shifted_one_best_loss
                     #self.kd_loss = self.shifted_one_best_path_loss
                     self.shift_step = args.shift_step
+                elif self.kd_mode == "ILM_loss":
+                    self.kd_loss = self.kd_ILM_CE_loss
                 else:
                     raise NotImplementedError("Not implemented {}".format(self.kd_mode))
                 print("Distillation mode: {}, kd factor: {}".format(self.kd_mode, self.kd_mtl_factor))
@@ -596,7 +598,27 @@ class E2E(ASRInterface, torch.nn.Module):
 
         return kd_loss / bs
 
-    def forward(self, xs_pad, ilens, ys_pad):
+    def kd_ILM_CE_loss(self, h_dec, h_dec_kd, ys_pad):
+        def CXE(target, predicted):
+            return -(target * predicted.log_softmax(-1))
+        mask = ys_pad != self.ignore_id
+        mask = mask.to(ys_pad.device)
+        
+        dec_logits = self.joint_network.forward_ILM(h_dec).squeeze(2)
+        dec_logits = dec_logits[:,:-1,1:] # remove last token and blank
+        h_dec_kd = h_dec_kd[:,:,1:] # remove blank
+        assert h_dec_kd.shape == dec_logits.shape
+        #loss_fc = torch.nn.CrossEntropyLoss(reduction='none')
+        #loss = loss_fc(de)
+        h_dec_kd *= 0.37 # lm weight
+        loss = CXE(torch.softmax(h_dec_kd.reshape(-1, h_dec_kd.size(-1)), dim=-1), dec_logits.reshape(-1, dec_logits.size(-1)))
+        loss = loss * mask.view(-1,1)
+        
+        count = mask.sum()
+        
+        return loss.sum()/count
+    
+    def forward(self, xs_pad, ilens, ys_pad, ys_kd_pad=None):
         """E2E forward.
 
         Args:
@@ -767,7 +789,10 @@ class E2E(ASRInterface, torch.nn.Module):
 
         if self.do_kd:
             if self.kd_mtl_factor > 0:
-                loss_kd = self.kd_mtl_factor * self.kd_loss(z, pred_len, target_len, cal_enc_T(ilens), ys_pad, ys_kd_pad)
+                if self.kd_mode == "ILM_loss":
+                    loss_kd = self.kd_mtl_factor * self.kd_loss(pred_pad.unsqueeze(2), ys_kd_pad, ys_pad)
+                else:
+                    loss_kd = self.kd_mtl_factor * self.kd_loss(z, pred_len, target_len, cal_enc_T(ilens), ys_pad, ys_kd_pad)
             else:
                 loss_kd = 0.0
         else:
@@ -912,9 +937,10 @@ class E2E(ASRInterface, torch.nn.Module):
         ys_pad = ys_pad.unsqueeze()
         for token in ys_pad:
             lm_score = lm.predict(lm_states, prev_token)
+            lm_score_list.append(lm_score)
             prev_token = token
         
-        lm_score_list = lm_score_list[:-1]
+        #lm_score_list = lm_score_list[:-1]
         
         return torch.tensor(lm_score_list)
     
@@ -1051,7 +1077,16 @@ class E2E(ASRInterface, torch.nn.Module):
         assert z.shape[0] == 1
         return pr
 
-
+    def collect_decoder_logits(self, xs_pad, ilens, ys_pad, lm=None, lm_weight=0.0):
+        
+        # here assume the batch size is one
+        assert xs_pad.shape[0] == 1
+        assert lm is not None
+        
+        lm_logits = self.get_one_best_lm_logits(ys_pad, lm)
+        
+        return lm_logits
+    
     def calculate_all_attentions(self, xs_pad, ilens, ys_pad):
         """E2E attention calculation.
 
