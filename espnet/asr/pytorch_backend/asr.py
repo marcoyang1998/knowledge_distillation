@@ -1267,7 +1267,7 @@ def recog(args):
     if args.batchsize == 0:
         with torch.no_grad():
             for idx, name in enumerate(js.keys(), 1):
-                logging.info("(%d/%d) decoding " + name, idx, len(js.keys()))
+                logging.warning("(%d/%d) decoding " + name, idx, len(js.keys()))
                 batch = [(name, js[name])]
                 feat = load_inputs_and_targets(batch)
                 feat = (
@@ -1750,7 +1750,8 @@ def collect_soft_labels(args):
                         np.save(f, full_lattice)
                     continue
                 elif args.rnnt_kd_data_collection_mode == "decoder_logits":
-                    print("Collecting decoder logits")
+                    logging.warning("Collecting decoder logits")
+                    decoder_logits = model.collect_decoder_logits(*x, rnnlm, lm_weight)
                 else:
                     raise NotImplementedError("{} not implemented".format(args.rnnt_kd_data_collection_mode))
 
@@ -1870,23 +1871,33 @@ def collect_rnnlm_blank_logit(args):
             #print(blank_logit)
 
 def collect_rnnlm_logit(args):
-    print("----Starting collecting rnnlm logit----")
+    logging.warning("----Starting collecting rnnlm logit----")
     set_deterministic_pytorch(args)
     assert args.word_rnnlm == None, "Soft-label collection does not support word_rnnlm"
     model, train_args = load_trained_model(args.model, training=False)
     assert args.rnnlm is not None
     lm_weight = args.lm_weight
     rnnlm_args = get_model_conf(args.rnnlm, args.rnnlm_conf)
-    rnnlm = lm_pytorch.ClassifierWithState(
-        lm_pytorch.RNNLM(
-            len(train_args.char_list),
-            rnnlm_args.layer,
-            rnnlm_args.unit,
-            getattr(rnnlm_args, "embed_unit", None),  # for backward compatibility
+    from espnet.nets.lm_interface import dynamic_import_lm
+    lm_model_module = getattr(rnnlm_args, "model_module", "default")
+    if lm_model_module != "default":
+        lm_class = dynamic_import_lm(lm_model_module, rnnlm_args.backend)
+        lm = lm_class(len(train_args.char_list), rnnlm_args)
+        torch_load(args.rnnlm, lm)
+        rnnlm = lm_pytorch.ClassifierWithState(lm)
+        #torch_load(args.rnnlm, lm)
+        rnnlm.eval()
+    else:
+        rnnlm = lm_pytorch.ClassifierWithState(
+            lm_pytorch.RNNLM(
+                len(train_args.char_list),
+                rnnlm_args.layer,
+                rnnlm_args.unit,
+                getattr(rnnlm_args, "embed_unit", None),  # for backward compatibility
+            )
         )
-    )
-    torch_load(args.rnnlm, rnnlm)
-    rnnlm.eval()
+        torch_load(args.rnnlm, rnnlm)
+        rnnlm.eval()
 
     if args.ngpu == 1:
         gpu_id = list(range(args.ngpu))
@@ -1902,7 +1913,7 @@ def collect_rnnlm_logit(args):
 
     is_rnnt = hasattr(model, "joint_network")
     load_inputs_and_targets = LoadInputsAndTargets(
-        mode="asr_kd",
+        mode="asr",
         load_output=True,
         sort_in_input_length=False,
         preprocess_conf=train_args.preprocess_conf
@@ -1914,6 +1925,7 @@ def collect_rnnlm_logit(args):
     assert args.batchsize == 0, 'Only support collection with bs=0'
     with torch.no_grad():
         for idx, name in enumerate(js.keys(), 1):
+            logging.warning("(%d/%d) decoding " + name, idx, len(js.keys()))
             region = name.split('-')[0]
             spkr = '-'.join(name.split('-')[:-1])
             output_dir = os.path.join(args.rnnlm_logit_dir, region, spkr)
@@ -1922,8 +1934,12 @@ def collect_rnnlm_logit(args):
             batch = [(name, js[name])]
             feat = load_inputs_and_targets(batch)
             yseq = feat[1][0]
-            #npy_file = js[name]['output'][1]['feat']
-
+            yseq_pad = torch.tensor(np.append([model.sos], yseq)).unsqueeze(0).long()
+            t_pad = torch.tensor(np.append(yseq,[model.eos])).unsqueeze(0).long()
+            transformer_outputs = rnnlm.predictor.encoder(yseq_pad)
+            hidden_states = transformer_outputs[0]
+            logits = rnnlm.predictor.decoder(hidden_states)
+            '''
             lm_state = None
             #total_len = token_list.shape[0]
             prev_token = torch.full((1, ), 0, dtype=torch.long, device=device)
@@ -1934,8 +1950,9 @@ def collect_rnnlm_logit(args):
                 prev_token = torch.full((1,), token, dtype=torch.long, device=device)
                 lm_state, lm_scores = rnnlm.predict(lm_state, prev_token)
                 logits.append(lm_scores[0].cpu().numpy())
+            '''
             with open(os.path.join(output_dir, name+'.npy'), 'wb') as f:
-                np.save(f, np.array(logits))
+                np.save(f, np.array(logits.squeeze(0)))
 
 def ctc_align(args):
     """CTC forced alignments with the given args.

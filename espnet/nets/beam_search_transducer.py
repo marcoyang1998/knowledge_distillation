@@ -5,6 +5,7 @@ from typing import Union
 
 import numpy as np
 import torch
+from transformers import logging
 
 from espnet.nets.pytorch_backend.transducer.utils import create_lm_batch_state
 from espnet.nets.pytorch_backend.transducer.utils import init_lm_state
@@ -278,7 +279,7 @@ class BeamSearchTransducer:
         kept_hyps = [Hypothesis(score=0.0, yseq=[self.blank], dec_state=dec_state, yseq_with_blank=[self.blank],yseq_with_blank_pr=[])] # B in the paper
         cache = {}
 
-        for hi in enc_out:
+        for i,hi in enumerate(enc_out):
             hyps = kept_hyps # hyps: A in the paper
             kept_hyps = []
 
@@ -292,6 +293,7 @@ class BeamSearchTransducer:
                 if self.use_ILME:
                     ilm_scores = torch.log_softmax(self.joint_network.forward_ILM(y), dim=-1)
                     ytu[1:] = ytu[1:] - self.internal_lm_weight*ilm_scores[1:]
+                    ytu[ytu > 0] = -1e-1 # for ILME hack
                 top_k = ytu[1:].topk(beam_k, dim=-1)
 
                 kept_hyps.append(
