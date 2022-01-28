@@ -416,9 +416,10 @@ class E2E(ASRInterface, torch.nn.Module):
                 self.aux_cross_entropy = LabelSmoothingLoss(
                     odim, ignore_id, args.aux_cross_entropy_smoothing
                 )
-            if args.ILM_gt_loss:
-                self.use_ILM_gt_loss = True
-                self.ILM_gt_loss_factor = args.ILM_gt_loss_factor
+            
+            self.use_ILM_gt_loss = args.ILM_gt_loss
+            self.ILM_gt_loss_factor = args.ILM_gt_loss_factor
+                
             if self.do_kd:
                 self.kd_mtl_factor = args.kd_mtl_factor
                 self.kd_temperature = args.kd_temperature
@@ -627,11 +628,14 @@ class E2E(ASRInterface, torch.nn.Module):
         mask = ys_pad != self.ignore_id
         mask = mask.to(ys_pad.device)
         dec_logits = self.joint_network.forward_ILM(h_dec).squeeze(2)
+        dec_logits = dec_logits[:,:-1,:].contiguous()
+        assert dec_logits.shape[1] == ys_pad.shape[1]
         
-        assert dec_logits.shape[0] == dec_logits.shape[0]
+        ys_pad[ys_pad == self.ignore_id] = 0
+        ys_pad = ys_pad[...,:].contiguous()
         
         loss_fct = torch.nn.CrossEntropyLoss(reduction='none')
-        loss = loss_fct(dec_logits.reshape(-1, dec_logits.size(-1)), ys_pad.reshape(-1))
+        loss = loss_fct(dec_logits.view(-1, dec_logits.size(-1)), ys_pad.view(-1))
         
         logp = loss * mask.view(-1)
         logp = logp.sum()
@@ -705,7 +709,7 @@ class E2E(ASRInterface, torch.nn.Module):
                 self.aux_decoder_output(pred_pad), ys_out_pad
             )
         elif self.use_ILM_gt_loss:
-            loss_lm = self.lm_gt_loss(pred_pad.unsqueeze(2), ys_pad)
+            loss_lm = self.lm_gt_loss(pred_pad.unsqueeze(2), ys_pad) * self.ILM_gt_loss_factor
         else:
             loss_lm = 0.0
 
