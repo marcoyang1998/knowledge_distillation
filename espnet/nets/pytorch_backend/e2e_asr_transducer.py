@@ -416,7 +416,9 @@ class E2E(ASRInterface, torch.nn.Module):
                 self.aux_cross_entropy = LabelSmoothingLoss(
                     odim, ignore_id, args.aux_cross_entropy_smoothing
                 )
-
+            if args.ILM_gt_loss:
+                self.use_ILM_gt_loss = True
+                self.ILM_gt_loss_factor = args.ILM_gt_loss_factor
             if self.do_kd:
                 self.kd_mtl_factor = args.kd_mtl_factor
                 self.kd_temperature = args.kd_temperature
@@ -601,6 +603,9 @@ class E2E(ASRInterface, torch.nn.Module):
     def kd_ILM_CE_loss(self, h_dec, h_dec_kd, ys_pad):
         def CXE(target, predicted):
             return -(target * predicted.log_softmax(-1))
+        
+        lm_weight = 0.37
+        
         mask = ys_pad != self.ignore_id
         mask = mask.to(ys_pad.device)
         
@@ -610,13 +615,29 @@ class E2E(ASRInterface, torch.nn.Module):
         assert h_dec_kd.shape == dec_logits.shape
         #loss_fc = torch.nn.CrossEntropyLoss(reduction='none')
         #loss = loss_fc(de)
-        h_dec_kd *= 0.37 # lm weight
+        h_dec_kd *= lm_weight # lm weight
         loss = CXE(torch.softmax(h_dec_kd.reshape(-1, h_dec_kd.size(-1)), dim=-1), dec_logits.reshape(-1, dec_logits.size(-1)))
         loss = loss * mask.view(-1,1)
         
         count = mask.sum()
         
         return loss.sum()/count
+    
+    def lm_gt_loss(self, h_dec, ys_pad):
+        mask = ys_pad != self.ignore_id
+        mask = mask.to(ys_pad.device)
+        dec_logits = self.joint_network.forward_ILM(h_dec).squeeze(2)
+        
+        assert dec_logits.shape[0] == dec_logits.shape[0]
+        
+        loss_fct = torch.nn.CrossEntropyLoss(reduction='none')
+        loss = loss_fct(dec_logits.reshape(-1, dec_logits.size(-1)), ys_pad.reshape(-1))
+        
+        logp = loss * mask.view(-1)
+        logp = logp.sum()
+        count = mask.sum()
+        
+        return logp / count
     
     def forward(self, xs_pad, ilens, ys_pad, ys_kd_pad=None):
         """E2E forward.
@@ -683,6 +704,8 @@ class E2E(ASRInterface, torch.nn.Module):
             loss_lm = self.aux_cross_entropy_weight * self.aux_cross_entropy(
                 self.aux_decoder_output(pred_pad), ys_out_pad
             )
+        elif self.use_ILM_gt_loss:
+            loss_lm = self.lm_gt_loss(pred_pad.unsqueeze(2), ys_pad)
         else:
             loss_lm = 0.0
 

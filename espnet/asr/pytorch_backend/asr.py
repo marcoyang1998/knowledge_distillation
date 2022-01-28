@@ -1923,9 +1923,11 @@ def collect_rnnlm_logit(args):
         preprocess_args={"train": False},
     )
     assert args.batchsize == 0, 'Only support collection with bs=0'
+    from espnet.nets.pytorch_backend.lm.default import GPT2LM
+    
     with torch.no_grad():
         for idx, name in enumerate(js.keys(), 1):
-            logging.warning("(%d/%d) decoding " + name, idx, len(js.keys()))
+            logging.info("(%d/%d) decoding " + name, idx, len(js.keys()))
             region = name.split('-')[0]
             spkr = '-'.join(name.split('-')[:-1])
             output_dir = os.path.join(args.rnnlm_logit_dir, region, spkr)
@@ -1936,9 +1938,21 @@ def collect_rnnlm_logit(args):
             yseq = feat[1][0]
             yseq_pad = torch.tensor(np.append([model.sos], yseq)).unsqueeze(0).long()
             t_pad = torch.tensor(np.append(yseq,[model.eos])).unsqueeze(0).long()
-            transformer_outputs = rnnlm.predictor.encoder(yseq_pad)
-            hidden_states = transformer_outputs[0]
-            logits = rnnlm.predictor.decoder(hidden_states)
+            if isinstance(rnnlm.predictor, GPT2LM):
+                transformer_outputs = rnnlm.predictor.encoder(yseq_pad)
+                hidden_states = transformer_outputs[0]
+                logits = rnnlm.predictor.decoder(hidden_states).squeeze(0)
+            else:
+                lm_state = None
+                prev_token = torch.full((1, ), 0, dtype=torch.long, device=device)
+                lm_state, lm_scores = rnnlm.predict(lm_state, prev_token)
+                logits = []
+                logits.append(lm_scores[0].cpu().numpy())
+                for token in yseq:
+                    prev_token = torch.full((1,), token, dtype=torch.long, device=device)
+                    lm_state, lm_scores = rnnlm.predict(lm_state, prev_token)
+                    logits.append(lm_scores[0].cpu().numpy())
+                logits = np.array(logits)
             '''
             lm_state = None
             #total_len = token_list.shape[0]
@@ -1952,7 +1966,7 @@ def collect_rnnlm_logit(args):
                 logits.append(lm_scores[0].cpu().numpy())
             '''
             with open(os.path.join(output_dir, name+'.npy'), 'wb') as f:
-                np.save(f, np.array(logits.squeeze(0)))
+                np.save(f, np.array(logits))
 
 def ctc_align(args):
     """CTC forced alignments with the given args.

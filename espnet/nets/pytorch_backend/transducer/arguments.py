@@ -307,6 +307,18 @@ def add_auxiliary_task_arguments(group):
         help="Whether to use CE as auxiliary task for the prediction network.",
     )
     group.add_argument(
+        "--ILM-gt-loss",
+        type=strtobool,
+        default=False,
+        help="Use gt lm loss as an auxiliary loss"
+    )
+    group.add_argument(
+        "--ILM-gt-loss-factor",
+        type=float,
+        default=1.0,
+        help="loss factor for gt lm loss as an auxiliary loss"
+    )
+    group.add_argument(
         "--aux-cross-entropy-smoothing",
         default=0.0,
         type=float,

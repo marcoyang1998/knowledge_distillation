@@ -19,11 +19,13 @@ def change(args):
     for k in data['utts']:
         new_file = data['utts'][k]['output'][1]['feat'].replace(original_key, new_key)
         if not os.path.isfile(new_file):
+            count += 1
             continue
         data['utts'][k]['output'][1]['feat'] = new_file
     
     with open(input_json,'w',encoding='utf-8') as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
+    print(f"A total of {count} files do not exist!")
     print('Finished! Output stored in {} with {} utts'.format(input_json,len(data['utts'])))
 
 if __name__ == '__main__':
