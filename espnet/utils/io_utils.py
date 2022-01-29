@@ -267,7 +267,13 @@ class LoadInputsAndTargets(object):
         xs = list(x_feats_dict.values())
 
         if self.load_output:
-            ys, ys_kd = list(y_feats_dict.values()) # token label and distillatio label
+            if len(y_feats_dict) == 2:
+                ys, ys_kd = list(y_feats_dict.values()) # token label and distillatio label
+            elif len(y_feats_dict) == 3:
+                ys, ys_kd, lm_kd = list(y_feats_dict.values())
+                lm_kd = [lm_kd]
+            else:
+                raise NotImplementedError()
             ys = [ys]
             ys_kd = [ys_kd]
             assert len(xs[0]) == len(ys[0]), "Number of input: {}, number of total targets {}".format(len(xs[0]), len(ys[0]))
@@ -302,16 +308,28 @@ class LoadInputsAndTargets(object):
             ys = [[y[i] for i in nonzero_sorted_idx] for y in ys]
             y_names = list(y_feats_dict.keys())
             y_token_name = [y_names[0]]
-            y_kd_name = [y_names[1]]
-
+            one_best_kd_name = [y_names[1]]                
             # Keeping x_name and y_name, e.g. input1, for future extension
-            return_batch = OrderedDict(
+            if len(y_feats_dict) == 2:
+                return_batch = OrderedDict(
+                    [
+                        *[(x_name, x) for x_name, x in zip(x_names, xs)],
+                        *[(y_name, y) for y_name, y in zip(y_token_name, ys)],
+                        *[(y_name, y) for y_name, y in zip(one_best_kd_name, ys_kd)],
+                    ]
+                )
+            elif len(y_feats_dict) == 3:
+                lm_kd_name = [y_names[2]]
+                return_batch = OrderedDict(
                 [
                     *[(x_name, x) for x_name, x in zip(x_names, xs)],
                     *[(y_name, y) for y_name, y in zip(y_token_name, ys)],
-                    *[(y_name, y) for y_name, y in zip(y_kd_name, ys_kd)],
+                    *[(y_name, y) for y_name, y in zip(one_best_kd_name, ys_kd)],
+                    *[(y_name, y) for y_name, y in zip(lm_kd_name, lm_kd)],
                 ]
             )
+            else:
+                raise NotImplementedError()
         else:
             return_batch = OrderedDict([(x_name, x) for x_name, x in zip(x_names, xs)])
         return return_batch, uttid_list

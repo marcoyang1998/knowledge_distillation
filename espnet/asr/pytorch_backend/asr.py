@@ -379,8 +379,10 @@ class CustomConverterKD(object):
         assert len(batch) == 1
         if len(batch[0]) == 2: # no multitask distillation
             xs, ys = batch[0]
-        else:
+        elif len(batch[0]) == 3: # only one kd label
             xs, ys, ys_kd = batch[0]
+        elif len(batch[0]) == 4: # two kd labels
+            xs, ys, ys_kd, lm_kd = batch[0]
         if self.subsampling_factor > 1:
             xs = [x[:: self.subsampling_factor, :] for x in xs]
         ilens = np.array([x.shape[0] for x in xs])
@@ -427,7 +429,21 @@ class CustomConverterKD(object):
             self.ignore_id,
         ).to(device)
         ilens = torch.from_numpy(ilens).to(device)
-        return xs_pad, ilens, ys_pad, ys_kd_pad
+        if len(batch[0]) == 3:
+            return xs_pad, ilens, ys_pad, ys_kd_pad
+        
+        if len(batch[0]) == 4:
+            lm_kd_pad = pad_list(
+            [
+                torch.from_numpy(
+                    np.array(y[0][:]) if isinstance(y, tuple) else y
+                ).float()
+                for y in lm_kd
+            ],
+            self.ignore_id,
+            ).to(device)
+            return xs_pad, ilens, ys_pad, ys_kd_pad, lm_kd_pad
+        
 
 
 class CustomConverterMulEnc(object):
