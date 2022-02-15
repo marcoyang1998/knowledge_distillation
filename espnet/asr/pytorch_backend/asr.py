@@ -2067,3 +2067,84 @@ def ctc_align(args):
                 {"utts": new_js}, indent=4, ensure_ascii=False, sort_keys=True
             ).encode("utf_8")
         )
+
+def calculate_ILM_ppl(args):
+    logging.info("Calculate the perplexity of the internal language model in a transducer model")
+    set_deterministic_pytorch(args)
+    model, train_args = load_trained_model(args.model, training=False)
+    assert isinstance(model, ASRInterface)
+    model.recog_args = args
+
+    if args.ngpu == 1:
+        gpu_id = list(range(args.ngpu))
+        logging.info("gpu id: " + str(gpu_id))
+        model.cuda()
+        device = "cuda"
+    else:
+        device = "cpu"
+        
+    dictionary = train_args.char_list
+    char_list = [entry.split(" ")[0] for entry in dictionary]
+    args.char_list_dict = {x: i for i, x in enumerate(char_list)}
+    args.n_vocab = len(char_list)
+        
+    unk = args.char_list_dict["<unk>"]
+    eos = args.char_list_dict["<eos>"]
+    
+    batch_size = 1
+    
+    from espnet.lm.lm_utils import load_dataset, ParallelSentenceIterator, read_tokens, count_tokens
+    
+    val, n_val_tokens, n_val_oovs = load_dataset(
+        args.ILM_valid_label, args.char_list_dict
+    )
+    test_iter = ParallelSentenceIterator(
+        val, batch_size, max_length=1000, sos=eos, eos=eos, repeat=False
+    )
+    logging.info("#vocab = " + str(args.n_vocab))
+    logging.info("#sentences in the validation data = " + str(len(val)))
+    logging.info("#tokens in the validation data = " + str(n_val_tokens))
+    test = read_tokens(args.ILM_valid_label, args.char_list_dict)
+    n_test_tokens, n_test_oovs = count_tokens(test, unk)
+    logging.info("#sentences in the test data = " + str(len(test)))
+    logging.info("#tokens in the test data = " + str(n_test_tokens))
+    
+    def concat_examples(batch, device=None, padding=None):
+        """Concat examples in minibatch.
+
+        :param np.ndarray batch: The batch to concatenate
+        :param int device: The device to send to
+        :param Tuple[int,int] padding: The padding to use
+        :return: (inputs, targets)
+        :rtype (torch.Tensor, torch.Tensor)
+        """
+        from chainer.dataset import convert
+        x, t = convert.concat_examples(batch, padding=padding)
+        x = torch.from_numpy(x)
+        t = torch.from_numpy(t)
+        if device=="cuda":
+            x = x.cuda(device)
+            t = t.cuda(device)
+        return x, t
+    
+    loss = 0
+    nll = 0
+    count = 0
+    model.eval()
+    
+    with torch.no_grad():
+        for batch in copy.copy(test_iter):
+            x, t = concat_examples(batch, device=device, padding=(0, -100))
+            l, n, c = model.forward_ILM(x, t)
+            loss += float(l.sum())
+            nll += float(n.sum())
+            count += int(c.sum())
+    model.train()
+    result = {
+        "loss": loss,
+        "nll": nll,
+        "count": count
+    }
+    result["perplexity"] = np.exp(result["nll"] / result["count"])
+    logging.info(f"test perplexity: {result['perplexity']}")
+    print(result)

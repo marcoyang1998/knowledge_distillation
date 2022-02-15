@@ -227,6 +227,7 @@ class BeamSearchTransducer:
                     lm_state, lm_scores = self.lm.predict(max_hyp.lm_state, lm_tokens)
                 else:
                     lm_state = max_hyp.lm_state
+                    lm_scores = [0.0]
 
 
                 for logp, k in zip(*top_k):

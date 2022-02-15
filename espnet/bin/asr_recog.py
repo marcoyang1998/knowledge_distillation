@@ -327,7 +327,18 @@ def get_parser():
         default=0.0,
         help="If 0, ILME is deactivated. Otherwise the ILM score is subtracted from the original score"
     )
-
+    parser.add_argument(
+        "--calculate-ILM-ppl",
+        type=strtobool,
+        default=False,
+        help="calculate the ppl of transducer ILM"
+    )
+    parser.add_argument(
+        "--ILM-valid-label",
+        type=str,
+        help="path to valid.txt file"
+    )
+    
     return parser
 
 
@@ -414,6 +425,10 @@ def main(args):
                     from espnet.asr.pytorch_backend.asr import collect_rnnlm_logit
                     logging.info("Do rnnlm logit collection")
                     collect_rnnlm_logit(args)
+                elif args.calculate_ILM_ppl:
+                    from espnet.asr.pytorch_backend.asr import calculate_ILM_ppl
+                    logging.info("Calculate transducer ILM ppl")
+                    calculate_ILM_ppl(args)
                 else:
                     from espnet.asr.pytorch_backend.asr import recog
 

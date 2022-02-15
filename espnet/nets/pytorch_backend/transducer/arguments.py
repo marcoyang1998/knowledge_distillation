@@ -319,6 +319,18 @@ def add_auxiliary_task_arguments(group):
         help="loss factor for gt lm loss as an auxiliary loss"
     )
     group.add_argument(
+        "--kd-ILM-loss-factor",
+        type=float,
+        default=0.0,
+        help="loss factor for kd CE ilm loss as an auxiliary loss"
+    )
+    group.add_argument(
+        "--kd-ILM-teacher-weight",
+        type=float,
+        default=0.3,
+        help="external teacher lm weight for CXE"
+    )
+    group.add_argument(
         "--aux-cross-entropy-smoothing",
         default=0.0,
         type=float,
@@ -334,8 +346,8 @@ def add_auxiliary_task_arguments(group):
         "--transducer-kd-mode",
         default="one_best_path",
         type=str,
-        choices=["one_best_path", "reduced_lattice", "shifted_one_best_path", "window_shifted_one_best_path", "ILM_loss"],
-        help="knowledge distillation mode",
+        choices=["one_best_path", "reduced_lattice", "shifted_one_best_path", "window_shifted_one_best_path"],
+        help="knowledge distillation mode, only for lattice based kd loss",
     )
     group.add_argument(
         "--kd-prob-label",

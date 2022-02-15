@@ -515,3 +515,68 @@ def evaluate(args):
     logging.info(f"test perplexity: {result['perplexity']}")
     print(f"test perplexity: {result['perplexity']}")
     print(result)
+    
+def evaluate_transducer_ILM(args):
+    from espnet.asr.pytorch_backend.asr_init import load_trained_model
+    from espnet.nets.asr_interface import ASRInterface
+    set_deterministic_pytorch(args)
+    model, train_args = load_trained_model(args.model, training=False)
+    assert isinstance(model, ASRInterface)
+    model.recog_args = args
+    
+    unk = args.char_list_dict["<unk>"]
+    eos = args.char_list_dict["<eos>"]
+    # read tokens as a sequence of sentences
+    batch_size = args.batchsize * max(args.ngpu, 1)
+    val, n_val_tokens, n_val_oovs = load_dataset(
+        args.valid_label, args.char_list_dict, args.dump_hdf5_path
+    )
+    test_iter = ParallelSentenceIterator(
+        val, batch_size, max_length=args.maxlen, sos=eos, eos=eos, repeat=False
+    )
+    logging.info("#vocab = " + str(args.n_vocab))
+    logging.info("#sentences in the validation data = " + str(len(val)))
+    logging.info("#tokens in the validation data = " + str(n_val_tokens))
+    logging.info(
+        "oov rate in the validation data = %.2f %%" % (n_val_oovs / n_val_tokens * 100)
+    )
+    
+    if args.ngpu > 0:
+        model.to("cuda")
+        gpu_id = list(range(args.ngpu))
+    else:
+        gpu_id = [-1]
+    
+    if args.train_dtype in ("float16", "float32", "float64"):
+        dtype = getattr(torch, args.train_dtype)
+        
+    test = read_tokens(args.valid_label, args.char_list_dict)
+    n_test_tokens, n_test_oovs = count_tokens(test, unk)
+    logging.info("#sentences in the test data = " + str(len(test)))
+    logging.info("#tokens in the test data = " + str(n_test_tokens))
+    
+    loss = 0
+    nll = 0
+    count = 0
+    model.eval()
+    with torch.no_grad():
+        for batch in copy.copy(test_iter):
+            x, t = concat_examples(batch, device=gpu_id[0], padding=(0, -100))
+            if gpu_id[0] == -1:
+                l, n, c = model(x, t)
+            else:
+                # apex does not support torch.nn.DataParallel
+                l, n, c = data_parallel(model, (x, t), gpu_id)
+            loss += float(l.sum())
+            nll += float(n.sum())
+            count += int(c.sum())
+    model.train()
+    result = {
+        "loss": loss,
+        "nll": nll,
+        "count": count
+    }                            
+    result["perplexity"] = np.exp(result["nll"] / result["count"])
+    logging.info(f"test perplexity: {result['perplexity']}")
+    print(f"test perplexity: {result['perplexity']}")
+    print(result)

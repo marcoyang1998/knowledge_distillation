@@ -295,9 +295,9 @@ def main(cmd_args):
     args.n_vocab = len(char_list)
 
     if args.evaluate_lm:
-        from espnet.lm.pytorch_backend.lm import evaluate
+        from espnet.lm.pytorch_backend.lm import evaluate, evaluate_transducer_ILM
 
-        evaluate(args)
+        evaluate_transducer_ILM(args)
         return
     # train
     logging.info("backend = " + args.backend)

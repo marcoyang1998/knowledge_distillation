@@ -436,15 +436,25 @@ class E2E(ASRInterface, torch.nn.Module):
                     self.kd_loss = self.kd_window_shifted_one_best_loss
                     #self.kd_loss = self.shifted_one_best_path_loss
                     self.shift_step = args.shift_step
-                elif self.kd_mode == "ILM_loss":
-                    self.kd_loss = self.kd_ILM_CE_loss
                 else:
                     raise NotImplementedError("Not implemented {}".format(self.kd_mode))
-                print("Distillation mode: {}, kd factor: {}".format(self.kd_mode, self.kd_mtl_factor))
+                
+                if self.kd_mtl_factor == 0:
+                    logging.warning('Lattice based CXE kd loss will not be calculated')
+                else:
+                    logging.warning("Distillation mode: {}, kd factor: {}".format(self.kd_mode, self.kd_mtl_factor))
+                
+                self.kd_ILM_loss_factor = args.kd_ILM_loss_factor
+                self.kd_ILM_teacher_weight = args.kd_ILM_teacher_weight
+                if self.kd_ILM_loss_factor == 0:
+                    logging.warning('CXE ILM kd loss will not be calculated!')
+                else:
+                    logging.warning(f'CXE ILM kd loss will be used with a factor of {self.kd_ILM_loss_factor}, Teacher LM weight is {self.kd_ILM_teacher_weight}!')
+                    
         self.loss = None
         self.rnnlm = None
         if args.streaming:
-            print("This is a streaming transducer!")
+            logging.warning("This is a streaming transducer!")
 
     def default_parameters(self, args):
         """Initialize/reset parameters for transducer.
@@ -601,14 +611,14 @@ class E2E(ASRInterface, torch.nn.Module):
 
         return kd_loss / bs
 
-    def kd_ILM_CE_loss(self, h_dec, h_dec_kd, ys_pad):
+    def kd_ILM_CE_loss(self, h_dec, h_dec_kd, lm_pad):
         def CXE(target, predicted):
             return -(target * predicted.log_softmax(-1))
         
-        lm_weight = 0.37
+        lm_weight = self.kd_ILM_teacher_weight
         
-        mask = ys_pad != self.ignore_id
-        mask = mask.to(ys_pad.device)
+        mask = lm_pad != self.ignore_id
+        mask = mask.to(lm_pad.device)
         
         dec_logits = self.joint_network.forward_ILM(h_dec).squeeze(2)
         dec_logits = dec_logits[:,:-1,1:] # remove last token and blank
@@ -745,7 +755,7 @@ class E2E(ASRInterface, torch.nn.Module):
 
         return self.loss
 
-    def forward_kd(self, xs_pad, ilens, ys_pad, ys_kd_pad):
+    def forward_kd(self, xs_pad, ilens, ys_pad, ys_kd_pad, lm_kd_pad=None):
         """E2E forward.
 
         Args:
@@ -813,13 +823,14 @@ class E2E(ASRInterface, torch.nn.Module):
             )
         else:
             loss_lm = 0.0
-
+        
         if self.do_kd:
-            if self.kd_mtl_factor > 0:
-                if self.kd_mode == "ILM_loss":
-                    loss_kd = self.kd_mtl_factor * self.kd_loss(pred_pad.unsqueeze(2), ys_kd_pad, ys_pad)
-                else:
-                    loss_kd = self.kd_mtl_factor * self.kd_loss(z, pred_len, target_len, cal_enc_T(ilens), ys_pad, ys_kd_pad)
+            if lm_kd_pad is not None or self.kd_ILM_loss_factor > 0: # for LM kd CXE loss
+                lm_kd_pad = ys_kd_pad if lm_kd_pad is None else lm_kd_pad
+                loss_lm += self.kd_ILM_loss_factor*self.kd_ILM_CE_loss(pred_pad.unsqueeze(2), lm_kd_pad, ys_pad)
+            
+            if self.kd_mtl_factor > 0:    
+                loss_kd = self.kd_mtl_factor * self.kd_loss(z, pred_len, target_len, cal_enc_T(ilens), ys_pad, ys_kd_pad)
             else:
                 loss_kd = 0.0
         else:
@@ -1147,3 +1158,35 @@ class E2E(ASRInterface, torch.nn.Module):
         self.train()
 
         return ret
+    
+    def forward_ILM(self, x, t): 
+        # forward ILM by feeding input and target t
+
+        hs_mask = torch.ones(x.size(0),1,320).bool()
+
+        ys_in_pad, ys_out_pad, target, pred_len, target_len = prepare_loss_inputs(
+            x, hs_mask,ignore_id=self.ignore_id
+        )
+        
+        hs_pad = torch.randn(x.size(0), 320, 144).to(x.device)
+        
+        pred_pad = self.dec(hs_pad, x)
+        
+        mask = x != self.ignore_id
+        mask = mask.to(x.device)
+        
+        x[x == self.ignore_id] = 0
+        ys_pad = x[...,:].contiguous()
+            
+        dec_logits = self.joint_network.forward_ILM(pred_pad)
+        shift_logits = dec_logits[..., :, :].contiguous() 
+        shift_labels = t[..., :].contiguous()
+        
+        loss_fct = torch.nn.CrossEntropyLoss(reduction='none')
+        loss = loss_fct(shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1))
+        
+        logp = loss * mask.view(-1)
+        logp = logp.sum()
+        count = mask.sum()
+        
+        return logp / count, logp, count
