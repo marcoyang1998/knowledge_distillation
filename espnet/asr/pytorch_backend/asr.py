@@ -835,6 +835,21 @@ def train(args):
         else:
             torch_resume(args.resume, trainer, args.resume_with_previous_opt, args.resume_with_previous_trainer)
 
+    if "transducer" in args.model_module:
+        if args.dproj_dim > 0:
+            logging.warning("Add projection layer to prediction network")
+            model.add_dproj_layer(args, device)
+
+            logging.warning(
+                "Updated: num. model params: {:,} (num. trained: {:,} ({:.1f}%))".format(
+                sum(p.numel() for p in model.parameters()),
+                sum(p.numel() for p in model.parameters() if p.requires_grad),
+                sum(p.numel() for p in model.parameters() if p.requires_grad)
+                * 100.0
+                / sum(p.numel() for p in model.parameters()),
+            )
+    )
+        
     # Evaluate the model with the test dataset for each epoch
     if args.save_interval_iters > 0:
         trainer.extend(
@@ -1957,7 +1972,10 @@ def collect_rnnlm_logit(args):
             if isinstance(rnnlm.predictor, GPT2LM):
                 transformer_outputs = rnnlm.predictor.encoder(yseq_pad)
                 hidden_states = transformer_outputs[0]
-                logits = rnnlm.predictor.decoder(hidden_states).squeeze(0)
+                if args.collect_lm_feature:
+                    logits = hidden_states
+                else:
+                    logits = rnnlm.predictor.decoder(hidden_states).squeeze(0)
             else:
                 lm_state = None
                 prev_token = torch.full((1, ), 0, dtype=torch.long, device=device)

@@ -332,14 +332,20 @@ class E2E(ASRInterface, torch.nn.Module):
                 args.dec_embed_dim,
                 args.dropout_rate_decoder,
                 args.dropout_rate_embed_decoder,
-                ignore_id=ignore_id
+                ignore_id=ignore_id,
+                dproj_dim=args.dproj_dim
             )
-            decoder_out = args.dunits
-
+        # dproj_dim=args.dproj_dim
+        decoder_out = args.dunits # if args.dproj_dim == 0 else args.dproj_dim
         self.joint_network = JointNetwork(
             odim, encoder_out, decoder_out, args.joint_dim, args.joint_activation_type
         )
-
+        
+        if args.dproj_dim > 0:
+            #print(self.dec.dproj)
+            print(self.joint_network.lin_dec)
+            logging.warning("Add projection layer after RNN predictor")
+            
         if hasattr(self, "most_dom_list"):
             self.most_dom_dim = sorted(
                 Counter(
@@ -453,8 +459,17 @@ class E2E(ASRInterface, torch.nn.Module):
                     
         self.loss = None
         self.rnnlm = None
+        self.use_dec_feature_loss = args.use_dec_feature_loss
         if args.streaming:
             logging.warning("This is a streaming transducer!")
+        self.use_dproj = False
+            
+    def add_dproj_layer(self, args, device):
+        
+        self.use_dproj = True
+        self.dec.add_projection_layer(device)
+        self.joint_network.lin_dec = torch.nn.Linear(args.dproj_dim, args.joint_dim,bias=False)
+        self.joint_network.lin_dec = self.joint_network.lin_dec.to(device)
 
     def default_parameters(self, args):
         """Initialize/reset parameters for transducer.
@@ -653,6 +668,24 @@ class E2E(ASRInterface, torch.nn.Module):
         
         return logp / count
     
+    def dec_feature_loss(self, pred_pad, lm_kd_pad, ys_pad):
+        start = torch.ones(ys_pad.shape[0], 1).int().to(ys_pad.device)
+        ys_pad = torch.cat([start, ys_pad], dim=1)
+        
+        mask = ys_pad != self.ignore_id
+        mask = mask.to(pred_pad.device)
+        
+        def _l1_loss(pred, target):
+            loss_fn = torch.nn.L1Loss(reduction='none')
+            loss = loss_fn(pred,target)
+            return loss
+        
+        loss = _l1_loss(pred_pad, lm_kd_pad)
+        loss = (loss * mask.unsqueeze(-1)).view(-1)
+        count = mask.sum()
+        
+        return loss.sum() / (count*pred_pad.shape[-1])
+    
     def forward(self, xs_pad, ilens, ys_pad, ys_kd_pad=None):
         """E2E forward.
 
@@ -691,6 +724,7 @@ class E2E(ASRInterface, torch.nn.Module):
             pred_pad, _ = self.decoder(ys_in_pad, ys_mask, hs_pad)
         else:
             pred_pad = self.dec(hs_pad, ys_in_pad)
+
 
         z = self.joint_network(hs_pad.unsqueeze(2), pred_pad.unsqueeze(1))
 
@@ -794,7 +828,7 @@ class E2E(ASRInterface, torch.nn.Module):
             pred_pad, _ = self.decoder(ys_in_pad, ys_mask, hs_pad)
         else:
             pred_pad = self.dec(hs_pad, ys_in_pad)
-
+        
         z = self.joint_network(hs_pad.unsqueeze(2), pred_pad.unsqueeze(1))
 
         # 3. loss computation
@@ -828,6 +862,10 @@ class E2E(ASRInterface, torch.nn.Module):
             if lm_kd_pad is not None or self.kd_ILM_loss_factor > 0: # for LM kd CXE loss
                 lm_kd_pad = ys_kd_pad if lm_kd_pad is None else lm_kd_pad
                 loss_lm += self.kd_ILM_loss_factor*self.kd_ILM_CE_loss(pred_pad.unsqueeze(2), lm_kd_pad, ys_pad)
+                
+            if self.use_dec_feature_loss:
+                dec_kd_pad = ys_kd_pad if lm_kd_pad is None else lm_kd_pad
+                loss_lm += self.dec_feature_loss(pred_pad, dec_kd_pad, ys_pad)
             
             if self.kd_mtl_factor > 0:    
                 loss_kd = self.kd_mtl_factor * self.kd_loss(z, pred_len, target_len, cal_enc_T(ilens), ys_pad, ys_kd_pad)

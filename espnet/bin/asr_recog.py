@@ -338,6 +338,12 @@ def get_parser():
         type=str,
         help="path to valid.txt file"
     )
+    parser.add_argument(
+        "--collect-lm-feature",
+        type=strtobool,
+        default=False,
+        help="collect feature vectors before linear output layer"
+    )
     
     return parser
 

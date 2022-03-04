@@ -30,7 +30,8 @@ class DecoderRNNT(TransducerDecoderInterface, torch.nn.Module):
         embed_dim,
         dropout=0.0,
         dropout_embed=0.0,
-        ignore_id=-1
+        ignore_id=-1,
+        dproj_dim=0
     ):
         """Transducer initializer."""
         super().__init__()
@@ -58,6 +59,9 @@ class DecoderRNNT(TransducerDecoderInterface, torch.nn.Module):
         self.blank = blank
 
         self.multi_gpus = torch.cuda.device_count() > 1
+        self.dproj_dim = dproj_dim
+        #if self.dproj_dim > 0:
+        #    self.add_projection_layer()
 
     def set_device(self, device):
         """Set GPU device to use.
@@ -141,6 +145,10 @@ class DecoderRNNT(TransducerDecoderInterface, torch.nn.Module):
 
             y = self.dropout_dec(y)
 
+        if self.use_dproj:
+            y = self.dproj(y)
+            y = self.dproj_ln(y)
+            
         return y, (h_next, c_next)
 
     def forward(self, hs_pad, ys_in_pad):
@@ -191,7 +199,7 @@ class DecoderRNNT(TransducerDecoderInterface, torch.nn.Module):
 
             y, state = self.rnn_forward(ey, hyp.dec_state)
             cache[str_yseq] = (y, state)
-
+        
         return y[0][0], state, vy[0]
 
     def batch_score(self, hyps, batch_states, cache, use_lm):
@@ -291,3 +299,13 @@ class DecoderRNNT(TransducerDecoderInterface, torch.nn.Module):
             if self.dtype == "lstm"
             else None,
         )
+
+    def add_projection_layer(self, device):
+
+        self.use_dproj = True
+        
+        self.dproj = torch.nn.Linear(self.dunits, self.dproj_dim)
+        self.dproj_ln = torch.nn.LayerNorm(self.dproj_dim, eps=1e-05)
+        
+        self.dproj = self.dproj.to(device)
+        self.dproj_ln = self.dproj_ln.to(device)
