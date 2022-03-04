@@ -59,6 +59,8 @@ class DecoderRNNT(TransducerDecoderInterface, torch.nn.Module):
         self.blank = blank
 
         self.multi_gpus = torch.cuda.device_count() > 1
+        
+        self.use_dproj = False
         self.dproj_dim = dproj_dim
         if self.dproj_dim > 0:
             self.add_projection_layer()
