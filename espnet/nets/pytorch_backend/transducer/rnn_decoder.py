@@ -60,8 +60,8 @@ class DecoderRNNT(TransducerDecoderInterface, torch.nn.Module):
 
         self.multi_gpus = torch.cuda.device_count() > 1
         self.dproj_dim = dproj_dim
-        #if self.dproj_dim > 0:
-        #    self.add_projection_layer()
+        if self.dproj_dim > 0:
+            self.add_projection_layer()
 
     def set_device(self, device):
         """Set GPU device to use.
@@ -300,12 +300,9 @@ class DecoderRNNT(TransducerDecoderInterface, torch.nn.Module):
             else None,
         )
 
-    def add_projection_layer(self, device):
+    def add_projection_layer(self):
 
         self.use_dproj = True
         
         self.dproj = torch.nn.Linear(self.dunits, self.dproj_dim)
         self.dproj_ln = torch.nn.LayerNorm(self.dproj_dim, eps=1e-05)
-        
-        self.dproj = self.dproj.to(device)
-        self.dproj_ln = self.dproj_ln.to(device)

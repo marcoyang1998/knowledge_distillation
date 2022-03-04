@@ -335,14 +335,13 @@ class E2E(ASRInterface, torch.nn.Module):
                 ignore_id=ignore_id,
                 dproj_dim=args.dproj_dim
             )
-        # dproj_dim=args.dproj_dim
-        decoder_out = args.dunits # if args.dproj_dim == 0 else args.dproj_dim
+        decoder_out = args.dunits if args.dproj_dim == 0 else args.dproj_dim
         self.joint_network = JointNetwork(
             odim, encoder_out, decoder_out, args.joint_dim, args.joint_activation_type
         )
         
         if args.dproj_dim > 0:
-            #print(self.dec.dproj)
+            print(self.dec.dproj)
             print(self.joint_network.lin_dec)
             logging.warning("Add projection layer after RNN predictor")
             
@@ -467,9 +466,6 @@ class E2E(ASRInterface, torch.nn.Module):
     def add_dproj_layer(self, args, device):
         
         self.use_dproj = True
-        self.dec.add_projection_layer(device)
-        self.joint_network.lin_dec = torch.nn.Linear(args.dproj_dim, args.joint_dim,bias=False)
-        self.joint_network.lin_dec = self.joint_network.lin_dec.to(device)
 
     def default_parameters(self, args):
         """Initialize/reset parameters for transducer.
