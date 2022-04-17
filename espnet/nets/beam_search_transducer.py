@@ -178,7 +178,80 @@ class BeamSearchTransducer:
 
         return [hyp]
 
-    def default_beam_search(self, h: torch.Tensor) -> List[Hypothesis]:
+    def default_beam_search(self, enc_out: torch.Tensor) -> List[Hypothesis]:
+        """Beam search implementation.
+        Modified from https://arxiv.org/pdf/1211.3711.pdf
+        Args:
+            enc_out: Encoder output sequence. (T, D)
+        Returns:
+            nbest_hyps: N-best hypothesis.
+        """
+        beam = min(self.beam_size, self.vocab_size)
+        beam_k = min(beam, (self.vocab_size - 1))
+
+        dec_state = self.decoder.init_state(1)
+
+        kept_hyps = [Hypothesis(score=0.0, yseq=[self.blank], dec_state=dec_state)]
+        cache = {}
+
+        for enc_out_t in enc_out:
+            hyps = kept_hyps
+            kept_hyps = []
+
+            while True:
+                max_hyp = max(hyps, key=lambda x: x.score)
+                hyps.remove(max_hyp)
+
+                dec_out, state, lm_tokens = self.decoder.score(max_hyp, cache)
+
+                logp = torch.log_softmax(
+                    self.joint_network(
+                        enc_out_t, dec_out
+                    ),dim=-1,
+                )
+                top_k = logp[1:].topk(beam_k, dim=-1)
+
+                kept_hyps.append(
+                    Hypothesis(
+                        score=(max_hyp.score + float(logp[0:1])),
+                        yseq=max_hyp.yseq[:],
+                        dec_state=max_hyp.dec_state,
+                        lm_state=max_hyp.lm_state,
+                    )
+                )
+
+                if self.use_lm:
+                    lm_state, lm_scores = self.lm.predict(max_hyp.lm_state, lm_tokens)
+                else:
+                    lm_state = max_hyp.lm_state
+
+                for logp, k in zip(*top_k):
+                    score = max_hyp.score + float(logp)
+
+                    if self.use_lm:
+                        score += self.lm_weight * lm_scores[0][k + 1]
+
+                    hyps.append(
+                        Hypothesis(
+                            score=score,
+                            yseq=max_hyp.yseq[:] + [int(k + 1)],
+                            dec_state=state,
+                            lm_state=lm_state,
+                        )
+                    )
+
+                hyps_max = float(max(hyps, key=lambda x: x.score).score)
+                kept_most_prob = sorted(
+                    [hyp for hyp in kept_hyps if hyp.score > hyps_max],
+                    key=lambda x: x.score,
+                )
+                if len(kept_most_prob) >= beam:
+                    kept_hyps = kept_most_prob
+                    break
+
+        return self.sort_nbest(kept_hyps)
+    
+    def default_beam_search_mine(self, h: torch.Tensor) -> List[Hypothesis]:
         """Beam search implementation.
 
         Args:

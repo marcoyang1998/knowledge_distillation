@@ -5,6 +5,7 @@ from collections import Counter
 from dataclasses import asdict
 import logging
 import math
+from typing import List
 import numpy
 
 import chainer
@@ -47,6 +48,7 @@ from espnet.nets.pytorch_backend.transformer.label_smoothing_loss import (
 from espnet.nets.pytorch_backend.transformer.mask import target_mask
 from espnet.nets.pytorch_backend.transformer.plot import PlotAttentionReport
 from espnet.utils.fill_missing_args import fill_missing_args
+from espnet.nets.pytorch_backend.nets_utils import pad_list
 
 
 class Reporter(chainer.Chain):
@@ -277,9 +279,10 @@ class E2E(ASRInterface, torch.nn.Module):
                 positionwise_activation_type=args.custom_enc_pw_activation_type,
                 conv_mod_activation_type=args.custom_enc_conv_mod_activation_type,
                 aux_task_layer_list=aux_task_layer_list,
-                streaming=args.streaming
+                streaming=args.streaming,
+                encoder_projection=args.encoder_projection,
             )
-            encoder_out = self.encoder.enc_out
+            encoder_out = self.encoder.enc_out if args.encoder_projection == 0 else args.encoder_projection
 
             self.most_dom_list = args.enc_block_arch[:]
         else:
@@ -292,13 +295,15 @@ class E2E(ASRInterface, torch.nn.Module):
                 aux_task_layer_list=aux_task_layer_list,
             )
             encoder_out = args.eprojs
-        if args.modify_first_block and args.streaming: # modify the first encoder block to allow for furture context, only used when streaming
-            if args.first_block_future_context > 0:
-                n_head = args.enc_block_arch[0]['heads']
-                n_feat = args.enc_block_arch[0]['d_hidden']
-                att_dropout = args.enc_block_arch[0]['att-dropout-rate']
-                self.encoder.encoders[0].self_attn = RelPositionMultiHeadedAttention(n_head=n_head, n_feat=n_feat, dropout_rate= att_dropout, zero_triu=args.streaming, future_context=args.first_block_future_context)
-                #self.encoder.encoders[0].conv_module = None
+        if args.modify_first_block and args.streaming and args.first_block_future_context > 0: # modify the first encoder block to allow for furture context, only used when streaming
+            n_head = args.enc_block_arch[0]['heads']
+            n_feat = args.enc_block_arch[0]['d_hidden']
+            att_dropout = args.enc_block_arch[0]['att-dropout-rate']
+            self.encoder.encoders[0].self_attn = RelPositionMultiHeadedAttention(n_head=n_head, 
+                                                                                 n_feat=n_feat, 
+                                                                                 dropout_rate=att_dropout,
+                                                                                 zero_triu=args.streaming, 
+                                                                                 future_context=args.first_block_future_context)
 
         if "custom" in args.dtype:
             if args.dec_block_arch is None:
@@ -336,13 +341,15 @@ class E2E(ASRInterface, torch.nn.Module):
                 dproj_dim=args.dproj_dim
             )
         decoder_out = args.dunits if args.dproj_dim == 0 else args.dproj_dim
+        self.decoder_out = decoder_out
+        
         self.joint_network = JointNetwork(
             odim, encoder_out, decoder_out, args.joint_dim, args.joint_activation_type
         )
         
         if args.dproj_dim > 0:
-            print(self.dec.dproj)
-            print(self.joint_network.lin_dec)
+            logging.info(self.dec.dproj)
+            logging.info(self.joint_network.lin_dec)
             logging.warning("Add projection layer after RNN predictor")
             
         if hasattr(self, "most_dom_list"):
@@ -377,7 +384,8 @@ class E2E(ASRInterface, torch.nn.Module):
         self.default_parameters(args)
 
         if training:
-            self.criterion = TransLoss(args.trans_type, self.blank_id)
+            self.trans_loss_reduction = args.trans_loss_reduction
+            self.criterion = TransLoss(args.trans_type, self.blank_id, reduction=self.trans_loss_reduction)
 
             decoder = self.decoder if self.dtype == "custom" else self.dec
 
@@ -458,7 +466,9 @@ class E2E(ASRInterface, torch.nn.Module):
                     
         self.loss = None
         self.rnnlm = None
-        self.use_dec_feature_loss = args.use_dec_feature_loss
+        self.dec_feature_loss_factor = args.dec_feature_loss_factor
+        self.use_dec_feature_loss = args.use_dec_feature_loss and self.dec_feature_loss_factor > 0
+        
         if args.streaming:
             logging.warning("This is a streaming transducer!")
         self.use_dproj = False
@@ -467,6 +477,26 @@ class E2E(ASRInterface, torch.nn.Module):
         
         self.use_dproj = True
 
+    def update_joiner(self, args, device):
+        
+        self.joint_network = JointNetwork(
+            self.odim, args.encoder_projection, self.decoder_out, args.joint_dim, args.joint_activation_type
+        )
+        initializer(self, args, name_list=['joint_network'])
+        self.joint_network.to(device)
+        if args.report_cer or args.report_wer:
+            self.error_calculator = ErrorCalculator(
+                self.decoder if self.dtype == "custom" else self.dec,
+                self.joint_network,
+                args.char_list,
+                args.sym_space,
+                args.sym_blank,
+                args.report_cer,
+                args.report_wer,
+            )
+                       
+        logging.warning(self.joint_network)
+        
     def default_parameters(self, args):
         """Initialize/reset parameters for transducer.
 
@@ -476,13 +506,10 @@ class E2E(ASRInterface, torch.nn.Module):
         """
         initializer(self, args)
 
-    def kd_one_best_loss(self, z, pred_len, target_len, enc_T, ys_pad, ys_pad_kd):
+    def kd_one_best_loss(self, z, pred_len, target_len, enc_T, ys_pad, ys_pad_kd, reduction='mean'):
         # 0: t_list, 1: u_list， 2： y_seq_with_blank
         def CXE(target, predicted):
             return -(target * predicted.log_softmax(-1)).sum()
-
-        def CXE_prob(target, predicted):
-            return -(target * predicted.log(-1)).sum()
 
         bs = z.shape[0]
         #ys = [y[y != self.ignore_id] for y in ys_pad]
@@ -506,15 +533,22 @@ class E2E(ASRInterface, torch.nn.Module):
         #assert max([max(l) for l in u_list]) < z.shape[2], print([max(l) for l in u_list], z.shape)
 
         logits = [lattice[t_list[i].long(), u_list[i].long(), :] for i, lattice in enumerate(z)]
-
-        ys_kd = torch.cat(ys_kd, dim=0)
-        logits = torch.cat(logits, dim=0)
-        if self.kd_prob_label:
-            kd_loss = CXE(ys_kd, logits)
+        if reduction == 'none':
+            kd_loss_list = []
+            for i in range(bs):
+                kd_loss_list.append(CXE(torch.softmax(ys_kd[i] / self.kd_temperature, dim=-1), 
+                                        logits[i] / self.kd_temperature))
+            return kd_loss_list
         else:
-            kd_loss = CXE(torch.softmax(ys_kd / self.kd_temperature, dim=-1), logits / self.kd_temperature)
+            ys_kd = torch.cat(ys_kd, dim=0)
+            logits = torch.cat(logits, dim=0)
+            count = ys_kd.shape[0]
+            if self.kd_prob_label:
+                kd_loss = CXE(ys_kd, logits)
+            else:
+                kd_loss = CXE(torch.softmax(ys_kd / self.kd_temperature, dim=-1), logits / self.kd_temperature)
 
-        return kd_loss/bs
+            return kd_loss/bs
 
     def kd_reduced_lattice_loss(self, z, pred_len, target_len, enc_T, ys_pad, ys_pad_kd):
         def reduced_CXE(target, predicted):
@@ -676,11 +710,23 @@ class E2E(ASRInterface, torch.nn.Module):
             loss = loss_fn(pred,target)
             return loss
         
-        loss = _l1_loss(pred_pad, lm_kd_pad)
+        def _l2_loss(pred, target):
+            loss_fn = torch.nn.MSELoss(reduction='none')
+            loss = loss_fn(pred,target)
+            return loss
+        def _cosine_sim(pred, target):
+            loss_fn = torch.nn.CosineSimilarity(dim=-1, eps=1e-6)
+            loss = loss_fn(pred, target)
+            loss = loss.unsqueeze(-1)
+            return loss
+        
+        loss_fn = _l1_loss
+        loss = loss_fn(pred_pad, lm_kd_pad)
         loss = (loss * mask.unsqueeze(-1)).view(-1)
         count = mask.sum()
         
-        return loss.sum() / (count*pred_pad.shape[-1])
+        #return loss.sum() / (count*pred_pad.shape[-1])
+        return loss.sum() / (count)
     
     def forward(self, xs_pad, ilens, ys_pad, ys_kd_pad=None):
         """E2E forward.
@@ -726,6 +772,8 @@ class E2E(ASRInterface, torch.nn.Module):
 
         # 3. loss computation
         loss_trans = self.criterion(z, target, pred_len, target_len)
+        if self.trans_loss_reduction == "none": # using none reduction
+            loss_trans = torch.mean(loss_trans)
 
         if self.use_aux_task and aux_hs_pad is not None:
             loss_aux_trans, loss_aux_symm_kl = self.auxiliary_task(
@@ -854,16 +902,17 @@ class E2E(ASRInterface, torch.nn.Module):
         else:
             loss_lm = 0.0
         
-        if self.do_kd:
-            if lm_kd_pad is not None or self.kd_ILM_loss_factor > 0: # for LM kd CXE loss
+        if self.do_kd:           
+            if self.use_dec_feature_loss:
+                #logging.warning('Using decoder feature loss')
+                dec_kd_pad = ys_kd_pad if lm_kd_pad is None else lm_kd_pad
+                #logging.warning(dec_kd_pad.shape)
+                loss_lm += self.dec_feature_loss(pred_pad, dec_kd_pad, ys_pad) * self.dec_feature_loss_factor
+            elif (lm_kd_pad is not None and self.kd_ILM_loss_factor > 0):
+                logging.warning('Using ILM CXE loss')
                 lm_kd_pad = ys_kd_pad if lm_kd_pad is None else lm_kd_pad
                 loss_lm += self.kd_ILM_loss_factor*self.kd_ILM_CE_loss(pred_pad.unsqueeze(2), lm_kd_pad, ys_pad)
-                
-            if self.use_dec_feature_loss:
-                dec_kd_pad = ys_kd_pad if lm_kd_pad is None else lm_kd_pad
-                loss_lm += self.dec_feature_loss(pred_pad, dec_kd_pad, ys_pad)
-            
-            if self.kd_mtl_factor > 0:    
+            if self.kd_mtl_factor > 0:
                 loss_kd = self.kd_mtl_factor * self.kd_loss(z, pred_len, target_len, cal_enc_T(ilens), ys_pad, ys_kd_pad)
             else:
                 loss_kd = 0.0
@@ -999,7 +1048,7 @@ class E2E(ASRInterface, torch.nn.Module):
         return z
 
     def get_one_best_lm_logits(self, ys_pad, lm):
-        prev_token = torch.full((1, ), self.sos, dtype=torch.long, device=ys_pad.device)
+        prev_token = torch.full((1, ), self.blank, dtype=torch.long, device=ys_pad.device)
         lm_states = None
         lm_score_list = []
         
@@ -1041,8 +1090,7 @@ class E2E(ASRInterface, torch.nn.Module):
         score = 0.0
         lm_state = None
         i = 0
-        #prev_token = torch.full((1, ), 0, dtype=torch.long, device=xs_pad.device)
-        prev_token = torch.full((1, ), self.sos, dtype=torch.long, device=xs_pad.device)
+        prev_token = torch.full((1, ), 0, dtype=torch.long, device=xs_pad.device)
         if use_lm:
             lm_state, lm_scores = lm.predict(lm_state, prev_token)
         while True:
@@ -1149,15 +1197,18 @@ class E2E(ASRInterface, torch.nn.Module):
         assert z.shape[0] == 1
         return pr
 
-    def collect_decoder_logits(self, xs_pad, ilens, ys_pad, lm=None, lm_weight=0.0):
+    def collect_decoder_features(self, xs_pad, ilens, ys_pad, lm=None, lm_weight=0.0):
         
         # here assume the batch size is one
         assert xs_pad.shape[0] == 1
-        assert lm is not None
+
+        hs_pad = torch.ones(1,1,768).to(ys_pad.device)
+        blank = ys_pad.new([0]).view(-1,1)
+        ys_pad = torch.cat([blank, ys_pad], -1)
         
-        lm_logits = self.get_one_best_lm_logits(ys_pad, lm)
+        predictor_features = self.dec(hs_pad, ys_pad)
         
-        return lm_logits
+        return predictor_features
     
     def calculate_all_attentions(self, xs_pad, ilens, ys_pad):
         """E2E attention calculation.
@@ -1224,3 +1275,245 @@ class E2E(ASRInterface, torch.nn.Module):
         count = mask.sum()
         
         return logp / count, logp, count
+    
+    def collect_encoder_features(self, xs_pad, ilens, ys_pad):
+        if self.etype == 'wav2vec':
+            self.enc.encoders.mask_channel_prob = 0
+            self.enc.encoders.mask_prob = 0
+            
+        xs_pad = xs_pad[:, : max(ilens)]
+        
+        if "custom" in self.etype:
+            src_mask = make_non_pad_mask(ilens.tolist()).to(xs_pad.device).unsqueeze(-2)
+
+            _hs_pad, _ = self.encoder(xs_pad, src_mask)
+        else:
+            _hs_pad, _, _ = self.enc(xs_pad, ilens)
+        
+        hs_pad, _  = _hs_pad, None
+        
+        return hs_pad
+    
+    def forward_encoder_KD(self, xs_pad, ilens, ys_pad, enc_kd_pad=None):
+        """Encoder forwarding for KD
+
+        Args:
+            xs_pad (torch.Tensor): batch of padded source sequences (B, Tmax, idim)
+            ilens (torch.Tensor): batch of lengths of input sequences (B)
+            ys_pad (torch.Tensor): batch of padded target sequences (B, Lmax)
+            enc_kd_pad (torch.Tensor): batch of padded encoder output as target in KD training
+
+        Returns:
+            _type_: _description_
+        """
+        enc_kd_pad = ys_pad if enc_kd_pad is None else enc_kd_pad
+        
+        bs = xs_pad.size(0)
+        xs_pad = xs_pad[:, : max(ilens)]
+
+        if "custom" in self.etype:
+            src_mask = make_non_pad_mask(ilens.tolist()).to(xs_pad.device).unsqueeze(-2)
+
+            _hs_pad, _ = self.encoder(xs_pad, src_mask)
+        else:
+            _hs_pad, _, _ = self.enc(xs_pad, ilens)
+        
+        hs_pad, _  = _hs_pad, None
+        
+        criterion = torch.nn.L1Loss(reduction='none')
+        min_T = min(enc_kd_pad.shape[1] , hs_pad.shape[1])
+        enc_kd_pad = enc_kd_pad[:, :min_T, :]
+        hs_pad = hs_pad[:, :min_T, :]
+        
+        mask = enc_kd_pad != self.ignore_id
+        
+        loss_kd = criterion(hs_pad, enc_kd_pad) * mask
+        if self.training:
+            loss_kd = loss_kd.sum()/(bs*hs_pad.shape[-1])
+            loss_kd *= self.kd_mtl_factor
+        else:
+            loss_kd = loss_kd.sum()/(mask.sum()*hs_pad.shape[-1])
+        
+        loss_lm = 0.0
+        loss_trans = 0.0
+        loss_ctc = 0.0
+        loss_aux_trans, loss_aux_symm_kl = 0.0, 0.0
+        
+        loss = loss_trans + loss_kd
+        
+        self.loss = loss
+        loss_data = float(loss)
+        
+        cer, wer = 0.0, 0.0
+        
+        if not math.isnan(loss_data):
+            self.reporter.report_kd(
+                loss_data,
+                float(loss_trans),
+                float(loss_ctc),
+                float(loss_lm),
+                float(loss_aux_trans),
+                float(loss_aux_symm_kl),
+                float(loss_kd),
+                cer,
+                wer,
+            )
+        else:
+            logging.warning("loss (=%f) is not correct", loss_data)
+
+        return self.loss
+    
+    def forward_decoder_KD(self, xs_pad, ilens, ys_pad, dec_kd_pad=None):
+        # forward decoder for KD    
+        bs = ys_pad.size(0)
+        dec_kd_pad = xs_pad if dec_kd_pad is None else dec_kd_pad
+        
+        hs_pad = torch.ones(bs,1,768).to(ys_pad.device)
+        ys = [y[y != self.ignore_id] for y in ys_pad]
+        blank = ys[0].new([0])
+
+        ys_in_pad = pad_list([torch.cat([blank, y], dim=0) for y in ys], 0)
+        
+        predictor_features = self.dec(hs_pad, ys_in_pad)
+        
+        mask = ys_pad != self.ignore_id
+        mask = torch.cat([torch.ones(bs, 1).bool().to(mask.device), mask], dim=1)
+        criterion = torch.nn.L1Loss(reduction='none')
+        loss_kd = criterion(predictor_features, dec_kd_pad) * mask.unsqueeze(-1)
+        
+        if self.training:
+            loss_kd = loss_kd.sum()/(bs*predictor_features.shape[-1])
+            loss_kd *= self.kd_mtl_factor
+        else:
+            loss_kd = loss_kd.sum()/(mask.sum()*predictor_features.shape[-1])
+        
+        loss_lm = 0.0
+        loss_trans = 0.0
+        loss_ctc = 0.0
+        loss_aux_trans, loss_aux_symm_kl = 0.0, 0.0
+        
+        loss = loss_trans + loss_kd
+        
+        self.loss = loss
+        loss_data = float(loss)
+        
+        cer, wer = 0.0, 0.0
+        
+        if not math.isnan(loss_data):
+            self.reporter.report_kd(
+                loss_data,
+                float(loss_trans),
+                float(loss_ctc),
+                float(loss_lm),
+                float(loss_aux_trans),
+                float(loss_aux_symm_kl),
+                float(loss_kd),
+                cer,
+                wer,
+            )
+        else:
+            logging.warning("loss (=%f) is not correct", loss_data)
+            
+        return self.loss
+        
+    def forward_nbest_KD(self, xs_pad: torch.Tensor, ilens: torch.Tensor, n_best_list: List):
+        """E2E n-best KD forward
+
+        Args:
+            xs_pad (torch.Tensor): batch of padded input 
+            ilens (torch.Tensor): batch of lengths of input sequences
+            n_best_list (list): a list of tuples, each tuple consists of (transcription, kd_aligment)
+        """
+        bs = xs_pad.shape[0]
+        xs_pad = xs_pad[:, : max(ilens)]
+        def cal_enc_T(ilens):
+            return [(((idim - 1) // 2 - 1) // 2) for idim in ilens]
+        if "custom" in self.etype:
+            src_mask = make_non_pad_mask(ilens.tolist()).to(xs_pad.device).unsqueeze(-2)
+
+            _hs_pad, hs_mask = self.encoder(xs_pad, src_mask)
+        else:
+            _hs_pad, hs_mask, _ = self.enc(xs_pad, ilens)
+
+        if self.use_aux_task:
+            hs_pad, aux_hs_pad = _hs_pad[0], _hs_pad[1]
+        else:
+            hs_pad, aux_hs_pad = _hs_pad, None
+            
+        n_best_num = len(n_best_list)
+        
+        loss_aux_trans, loss_aux_symm_kl = 0.0, 0.0
+        loss_ctc, loss_lm = 0.0, 0.0
+        loss_kd = 0.0
+        loss_trans = 0.0
+        loss_trans_list = []
+        loss_kd_list = []
+        
+        for (ys_pad, kd_pad) in n_best_list:
+            # prepare transducer loss
+            ys_in_pad, ys_out_pad, target, pred_len, target_len = prepare_loss_inputs(ys_pad, hs_mask,ignore_id=self.ignore_id)
+            
+            if "custom" in self.dtype:
+                ys_mask = target_mask(ys_in_pad, self.blank_id)
+                pred_pad, _ = self.decoder(ys_in_pad, ys_mask, hs_pad)
+            else:
+                pred_pad = self.dec(hs_pad, ys_in_pad)
+            
+            # lattice generation
+            z = self.joint_network(hs_pad.unsqueeze(2), pred_pad.unsqueeze(1))
+            
+            # loss computation
+            loss_trans_list += self.criterion(z, target, pred_len, target_len)
+            
+            if self.kd_mtl_factor > 0:
+                loss_kd_list += (self.kd_loss(z, pred_len, target_len, cal_enc_T(ilens), ys_pad, kd_pad, reduction='none'))
+        
+        # loss_trans_list = numpy.array(loss_trans_list)
+        loss_trans_data = numpy.array([d.item() for d in loss_trans_list]).reshape(n_best_num, bs)
+
+        hyp_probs = numpy.exp(-loss_trans_data) + 1e-5
+        hyp_probs = torch.from_numpy(hyp_probs/numpy.sum(hyp_probs, axis=0).reshape(1,bs)).float().to(xs_pad.device)
+        hyp_probs = hyp_probs.view(-1)
+        
+        # loss_trans += loss_trans_list[i] for i in range(bs)  # the groundtruth or best sequence
+        for i in range(bs):
+            loss_trans += loss_trans_list[i]
+        loss_trans = loss_trans / bs
+        
+        for i in range(n_best_num * bs):
+            loss_kd += hyp_probs[i] * loss_kd_list[i]
+        loss_kd = loss_kd * self.kd_mtl_factor / bs
+                
+        loss = (
+            loss_trans
+            + self.transducer_weight * (loss_aux_trans + loss_aux_symm_kl)
+            + loss_ctc
+            + loss_lm
+            + loss_kd
+        )
+
+        self.loss = loss
+        loss_data = float(loss)
+
+        # compute cer/wer
+        if self.training or self.error_calculator is None:
+            cer, wer = None, None
+        else:
+            cer, wer = self.error_calculator(hs_pad, ys_pad)
+        
+        if not math.isnan(loss_data):
+            self.reporter.report_kd(
+                    loss_data,
+                    float(loss_trans),
+                    float(loss_ctc),
+                    float(loss_lm),
+                    float(loss_aux_trans),
+                    float(loss_aux_symm_kl),
+                    float(loss_kd),
+                    cer,
+                    wer,
+                )   
+        else:
+            logging.warning("loss (=%f) is not correct", loss_data)    
+
+        return self.loss

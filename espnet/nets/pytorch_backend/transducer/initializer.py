@@ -8,7 +8,7 @@ import math
 from espnet.nets.pytorch_backend.initialization import set_forget_bias_to_one
 
 
-def initializer(model, args):
+def initializer(model, args, name_list=None):
     """Initialize transducer model.
 
     Args:
@@ -16,10 +16,14 @@ def initializer(model, args):
         args (Namespace): argument Namespace containing options
 
     """
-    if args.etype == 'wav2vec':
-        components_list = ["dec.", "joint_network"]
+    if name_list is None:
+        if args.etype == 'wav2vec':
+            components_list = ["dec.", "joint_network"]
+        else:
+            components_list = ["enc.", "dec.", "joint_network"]
     else:
-        components_list = ["enc.", "dec.", "joint_network"]
+        components_list = name_list
+        
     for name, p in model.named_parameters():
         if any(x in name for x in components_list):
             # rnn based parts + joint network

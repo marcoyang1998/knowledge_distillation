@@ -13,16 +13,17 @@ class TransLoss(torch.nn.Module):
         blank_id (int): blank symbol id
     """
 
-    def __init__(self, trans_type, blank_id):
+    def __init__(self, trans_type, blank_id, reduction='mean'):
         """Construct an TransLoss object."""
         super().__init__()
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.reduction = reduction
 
         if trans_type == "warp-transducer":
             from warprnnt_pytorch import RNNTLoss
 
-            self.trans_loss = RNNTLoss(blank=blank_id)
+            self.trans_loss = RNNTLoss(blank=blank_id, reduction=self.reduction)
         elif trans_type == "warp-rnnt":
             if device.type == "cuda":
                 try:

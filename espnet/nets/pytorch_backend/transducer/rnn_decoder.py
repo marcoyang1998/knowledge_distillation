@@ -149,7 +149,7 @@ class DecoderRNNT(TransducerDecoderInterface, torch.nn.Module):
 
         if self.use_dproj:
             y = self.dproj(y)
-            y = self.dproj_ln(y)
+            #y = self.dproj_ln(y)
             
         return y, (h_next, c_next)
 

@@ -2,6 +2,7 @@
 
 import ast
 from distutils.util import strtobool
+from email.policy import default
 
 
 def add_encoder_general_arguments(group):
@@ -122,6 +123,12 @@ def add_custom_encoder_arguments(group):
         choices=["relu", "hardtanh", "selu", "swish"],
         help="Custom encoder convolutional module activation type",
     )
+    group.add_argument(
+        "--encoder-projection",
+        type=int,
+        default=0,
+        help="Add a projection layer after the encoder. If 0, no projection layer will be added"
+    )
 
     return group
 
@@ -224,6 +231,12 @@ def add_custom_training_arguments(group):
         default=10.0,
         type=float,
         help="Initial value of learning rate",
+    )
+    group.add_argument(
+        "--trans-loss-reduction",
+        default="mean",
+        type=str,
+        help="Reduction type, set to none for n-best KD"
     )
 
     return group
@@ -386,6 +399,12 @@ def add_auxiliary_task_arguments(group):
         default=0,
         type=int,
         help="Only used when modify-first-block is set True. How many future frames are used in the first encoder block"
+    )
+    group.add_argument(
+        "--dec-feature-loss-factor",
+        default=0.0,
+        type=float,
+        help="The factor of decoder feature loss"
     )
 
     return group
