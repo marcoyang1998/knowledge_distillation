@@ -277,7 +277,7 @@ def get_parser():
     parser.add_argument(
         "--rnnt-kd-data-collection-mode",
         type=str,
-        choices=["beam_search", "reduced_lattice", "one_best_lattice", "full_lattice", "decoder_logits"],
+        choices=["beam_search", "reduced_lattice", "one_best_lattice", "full_lattice", "decoder_logits", "decoder_features", "encoder_features"],
         default= "beam_search",
         help="Beam search: using beam search to find the best sequence, Reduced lattice: paper's implementation, one best lattice: using ground truth to find best path"
 

@@ -103,14 +103,12 @@ class Reporter(chainer.Chain):
 
 class E2E(ASRInterface, torch.nn.Module):
     """E2E module for transducer models.
-
     Args:
         idim (int): dimension of inputs
         odim (int): dimension of outputs
         args (Namespace): argument Namespace containing options
         ignore_id (int): padding symbol id
         blank_id (int): blank symbol id
-
     """
 
     @staticmethod
@@ -469,10 +467,8 @@ class E2E(ASRInterface, torch.nn.Module):
 
     def default_parameters(self, args):
         """Initialize/reset parameters for transducer.
-
         Args:
             args (Namespace): argument Namespace containing options
-
         """
         initializer(self, args)
 
@@ -684,15 +680,12 @@ class E2E(ASRInterface, torch.nn.Module):
     
     def forward(self, xs_pad, ilens, ys_pad, ys_kd_pad=None):
         """E2E forward.
-
         Args:
             xs_pad (torch.Tensor): batch of padded source sequences (B, Tmax, idim)
             ilens (torch.Tensor): batch of lengths of input sequences (B)
             ys_pad (torch.Tensor): batch of padded target sequences (B, Lmax)
-
         Returns:
             loss (torch.Tensor): transducer loss value
-
         """
         # 1. encoder
         xs_pad = xs_pad[:, : max(ilens)]
@@ -787,15 +780,12 @@ class E2E(ASRInterface, torch.nn.Module):
 
     def forward_kd(self, xs_pad, ilens, ys_pad, ys_kd_pad, lm_kd_pad=None):
         """E2E forward.
-
         Args:
             xs_pad (torch.Tensor): batch of padded source sequences (B, Tmax, idim)
             ilens (torch.Tensor): batch of lengths of input sequences (B)
             ys_pad (torch.Tensor): batch of padded target sequences (B, Lmax)
-
         Returns:
             loss (torch.Tensor): transducer loss value
-
         """
         # 1. encoder
         xs_pad = xs_pad[:, : max(ilens)]
@@ -907,13 +897,10 @@ class E2E(ASRInterface, torch.nn.Module):
 
     def encode_custom(self, x):
         """Encode acoustic features.
-
         Args:
             x (ndarray): input acoustic feature (T, D)
-
         Returns:
             x (torch.Tensor): encoded features (T, D_enc)
-
         """
         p = next(self.parameters())
         x = torch.as_tensor(x,device=p.device).unsqueeze(0)
@@ -923,13 +910,10 @@ class E2E(ASRInterface, torch.nn.Module):
 
     def encode_rnn(self, x):
         """Encode acoustic features.
-
         Args:
             x (ndarray): input acoustic feature (T, D)
-
         Returns:
             x (torch.Tensor): encoded features (T, D_enc)
-
         """
         p = next(self.parameters())
         if self.etype == 'wav2vec':
@@ -952,14 +936,11 @@ class E2E(ASRInterface, torch.nn.Module):
 
     def recognize(self, x, beam_search):
         """Recognize input features.
-
         Args:
             x (ndarray): input acoustic feature (T, D)
             beam_search (class): beam search class
-
         Returns:
             nbest_hyps (list): n-best decoding results
-
         """
         self.eval()
 
@@ -1161,18 +1142,15 @@ class E2E(ASRInterface, torch.nn.Module):
     
     def calculate_all_attentions(self, xs_pad, ilens, ys_pad):
         """E2E attention calculation.
-
         Args:
             xs_pad (torch.Tensor): batch of padded input sequences (B, Tmax, idim)
             ilens (torch.Tensor): batch of lengths of input sequences (B)
             ys_pad (torch.Tensor):
                 batch of padded character id sequence tensor (B, Lmax)
-
         Returns:
             ret (ndarray): attention weights with the following shape,
                 1) multi-head case => attention weights (B, H, Lmax, Tmax),
                 2) other case => attention weights (B, Lmax, Tmax).
-
         """
         self.eval()
 

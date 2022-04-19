@@ -181,7 +181,7 @@ def load_trained_model(model_path, training=True):
     return model, train_args
 
 
-def get_trained_model_state_dict(model_path):
+def get_trained_model_state_dict(model_path, load_model=False):
     """Extract the trained model state dict for pre-initialization.
 
     Args:
@@ -215,8 +215,10 @@ def get_trained_model_state_dict(model_path):
         or isinstance(model, ASRInterface)
         or isinstance(model, TTSInterface)
     )
-
-    return model.state_dict()
+    if load_model:
+        return model
+    else:
+        return model.state_dict()
 
 
 def load_trained_modules(idim, odim, args, interface=ASRInterface):

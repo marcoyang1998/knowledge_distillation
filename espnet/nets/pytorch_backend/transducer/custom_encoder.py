@@ -42,7 +42,8 @@ class CustomEncoder(torch.nn.Module):
         normalize_before=True,
         aux_task_layer_list=[],
         padding_idx=-1,
-        streaming=False
+        streaming=False,
+        encoder_projection=0,
     ):
         """Construct an CustomEncoder object."""
         super().__init__()
@@ -72,6 +73,12 @@ class CustomEncoder(torch.nn.Module):
         if self.normalize_before:
             self.after_norm = LayerNorm(self.enc_out)
 
+        self.encoder_projection = encoder_projection
+        
+        if self.encoder_projection > 0:
+            self.encoder_proj_layer = torch.nn.Linear(in_features=self.enc_out,
+                                                      out_features=self.encoder_projection)
+        
         self.n_blocks = len(enc_arch) * repeat_block
 
         self.aux_task_layer_list = aux_task_layer_list
@@ -119,7 +126,10 @@ class CustomEncoder(torch.nn.Module):
 
         if self.normalize_before:
             xs = self.after_norm(xs)
-
+        
+        if self.encoder_projection:
+            xs = self.encoder_proj_layer(xs)
+        
         if self.aux_task_layer_list:
             return (xs, aux_xs_list), masks
 

@@ -1087,3 +1087,10 @@ def format_mulenc_args(args):
             )
             vars(args)[k] = [vars(args)[k] for _ in range(args.num_encs)]
     return args
+
+def calculate_w2v2_output_shape(dim):
+    strides = [5,2,2,2,2,2,2]
+    kernels = [10,3,3,3,3,2,2]
+    for i in range(len(strides)):
+        dim = int((dim-kernels[i])/strides[i])+1
+    return dim

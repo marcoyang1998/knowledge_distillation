@@ -456,6 +456,18 @@ def get_parser(parser=None, required=True):
         help="List of decoder modules to initialize, separated by a comma.",
     )
     parser.add_argument(
+        "--joint-init",
+        default=None,
+        type=str,
+        help="Pre-trained ASR to initialize joiner.",
+    )
+    parser.add_argument(
+        "--joint-init-mods",
+        default="joint_network.",
+        type=lambda s: [str(mod) for mod in s.split(",") if s != ""],
+        help="List of joint network modules to initialize, separated by a comma. . This is only valid for transducer models",
+    )
+    parser.add_argument(
         "--freeze-mods",
         default=None,
         type=lambda s: [str(mod) for mod in s.split(",") if s != ""],
@@ -596,6 +608,13 @@ def get_parser(parser=None, required=True):
         type=strtobool,
         default=False,
         help="do knowledge distillation?"
+    )
+    parser.add_argument(
+        "--kd-mode",
+        type=str,
+        default="normal",
+        choices=["normal", "encoder", "decoder", "normal_n_best"],
+        help="Choose the KD mode."
     )
     parser.add_argument(
         "--kd-mtl-factor",

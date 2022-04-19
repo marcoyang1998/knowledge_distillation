@@ -6,6 +6,7 @@
 import copy
 import gc
 import json
+from json import encoder
 import logging
 import math
 import os
@@ -33,6 +34,7 @@ from espnet.asr.asr_utils import torch_resume,torch_resume_only_weight
 from espnet.asr.asr_utils import torch_snapshot
 from espnet.asr.pytorch_backend.asr_init import freeze_modules
 from espnet.asr.pytorch_backend.asr_init import load_trained_model
+from espnet.asr.pytorch_backend.asr_init import get_trained_model_state_dict
 from espnet.asr.pytorch_backend.asr_init import load_trained_modules
 import espnet.lm.pytorch_backend.extlm as extlm_pytorch
 from espnet.nets.asr_interface import ASRInterface
@@ -71,6 +73,8 @@ def _recursive_to(xs, device):
         return xs.to(device)
     if isinstance(xs, tuple):
         return tuple(_recursive_to(x, device) for x in xs)
+    if isinstance(xs, list):
+        return list(_recursive_to(x, device) for x in xs)
     return xs
 
 
@@ -155,7 +159,63 @@ class CustomEvaluator(BaseEvaluator):
         #self.report = summary.compute_mean()
         return summary.compute_mean()
 
+class FeatureKD_Evaluator(BaseEvaluator):
+    def __init__(self, model, iterator, target, device, ngpu=None, do_kd=False, kd_mode='encoder'):
+        super(FeatureKD_Evaluator, self).__init__(iterator, target)
+        self.model = model
+        self.device = device
+        self._call = 0
+        if ngpu is not None:
+            self.ngpu = ngpu
+        elif device.type == "cpu":
+            self.ngpu = 0
+        else:
+            self.ngpu = 1
+        self.report = {}
+        self.do_kd = do_kd
+        self.kd_mode = kd_mode
 
+        
+    def evaluate(self):
+        self._call += 1
+        iterator = self._iterators["main"]
+        
+        if self.eval_hook:
+            self.eval_hook(self)
+            
+        if hasattr(iterator, "reset"):
+            iterator.reset()
+            it = iterator
+        else:
+            it = copy.copy(iterator)
+        
+        summary = reporter_module.DictSummary()
+
+        self.model.eval()
+        with torch.no_grad():
+            for batch in it:
+                x = _recursive_to(batch, self.device)
+                observation = {}
+                with reporter_module.report_scope(observation):
+                    # read scp files
+                    # x: original json with loaded features
+                    #    will be converted to chainer variable later
+                    if self.ngpu <=1:
+                        if "encoder" in self.kd_mode:
+                            self.model.forward_encoder_KD(*x)
+                        elif "decoder" in self.kd_mode:
+                            self.model.forward_decoder_KD(*x)
+                        else:
+                            raise NotImplementedError("Wrong kd-mode!")
+                    else:
+                        if self.do_kd:
+                            raise NotImplementedError("KD does not support multi gpu!")
+                        data_parallel(self.model, x, range(self.ngpu))
+
+                summary.add(observation)
+        self.model.train()
+        #self.report = summary.compute_mean()
+        return summary.compute_mean()
 class CustomUpdater(StandardUpdater):
     """Custom Updater for Pytorch.
 
@@ -182,7 +242,8 @@ class CustomUpdater(StandardUpdater):
         grad_noise=False,
         accum_grad=1,
         use_apex=False,
-        do_kd=False
+        do_kd=False,
+        kd_mode=""
     ):
         super(CustomUpdater, self).__init__(train_iter, optimizer)
         self.model = model
@@ -195,6 +256,9 @@ class CustomUpdater(StandardUpdater):
         self.iteration = 0
         self.use_apex = use_apex
         self.do_kd = do_kd
+        self.kd_mode = kd_mode
+        if self.do_kd:
+            logging.warning("KD mode is set to {}".format(self.kd_mode))
 
     # The core part of the update routine can be customized by overriding.
     def update_core(self):
@@ -219,26 +283,26 @@ class CustomUpdater(StandardUpdater):
         # see details in https://github.com/espnet/espnet/pull/1388
 
         # Compute the loss at this time step and accumulate it
-        if self.ngpu == 0:
-            if self.do_kd:
+        
+        if self.do_kd:
+            if self.kd_mode == "normal":
                 loss = self.model.forward_kd(*x).mean() / self.accum_grad
+            elif self.kd_mode == "encoder":
+                loss = self.model.forward_encoder_KD(*x).mean() / self.accum_grad
+            elif self.kd_mode == "decoder":
+                loss = self.model.forward_decoder_KD(*x).mean() / self.accum_grad
+            elif self.kd_mode == "normal_n_best":
+                loss = self.model.forward_nbest_KD(*x).mean() / self.accum_grad
             else:
-                loss = self.model(*x).mean() / self.accum_grad
-        elif self.ngpu == 1:
-            if self.do_kd:
-                loss = self.model.forward_kd(*x).mean() / self.accum_grad
-                #loss = (
-                #        data_parallel(self.model, x, range(self.ngpu)).mean() / self.accum_grad
-                #)
-            else:
-                loss = self.model(*x).mean() / self.accum_grad
+                raise NotImplementedError("KD mode: {} is not implemented".format(self.kd_mode))
         else:
-            # apex does not support torch.nn.DataParallel
-            #if self.do_kd:
-            #    raise NotImplementedError("KD does not support multi gpu!")
-            loss = (
-                data_parallel(self.model, x, range(self.ngpu)).mean() / self.accum_grad
-            )
+            if self.ngpu == 0:
+                loss = self.model(*x).mean() / self.accum_grad
+            else:
+                # apex does not support torch.nn.DataParallel
+                loss = (
+                    data_parallel(self.model, x, range(self.ngpu)).mean() / self.accum_grad
+                )
         if self.use_apex:
             from apex import amp
 
@@ -356,15 +420,26 @@ class CustomConverter(object):
                 self.ignore_id,
             ).to(device)
         else:
-            ys_pad = pad_list(
-                [
-                    torch.from_numpy(
-                        np.array(y[0][:]) if isinstance(y, tuple) else y
-                    ).long()
-                    for y in ys
-                ],
-                self.ignore_id,
-            ).to(device)
+            if ys[0].min() < 0: # for feature level KD evaluation
+                ys_pad = pad_list(
+                    [
+                        torch.from_numpy(
+                            np.array(y[0][:]) if isinstance(y, tuple) else y
+                        ).float()
+                        for y in ys
+                    ],
+                    self.ignore_id,
+                ).to(device)
+            else:
+                ys_pad = pad_list(
+                    [
+                        torch.from_numpy(
+                            np.array(y[0][:]) if isinstance(y, tuple) else y
+                        ).long()
+                        for y in ys
+                    ],
+                    self.ignore_id,
+                ).to(device)
 
         return xs_pad, ilens, ys_pad
 
@@ -377,12 +452,19 @@ class CustomConverterKD(object):
 
     def __call__(self, batch, device=torch.device("cpu")):
         assert len(batch) == 1
+        mode = ''
         if len(batch[0]) == 2: # no multitask distillation
             xs, ys = batch[0]
+            mode = "no distillation"
         elif len(batch[0]) == 3: # only one kd label
             xs, ys, ys_kd = batch[0]
+            mode = "one-best"
         elif len(batch[0]) == 4: # two kd labels
             xs, ys, ys_kd, lm_kd = batch[0]
+            mode = "one-best + lm_kd"
+        elif len(batch[0]) == 5: # 2-best kd
+            xs, ys, ys_kd, ys_1, ys_kd_1 = batch[0]
+            mode = "2-best"
         if self.subsampling_factor > 1:
             xs = [x[:: self.subsampling_factor, :] for x in xs]
         ilens = np.array([x.shape[0] for x in xs])
@@ -429,6 +511,7 @@ class CustomConverterKD(object):
             self.ignore_id,
         ).to(device)
         ilens = torch.from_numpy(ilens).to(device)
+        
         if len(batch[0]) == 3:
             return xs_pad, ilens, ys_pad, ys_kd_pad
         
@@ -443,6 +526,30 @@ class CustomConverterKD(object):
             self.ignore_id,
             ).to(device)
             return xs_pad, ilens, ys_pad, ys_kd_pad, lm_kd_pad
+        
+        if len(batch[0]) == 5:
+            ys_1_pad = pad_list(
+            [
+                torch.from_numpy(
+                    np.array(y[0][:]) if isinstance(y, tuple) else y
+                ).long()
+                for y in ys_1
+            ],
+            self.ignore_id,
+            ).to(device)
+            
+            ys_kd_1_pad = pad_list(
+            [
+                torch.from_numpy(
+                    np.array(y[0][:]) if isinstance(y, tuple) else y
+                ).float()
+                for y in ys_kd_1
+            ],
+            self.ignore_id,
+            ).to(device)
+            
+            return xs_pad, ilens, [(ys_pad, ys_kd_pad), (ys_1_pad, ys_kd_1_pad)]
+        
         
 
 
@@ -564,6 +671,8 @@ def train(args):
 
     if (args.enc_init is not None or args.dec_init is not None) and args.num_encs == 1:
         model = load_trained_modules(idim_list[0], odim, args)
+        if args.joint_init is not None and "transducer" in args.model_module:
+            model.joint_network = get_trained_model_state_dict(args.joint_init, load_model=True).joint_network
     elif args.model_init_path:
         model = load_trained_model(args.model_init_path, training=True)
     else:
@@ -724,12 +833,10 @@ def train(args):
     # read json data
     with open(args.train_json, "rb") as f:
         train_json = json.load(f)["utts"]
-        if len(train_json)<30000:
-            pass
-            #print('Data will be stored on disk')
+        if load_data_on_disk:
+            logging.warning('Data will be stored on disk')
         else:
-            load_data_on_disk = False
-            #print("Data will NOT be stored on disk")
+            logging.warning("Data will NOT be stored on disk")
     print("Load data on dist: {}".format(load_data_on_disk))
     with open(args.valid_json, "rb") as f:
         valid_json = json.load(f)["utts"]
@@ -817,7 +924,8 @@ def train(args):
         args.grad_noise,
         args.accum_grad,
         use_apex=use_apex,
-        do_kd=args.do_knowledge_distillation
+        do_kd=args.do_knowledge_distillation,
+        kd_mode=args.kd_mode
     )
     trainer = training.Trainer(updater, (args.epochs, "epoch"), out=args.outdir)
 
@@ -838,24 +946,30 @@ def train(args):
     if "transducer" in args.model_module:
         if args.dproj_dim > 0:
             logging.warning("Add projection layer to prediction network")
-            model.add_dproj_layer(args, device)
+            model.add_dproj_layer(args, device)        
+        
+        if args.encoder_projection > 0:
+            logging.warning("Modifying joiner to match enc out shape")
+            model.update_joiner(args, device)
 
-            logging.warning(
+        logging.warning(
                 "Updated: num. model params: {:,} (num. trained: {:,} ({:.1f}%))".format(
                 sum(p.numel() for p in model.parameters()),
                 sum(p.numel() for p in model.parameters() if p.requires_grad),
-                sum(p.numel() for p in model.parameters() if p.requires_grad)
-                * 100.0
-                / sum(p.numel() for p in model.parameters()),
+                sum(p.numel() for p in model.parameters() if p.requires_grad) * 100.0 / sum(p.numel() for p in model.parameters()),
+                )
             )
-    )
         
     # Evaluate the model with the test dataset for each epoch
     if args.save_interval_iters > 0:
-        trainer.extend(
-            CustomEvaluator(model, {"main": valid_iter}, reporter, device, ngpu=args.ngpu, interval=args.save_interval_iters, do_kd=args.do_knowledge_distillation, start=args.start_evaluation_epoch),
-            trigger=(args.save_interval_iters, "iteration"),
-        )
+        if "normal" not in args.kd_mode and args.do_knowledge_distillation:
+            trainer.extend(FeatureKD_Evaluator(model, {"main": valid_iter}, reporter, device, ngpu=args.ngpu, do_kd=args.do_knowledge_distillation, kd_mode=args.kd_mode),
+                           trigger=(args.save_interval_iters, "iteration"))
+        else:
+            trainer.extend(
+                CustomEvaluator(model, {"main": valid_iter}, reporter, device, ngpu=args.ngpu, interval=args.save_interval_iters, do_kd=args.do_knowledge_distillation, start=args.start_evaluation_epoch),
+                trigger=(args.save_interval_iters, "iteration"),
+            )
     else:
         if args.valid_interval > 0: # in epoch
             trainer.extend(
@@ -1172,7 +1286,7 @@ def recog(args):
         args (namespace): The program arguments.
 
     """
-    print("----Starting recoginition----")
+    logging.info("----Starting recoginition----")
     set_deterministic_pytorch(args)
     model, train_args = load_trained_model(args.model, training=False)
     assert isinstance(model, ASRInterface)
@@ -1659,8 +1773,363 @@ def enhance(args):
                 logging.info("Breaking the process.")
                 break
 
+def train_encoder_KD(args):
+    logging.warning("----Start encoder KD training")
+    set_deterministic_pytorch(args)
+    
+    # check cuda availability
+    if not torch.cuda.is_available():
+        logging.warning("cuda is not available")
+    
+    # get input and output dimension info
+    with open(args.valid_json, "rb") as f:
+        valid_json = json.load(f)["utts"]
+    utts = list(valid_json.keys())
+    idim_list = [
+        int(valid_json[utts[0]]["input"][i]["shape"][-1]) for i in range(args.num_encs)
+    ]
+    
+    odim = len(args.char_list)
+    logging.info("#output dims: " + str(odim))
+    if "transducer" in args.model_module:
+        if (
+            getattr(args, "etype", False) == "custom"
+            or getattr(args, "dtype", False) == "custom"
+        ):
+            mtl_mode = "custom_transducer"
+        else:
+            mtl_mode = "transducer"
+        logging.info("Pure transducer mode")
+        
+    if (args.enc_init is not None or args.dec_init is not None) and args.num_encs == 1:
+        model = load_trained_modules(idim_list[0], odim, args)
+    else:
+        model_class = dynamic_import(args.model_module)
+        model = model_class(
+            idim_list[0] if args.num_encs == 1 else idim_list, odim, args, ignore_id=args.ignore_id
+        )
+    
+    assert isinstance(model, ASRInterface)
+    
+    total_subsampling_factor = model.get_total_subsampling_factor()
+    
+    logging.info(
+        " Total parameter of the model = "
+        + str(sum(p.numel() for p in model.parameters()))
+    )
+    
+    # write model config
+    if not os.path.exists(args.outdir):
+        os.makedirs(args.outdir)
+    model_conf = args.outdir + "/model.json"
+    with open(model_conf, "wb") as f:
+        logging.info("writing a model config file to " + model_conf)
+        f.write(
+            json.dumps(
+                (idim_list[0] if args.num_encs == 1 else idim_list, odim, vars(args)),
+                indent=4,
+                ensure_ascii=False,
+                sort_keys=True,
+            ).encode("utf_8")
+        )
+    for key in sorted(vars(args).keys()):
+        logging.info("ARGS: " + key + ": " + str(vars(args)[key]))
+    
+    reporter = model.reporter
+
+    # GPU devices
+    if args.ngpu > 1:
+        if args.batch_size != 0:
+            logging.warning(
+                "batch size is automatically increased (%d -> %d)"
+                % (args.batch_size, args.batch_size * args.ngpu)
+            )
+            args.batch_size *= args.ngpu
+            
+    device = torch.device("cuda" if args.ngpu > 0 else "cpu")
+    if args.train_dtype in ("float16", "float32", "float64"):
+        dtype = getattr(torch, args.train_dtype)
+    else:
+        dtype = torch.float32
+    model = model.to(device=device, dtype=dtype)
+    
+    # freeze modules
+    if args.freeze_mods:
+        model, model_params = freeze_modules(model, args.freeze_mods)
+    else:
+        model_params = model.parameters()
+    
+    logging.warning(
+        "num. model params: {:,} (num. trained: {:,} ({:.1f}%))".format(
+            sum(p.numel() for p in model.parameters()),
+            sum(p.numel() for p in model.parameters() if p.requires_grad),
+            sum(p.numel() for p in model.parameters() if p.requires_grad)
+            * 100.0
+            / sum(p.numel() for p in model.parameters()),
+        )
+    )
+    
+    # Setup an optimizer
+    if args.opt == "adadelta":
+        optimizer = torch.optim.Adadelta(
+            model_params, rho=0.95, eps=args.eps, weight_decay=args.weight_decay
+        )
+    elif args.opt == "adam":
+        optimizer = torch.optim.Adam(model_params, weight_decay=args.weight_decay, lr=args.adam_lr)
+    elif args.opt == "noam":
+        from espnet.nets.pytorch_backend.transformer.optimizer import get_std_opt
+
+        # For transformer-transducer, adim declaration is within the block definition.
+        # Thus, we need retrieve the most dominant value (d_hidden) for Noam scheduler.
+        if hasattr(args, "enc_block_arch") or hasattr(args, "dec_block_arch"):
+            adim = model.most_dom_dim
+        else:
+            adim = args.adim
+
+        optimizer = get_std_opt(
+            model_params, adim, args.transformer_warmup_steps, args.transformer_lr
+        )
+    elif args.opt == "tri-state-adam":
+        from espnet.nets.pytorch_backend.wav2vec2.optimizer import get_opt
+        optim_phase = [float(num) for num in args.optim_phase.split()]
+        optimizer = get_opt(model_params, optim_phase, args.optim_total_steps, args.init_lr, args.warmup_lr, args.end_lr, args.tri_state_adam_enc_lr_ratio)
+        logging.info("Adopting tri-state-adam optimizer")
+    else:
+        raise NotImplementedError("unknown optimizer: " + args.opt)
+     
+    use_apex = False   
+     
+    setattr(optimizer, "target", reporter)
+    setattr(optimizer, "serialize", lambda s: reporter.serialize(s))
+
+    # Setup a converter
+    if args.do_knowledge_distillation:
+        converter = CustomConverterKD(subsampling_factor=model.subsample[0], dtype=dtype, ignore_id=args.ignore_id)
+        valid_converter = CustomConverter(subsampling_factor=model.subsample[0], dtype=dtype, ignore_id=args.ignore_id)
+
+    load_data_on_disk=args.load_data_on_disk
+    # read json data
+    with open(args.train_json, "rb") as f:
+        train_json = json.load(f)["utts"]
+        if load_data_on_disk:
+            logging.warning('Data will be stored on disk')
+        else:
+            logging.warning("Data will NOT be stored on disk")
+    print("Load data on dist: {}".format(load_data_on_disk))
+    with open(args.valid_json, "rb") as f:
+        valid_json = json.load(f)["utts"]
+    
+    use_sortagrad = args.sortagrad == -1 or args.sortagrad > 0
+    
+    train = make_batchset(
+        train_json,
+        args.batch_size,
+        args.maxlen_in,
+        args.maxlen_out,
+        args.minibatches,
+        min_batch_size=args.ngpu if args.ngpu > 1 else 1,
+        shortest_first=use_sortagrad,
+        count=args.batch_count,
+        batch_bins=args.batch_bins,
+        batch_frames_in=args.batch_frames_in,
+        batch_frames_out=args.batch_frames_out,
+        batch_frames_inout=args.batch_frames_inout,
+        iaxis=0,
+        oaxis=0,
+    )
+    valid = make_batchset(
+        valid_json,
+        args.batch_size,
+        args.maxlen_in,
+        args.maxlen_out,
+        args.minibatches,
+        min_batch_size=args.ngpu if args.ngpu > 1 else 1,
+        count=args.batch_count,
+        batch_bins=args.batch_bins,
+        batch_frames_in=args.batch_frames_in,
+        batch_frames_out=args.batch_frames_out,
+        batch_frames_inout=args.batch_frames_inout,
+        iaxis=0,
+        oaxis=0,
+    )
+    if args.do_knowledge_distillation:
+        mode = "asr_kd"
+    else:
+        mode = "asr"
+        
+    load_tr = LoadInputsAndTargets(
+        mode=mode,
+        load_output=True,
+        preprocess_conf=args.preprocess_conf,
+        preprocess_args={"train": True},  # Switch the mode of preprocessing
+        keep_all_data_on_mem=load_data_on_disk,
+        do_knowledge_distillation=args.do_knowledge_distillation, # if is doing knowledge distillation
+        use_second_target=args.do_knowledge_distillation
+    )
+    load_cv = LoadInputsAndTargets(
+        mode='asr', # valid loader should always be asr
+        load_output=True,
+        preprocess_conf=args.preprocess_conf,
+        preprocess_args={"train": False},  # Switch the mode of preprocessing
+    )
+    # hack to make batchsize argument as 1
+    # actual bathsize is included in a list
+    # default collate function converts numpy array to pytorch tensor
+    # we used an empty collate function instead which returns list
+    train_iter = ChainerDataLoader(
+        dataset=TransformDataset(train, lambda data: converter([load_tr(data)])),
+        batch_size=1,
+        num_workers=args.n_iter_processes,
+        shuffle=not use_sortagrad,
+        collate_fn=lambda x: x[0],
+    )
+    valid_iter = ChainerDataLoader(
+        dataset=TransformDataset(valid, lambda data: valid_converter([load_cv(data)])),
+        batch_size=1,
+        shuffle=False,
+        collate_fn=lambda x: x[0],
+        num_workers=args.n_iter_processes,
+    )
+      
+    updater = CustomUpdater(
+        model,
+        args.grad_clip,
+        {"main": train_iter},
+        optimizer,
+        device,
+        args.ngpu,
+        args.grad_noise,
+        args.accum_grad,
+        use_apex=use_apex,
+        do_kd=args.do_knowledge_distillation
+    )
+    trainer = training.Trainer(updater, (args.epochs, "epoch"), out=args.outdir)  
+    
+    if use_sortagrad:
+        trainer.extend(
+            ShufflingEnabler([train_iter]),
+            trigger=(args.sortagrad if args.sortagrad != -1 else args.epochs, "epoch"),
+        )
+        
+    # Resume from a snapshot
+    if args.resume:
+        logging.info("resumed from %s" % args.resume)
+        if args.resume_only_weight:
+            torch_resume_only_weight(args.resume, trainer)
+        else:
+            torch_resume(args.resume, trainer, args.resume_with_previous_opt, args.resume_with_previous_trainer)
+
+    if "transducer" in args.model_module:
+        if args.dproj_dim > 0:
+            logging.warning("Add projection layer to prediction network")
+            model.add_dproj_layer(args, device)
+
+            logging.warning(
+                "Updated: num. model params: {:,} (num. trained: {:,} ({:.1f}%))".format(
+                sum(p.numel() for p in model.parameters()),
+                sum(p.numel() for p in model.parameters() if p.requires_grad),
+                sum(p.numel() for p in model.parameters() if p.requires_grad)
+                * 100.0
+                / sum(p.numel() for p in model.parameters()),
+            )
+    )
+    
+    if args.save_interval_iters > 0:
+        trainer.extend(
+            CustomEvaluator(model, {"main": valid_iter}, reporter, device, ngpu=args.ngpu, interval=args.save_interval_iters, do_kd=args.do_knowledge_distillation, start=args.start_evaluation_epoch),
+            trigger=(args.save_interval_iters, "iteration"),
+        )
+    else:
+        if args.valid_interval > 0: # in epoch
+            trainer.extend(
+                CustomEvaluator(model, {"main": valid_iter}, reporter, device, ngpu=args.ngpu, do_kd=args.do_knowledge_distillation, interval=args.valid_interval, start=args.start_evaluation_epoch),
+                trigger=(args.valid_interval, "epoch")
+            )
+    
+    if hasattr(model, "is_rnnt"):
+        trainer.extend(
+            extensions.PlotReport(
+                [
+                    "main/loss",
+                    "validation/main/loss",
+                    "main/loss_trans",
+                    "validation/main/loss_trans",
+                    "main/loss_ctc",
+                    "validation/main/loss_ctc",
+                    "main/loss_lm",
+                    "validation/main/loss_lm",
+                    "main/loss_aux_trans",
+                    "validation/main/loss_aux_trans",
+                    "main/loss_aux_symm_kl",
+                    "validation/main/loss_aux_symm_kl",
+                    "main/loss_kd",
+                ],
+                "epoch",
+                file_name="loss.png",
+            )
+        )
+    
+    if args.save_best:
+        trainer.extend(
+            snapshot_object(model, "model.loss.best"),
+            trigger=training.triggers.MinValueTrigger("validation/main/loss"),
+        )
+        
+    # save snapshot at every epoch - for model averaging
+    if args.save_interval_epochs > 0:
+        trainer.extend(torch_snapshot(), trigger=(args.save_interval_epochs, "epoch"))
+    else:
+        trainer.extend(torch_snapshot(), trigger=(1, "epoch"))
+    
+    # save snapshot which contains model and optimizer states
+    if args.save_interval_iters > 0:
+        trainer.extend(
+            torch_snapshot(filename="snapshot.iter.{.updater.iteration}"),
+            trigger=(args.save_interval_iters, "iteration"),
+        )
+    trainer.extend(torch_snapshot(), trigger=(1, "epoch"))
+    
+    # log writing
+    trainer.extend(
+        extensions.LogReport(trigger=(args.report_interval_iters, "iteration"))
+    )
+    
+    if hasattr(model, "is_rnnt"):
+        report_keys = [
+            "epoch",
+            "iteration",
+            "main/loss",
+            "main/loss_trans",
+            "main/loss_ctc",
+            "main/loss_lm",
+            "main/loss_aux_trans",
+            "main/loss_aux_symm_kl",
+            "validation/main/loss",
+            "validation/main/loss_trans",
+            "validation/main/loss_ctc",
+            "validation/main/loss_lm",
+            "validation/main/loss_aux_trans",
+            "validation/main/loss_aux_symm_kl",
+            "elapsed_time",
+        ]
+    
+
+    if args.do_knowledge_distillation:
+        report_keys.append("main/loss_kd")
+    if args.report_cer:
+        report_keys.append("validation/main/cer")
+    if args.report_wer:
+        report_keys.append("validation/main/wer")
+    
+    trainer.extend(extensions.ProgressBar(update_interval=args.report_interval_iters))
+    set_early_stop(trainer, args)
+
+    # Run the training
+    trainer.run()
+    check_early_stop(trainer, args.epochs)
+    
 def collect_soft_labels(args):
-    print("----Starting collecting labels----")
+    logging.warning("----Starting collecting labels----")
     set_deterministic_pytorch(args)
     model, train_args = load_trained_model(args.model, training=False)
     assert isinstance(model, ASRInterface)
@@ -1668,6 +2137,7 @@ def collect_soft_labels(args):
 
     if args.streaming_mode and "transformer" in train_args.model_module:
         raise NotImplementedError("streaming mode for transformer is not implemented")
+    
     logging.info(
         " Total parameter of the model = "
         + str(sum(p.numel() for p in model.parameters()))
@@ -1714,7 +2184,7 @@ def collect_soft_labels(args):
 
     with open(args.recog_json, "rb") as f:
         js = json.load(f)["utts"]
-    new_js = {}
+
     new_kd_js = {}
 
     is_rnnt = hasattr(model, "joint_network")
@@ -1727,15 +2197,8 @@ def collect_soft_labels(args):
         else args.preprocess_conf,
         keep_all_data_on_mem=False,
         preprocess_args={"train": False},
-    )
-
-    def calculate_w2v2_output_shape(dim):
-        strides = [5,2,2,2,2,2,2]
-        kernels = [10,3,3,3,3,2,2]
-        for i in range(7):
-            dim = int((dim-kernels[i])/strides[i])+1
-        return dim
-
+    ) 
+    model.eval()
     if is_rnnt: # rnnt model
         if args.collect_rnnt_kd_data:
             kd_json_folder = '/'.join(args.kd_json_label.split('/')[:-1])
@@ -1748,16 +2211,17 @@ def collect_soft_labels(args):
                 feat = load_inputs_and_targets(batch)
                 feat = (torch.tensor(feat[0][0]).unsqueeze(0).float(), torch.tensor([feat[0][0].shape[0]]), torch.tensor(feat[1][0]).view(1,-1))
                 x = _recursive_to(feat, device)
+                
+                region = name.split('-')[0]
+                spkr = '-'.join(name.split('-')[:-1])
+                output_dir = os.path.join(args.output_kd_dir, region, spkr)
+                
                 if args.rnnt_kd_data_collection_mode == "one_best_lattice":
                     nbest_hyps = model.collect_soft_label_one_best_lattice(*x, rnnlm, lm_weight)
                 elif args.rnnt_kd_data_collection_mode == "reduced_lattice":
                     print("Collecting reduced lattice")
                     reduced_lattice = model.collect_soft_label_reduced_lattice(*x)
                     assert reduced_lattice.shape[0] == 1
-                    #reduced_lattice = np.squeeze(reduced_lattice, axis=0)
-                    region = name.split('-')[0]
-                    spkr = '-'.join(name.split('-')[:-1])
-                    output_dir = os.path.join(args.output_kd_dir, region, spkr)
                     if not os.path.isdir(output_dir):
                         os.makedirs(output_dir)
                     with open(os.path.join(output_dir, name + ".npy"), 'wb') as f:
@@ -1772,17 +2236,30 @@ def collect_soft_labels(args):
                 elif args.rnnt_kd_data_collection_mode=="full_lattice":
                     print("Collecting full lattice")
                     full_lattice = model.collect_soft_label_full_lattice(*x)
-                    region = name.split('-')[0]
-                    spkr = '-'.join(name.split('-')[:-1])
-                    output_dir = os.path.join(args.output_kd_dir, region, spkr)
-                    if not os.path.isdir(output_dir):
-                        os.makedirs(output_dir)
                     with open(os.path.join(output_dir, name + ".npy"), 'wb') as f:
                         np.save(f, full_lattice)
                     continue
-                elif args.rnnt_kd_data_collection_mode == "decoder_logits":
+                elif args.rnnt_kd_data_collection_mode == "decoder_features":
                     logging.warning("Collecting decoder logits")
-                    decoder_logits = model.collect_decoder_logits(*x, rnnlm, lm_weight)
+                    decoder_features = model.collect_decoder_features(*x)
+                    if decoder_features.shape[0] == 1:
+                        decoder_features = decoder_features.squeeze(0)
+                    decoder_features = decoder_features.cpu().numpy()
+                    with open(os.path.join(output_dir, name + ".npy"), 'wb') as f:
+                        np.save(f, decoder_features)
+                    continue
+                    
+                elif args.rnnt_kd_data_collection_mode == "encoder_features":
+                    logging.warning("Collecting encoder features")
+                    logging.warning(model.enc.encoders.mask_channel_prob)
+                    logging.warning(model.enc.encoders.mask_prob)
+                    encoder_features = model.collect_encoder_features(*x)
+                    if encoder_features.shape[0] == 1:
+                        encoder_features = encoder_features.squeeze(0)
+                    encoder_features = encoder_features.cpu().numpy()
+                    with open(os.path.join(output_dir, name + ".npy"), 'wb') as f:
+                        np.save(f, encoder_features)
+                    continue
                 else:
                     raise NotImplementedError("{} not implemented".format(args.rnnt_kd_data_collection_mode))
 
@@ -1967,7 +2444,7 @@ def collect_rnnlm_logit(args):
             batch = [(name, js[name])]
             feat = load_inputs_and_targets(batch)
             yseq = feat[1][0]
-            yseq_pad = torch.tensor(np.append([model.sos], yseq)).unsqueeze(0).long()
+            yseq_pad = torch.tensor(np.append([0], yseq)).unsqueeze(0).long()
             t_pad = torch.tensor(np.append(yseq,[model.eos])).unsqueeze(0).long()
             if isinstance(rnnlm.predictor, GPT2LM):
                 transformer_outputs = rnnlm.predictor.encoder(yseq_pad)
@@ -2002,6 +2479,52 @@ def collect_rnnlm_logit(args):
             with open(os.path.join(output_dir, name+'.npy'), 'wb') as f:
                 np.save(f, np.array(logits))
 
+def collect_encoder_predictor_feature(args):
+    logging.warning("----Starting collecting encoder and predictor features----")
+    set_deterministic_pytorch(args)
+    model, train_args = load_trained_model(args.model, training=False)
+    assert isinstance(model, ASRInterface)
+    model.recog_args = args
+    
+    rnnlm=None
+    lm_weight = 0
+    
+    if args.ngpu == 1:
+        gpu_id = list(range(args.ngpu))
+        logging.info("gpu id: " + str(gpu_id))
+        model.cuda()
+        if rnnlm:
+            rnnlm.cuda()
+        device = "cuda"
+    else:
+        device = "cpu"
+    
+    with open(args.recog_json, "rb") as f:
+        js = json.load(f)["utts"]
+    is_rnnt = hasattr(model, "joint_network")
+    load_inputs_and_targets = LoadInputsAndTargets(
+        mode="asr",
+        load_output=False if not is_rnnt else True,
+        sort_in_input_length=False,
+        preprocess_conf=train_args.preprocess_conf
+        if args.preprocess_conf is None
+        else args.preprocess_conf,
+        keep_all_data_on_mem=False,
+        preprocess_args={"train": False},
+    )
+    
+    from espnet.asr.asr_utils import calculate_w2v2_output_shape
+    
+    assert args.batchsize == 0, 'Only support collection with bs=0'
+    
+    with torch.no_grad():
+        for idx, name in enumerate(js.keys(), 1):
+            logging.info("(%d/%d) decoding " + name, idx, len(js.keys()))
+            batch = [(name, js[name])]
+            feat = load_inputs_and_targets(batch)
+            feat = (torch.tensor(feat[0][0]).unsqueeze(0).float(), torch.tensor([feat[0][0].shape[0]]), torch.tensor(feat[1][0]).view(1,-1))
+            x = _recursive_to(feat, device)
+    
 def ctc_align(args):
     """CTC forced alignments with the given args.
 
