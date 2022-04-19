@@ -272,8 +272,12 @@ class LoadInputsAndTargets(object):
             elif len(y_feats_dict) == 3:
                 ys, ys_kd, lm_kd = list(y_feats_dict.values())
                 lm_kd = [lm_kd]
+            elif len(y_feats_dict) == 4:
+                ys, ys_kd, ys_bm, ys_bm_kd = list(y_feats_dict.values())
+                ys_bm = [ys_bm]
+                ys_bm_kd = [ys_bm_kd]
             else:
-                raise NotImplementedError()
+                raise NotImplementedError(len(y_feats_dict) == 2)
             ys = [ys]
             ys_kd = [ys_kd]
             assert len(xs[0]) == len(ys[0]), "Number of input: {}, number of total targets {}".format(len(xs[0]), len(ys[0]))
@@ -321,13 +325,25 @@ class LoadInputsAndTargets(object):
             elif len(y_feats_dict) == 3:
                 lm_kd_name = [y_names[2]]
                 return_batch = OrderedDict(
-                [
-                    *[(x_name, x) for x_name, x in zip(x_names, xs)],
-                    *[(y_name, y) for y_name, y in zip(y_token_name, ys)],
-                    *[(y_name, y) for y_name, y in zip(one_best_kd_name, ys_kd)],
-                    *[(y_name, y) for y_name, y in zip(lm_kd_name, lm_kd)],
-                ]
-            )
+                    [
+                        *[(x_name, x) for x_name, x in zip(x_names, xs)],
+                        *[(y_name, y) for y_name, y in zip(y_token_name, ys)],
+                        *[(y_name, y) for y_name, y in zip(one_best_kd_name, ys_kd)],
+                        *[(y_name, y) for y_name, y in zip(lm_kd_name, lm_kd)],
+                    ]
+                )
+            elif len(y_feats_dict) == 4:
+                ys_bm_names = [y_names[2]]
+                ys_bm_kd_names = [y_names[3]]
+                return_batch = OrderedDict(
+                    [
+                        *[(x_name, x) for x_name, x in zip(x_names, xs)],
+                        *[(y_name, y) for y_name, y in zip(y_token_name, ys)],
+                        *[(y_name, y) for y_name, y in zip(one_best_kd_name, ys_kd)],
+                        *[(y_name, y) for y_name, y in zip(ys_bm_names, ys_bm)],
+                        *[(y_name, y) for y_name, y in zip(ys_bm_kd_names, ys_bm_kd)],
+                    ]
+                )
             else:
                 raise NotImplementedError()
         else:
