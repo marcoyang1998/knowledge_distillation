@@ -462,6 +462,9 @@ class E2E(ASRInterface, torch.nn.Module):
                 else:
                     logging.warning(f'CXE ILM kd loss will be used with a factor of {self.kd_ILM_loss_factor}, Teacher LM weight is {self.kd_ILM_teacher_weight}!')
                     
+                self.kd_loss_reduction = args.kd_loss_reduction
+                logging.warning('KD loss reduction mode is set to {}'.format(self.kd_loss_reduction))
+                    
         self.loss = None
         self.rnnlm = None
         self.dec_feature_loss_factor = args.dec_feature_loss_factor
@@ -507,6 +510,7 @@ class E2E(ASRInterface, torch.nn.Module):
         def CXE(target, predicted):
             return -(target * predicted.log_softmax(-1)).sum()
 
+        kd_mask = ys_pad_kd[:,:,0] != self.ignore_id
         bs = z.shape[0]
         #ys = [y[y != self.ignore_id] for y in ys_pad]
         t_list = [y[:, 0][y[:, 0] != self.ignore_id] for y in ys_pad_kd]
@@ -538,13 +542,15 @@ class E2E(ASRInterface, torch.nn.Module):
         else:
             ys_kd = torch.cat(ys_kd, dim=0)
             logits = torch.cat(logits, dim=0)
-            count = ys_kd.shape[0]
+            count = kd_mask.sum()
             if self.kd_prob_label:
                 kd_loss = CXE(ys_kd, logits)
             else:
                 kd_loss = CXE(torch.softmax(ys_kd / self.kd_temperature, dim=-1), logits / self.kd_temperature)
-
-            return kd_loss/bs
+            if self.kd_loss_reduction == "node":
+                return kd_loss/count
+            else:
+                return kd_loss/bs
 
     def kd_reduced_lattice_loss(self, z, pred_len, target_len, enc_T, ys_pad, ys_pad_kd):
         def reduced_CXE(target, predicted):

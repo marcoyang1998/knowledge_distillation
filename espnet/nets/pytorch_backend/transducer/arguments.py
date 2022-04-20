@@ -3,6 +3,7 @@
 import ast
 from distutils.util import strtobool
 from email.policy import default
+from random import choices
 
 
 def add_encoder_general_arguments(group):
@@ -405,6 +406,13 @@ def add_auxiliary_task_arguments(group):
         default=0.0,
         type=float,
         help="The factor of decoder feature loss"
+    )
+    group.add_argument(
+        '--kd-loss-reduction',
+        default="batch",
+        type=str,
+        choices=['batch','node'],
+        help="How to average the kd loss"
     )
 
     return group
