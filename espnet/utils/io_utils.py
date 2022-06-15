@@ -609,7 +609,7 @@ class LoadInputsAndTargets(object):
             loader = self._loaders.get(filepath)
             if loader is None:
                 # To avoid disk access, create loader only for the first time
-                loader = np.load(filepath)
+                loader = np.load(filepath, mmap_mode='r')
                 self._loaders[filepath] = loader
             return loader[key]
         elif filetype == "npy":
@@ -617,9 +617,9 @@ class LoadInputsAndTargets(object):
             #    {"input": [{"feat": "some/path.npy",
             #                "filetype": "npy"},
             if not self.keep_all_data_on_mem:
-                return np.load(filepath)
+                return np.load(filepath, mmap_mode='r')
             if filepath not in self._loaders:
-                self._npy_loaders[filepath] = np.load(filepath)
+                self._npy_loaders[filepath] = np.load(filepath, mmap_mode='r') # accelerate by setting mmap_mode='r'
             return self._npy_loaders[filepath]
         elif filetype in ["mat", "vec"]:
             # e.g.
@@ -661,6 +661,11 @@ class LoadInputsAndTargets(object):
                 loader = kaldiio.load_scp(filepath)
                 self._loaders[filepath] = loader
             return loader[key]
+        elif filetype == "npz":
+            filepath, key = filepath.split(":", 1)
+            loader = self._loaders.get(filepath)
+            return loader[key]
+            
         elif filetype == "pseudo":
             return np.zeros((1,))
         else:

@@ -224,7 +224,7 @@ class E2E(ASRInterface, torch.nn.Module):
         else:
             return self.enc.conv_subsampling_factor * int(numpy.prod(self.subsample))
 
-    def __init__(self, idim, odim, args, ignore_id=-1, blank_id=0, training=True):
+    def __init__(self, idim, odim, args, blank_id=0, training=True):
         """Construct an E2E object for transducer model."""
         torch.nn.Module.__init__(self)
 
@@ -232,6 +232,9 @@ class E2E(ASRInterface, torch.nn.Module):
 
         self.is_rnnt = True
         self.transducer_weight = args.transducer_weight
+
+        self.ignore_id = getattr(args, "ignore_id", -512)
+        logging.info("Ignore_id: {}".format(self.ignore_id))
 
         self.use_aux_task = (
             True if (args.aux_task_type is not None and training) else False
@@ -335,7 +338,7 @@ class E2E(ASRInterface, torch.nn.Module):
                 args.dec_embed_dim,
                 args.dropout_rate_decoder,
                 args.dropout_rate_embed_decoder,
-                ignore_id=ignore_id,
+                ignore_id=self.ignore_id,
                 dproj_dim=args.dproj_dim
             )
         decoder_out = args.dunits if args.dproj_dim == 0 else args.dproj_dim
@@ -366,8 +369,6 @@ class E2E(ASRInterface, torch.nn.Module):
         self.sos = odim - 1
         self.eos = odim - 1
         self.blank_id = blank_id
-        self.ignore_id = ignore_id
-        print("Ignore_id: {}".format(self.ignore_id))
 
         self.space = args.sym_space
         self.blank = args.sym_blank
@@ -396,7 +397,7 @@ class E2E(ASRInterface, torch.nn.Module):
                     args.sym_blank,
                     args.report_cer,
                     args.report_wer,
-                    ignore_id=ignore_id
+                    ignore_id=self.ignore_id
                 )
 
             if self.use_aux_task:
@@ -425,7 +426,7 @@ class E2E(ASRInterface, torch.nn.Module):
                 self.aux_decoder_output = torch.nn.Linear(decoder_out, odim)
 
                 self.aux_cross_entropy = LabelSmoothingLoss(
-                    odim, ignore_id, args.aux_cross_entropy_smoothing
+                    odim, self.ignore_id, args.aux_cross_entropy_smoothing
                 )
             
             self.use_ILM_gt_loss = args.ILM_gt_loss
@@ -494,6 +495,7 @@ class E2E(ASRInterface, torch.nn.Module):
                 args.sym_blank,
                 args.report_cer,
                 args.report_wer,
+                args.ignore_id
             )
                        
         logging.warning(self.joint_network)

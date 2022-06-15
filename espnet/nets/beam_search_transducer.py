@@ -178,7 +178,7 @@ class BeamSearchTransducer:
 
         return [hyp]
 
-    def default_beam_search(self, enc_out: torch.Tensor) -> List[Hypothesis]:
+    def default_beam_search_orig(self, enc_out: torch.Tensor) -> List[Hypothesis]:
         """Beam search implementation.
         Modified from https://arxiv.org/pdf/1211.3711.pdf
         Args:
@@ -251,7 +251,7 @@ class BeamSearchTransducer:
 
         return self.sort_nbest(kept_hyps)
     
-    def default_beam_search_mine(self, h: torch.Tensor) -> List[Hypothesis]:
+    def default_beam_search(self, h: torch.Tensor) -> List[Hypothesis]:
         """Beam search implementation.
 
         Args:

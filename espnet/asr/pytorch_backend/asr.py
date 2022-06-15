@@ -639,9 +639,11 @@ def train(args):
     # get input and output dimension info
     with open(args.valid_json, "rb") as f:
         valid_json = json.load(f)["utts"]
-    utts = list(valid_json.keys())
+    with open(args.train_json, "rb") as f:
+        train_json = json.load(f)['utts']
+    utts = list(train_json.keys())
     idim_list = [
-        int(valid_json[utts[0]]["input"][i]["shape"][-1]) for i in range(args.num_encs)
+        int(train_json[utts[0]]["input"][i]["shape"][-1]) for i in range(args.num_encs)
     ]
     #odim = int(valid_json[utts[0]]["output"][0]["shape"][-1])
     odim = len(args.char_list)
@@ -678,7 +680,7 @@ def train(args):
     else:
         model_class = dynamic_import(args.model_module)
         model = model_class(
-            idim_list[0] if args.num_encs == 1 else idim_list, odim, args, ignore_id=args.ignore_id
+            idim_list[0] if args.num_encs == 1 else idim_list, odim, args
         )
     assert isinstance(model, ASRInterface)
 
@@ -944,13 +946,13 @@ def train(args):
             torch_resume(args.resume, trainer, args.resume_with_previous_opt, args.resume_with_previous_trainer)
 
     if "transducer" in args.model_module:
-        if args.dproj_dim > 0:
-            logging.warning("Add projection layer to prediction network")
-            model.add_dproj_layer(args, device)        
+        #if args.dproj_dim > 0:
+        #    logging.warning("Add projection layer to prediction network")
+        #    model.add_dproj_layer(args, device)        
         
-        if args.encoder_projection > 0:
-            logging.warning("Modifying joiner to match enc out shape")
-            model.update_joiner(args, device)
+        #if args.encoder_projection > 0:
+        #    logging.warning("Modifying joiner to match enc out shape")
+        #    model.update_joiner(args, device)
 
         logging.warning(
                 "Updated: num. model params: {:,} (num. trained: {:,} ({:.1f}%))".format(

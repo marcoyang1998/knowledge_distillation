@@ -155,12 +155,6 @@ def add_decoder_general_arguments(group):
         type=float,
         help="Dropout rate for the decoder embedding layer",
     )
-    group.add_argument(
-        "--dproj-dim",
-        default=0,
-        type=int,
-        help="Projection layer after decoder. If 0, no projection layer is used",
-    )
 
     return group
 
@@ -181,6 +175,12 @@ def add_rnn_decoder_arguments(group):
     )
     group.add_argument(
         "--use-dec-feature-loss", default=False, type=strtobool, help="Whether dec feature level loss will be used"
+    )
+    group.add_argument(
+        "--dproj-dim",
+        default=0,
+        type=int,
+        help="Projection layer after decoder. If 0, no projection layer is used",
     )
 
     return group
