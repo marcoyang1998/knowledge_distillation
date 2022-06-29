@@ -4,6 +4,7 @@ from typing import List
 from typing import Union
 
 import numpy as np
+import math
 import torch
 from transformers import logging
 
@@ -37,7 +38,8 @@ class BeamSearchTransducer:
         nbest: int = 1,
         collect_kd_data = False,
         lm_fusion_kd=False,
-        internal_lm_weight=0.0
+        internal_lm_weight=0.0,
+        allow_duplications=True
     ):
         """Initialize transducer beam search.
 
@@ -75,6 +77,8 @@ class BeamSearchTransducer:
             self.search_algorithm = self.nsc_beam_search
         elif search_type == "ILME":
             self.search_algorithm = self.default_beam_search_with_ILME
+        elif search_type == "non_duplicated":
+            self.search_algorithm = self.default_beam_search_non_duplicated
         else:
             raise NotImplementedError
 
@@ -103,6 +107,7 @@ class BeamSearchTransducer:
         self.score_norm = score_norm
 
         self.nbest = nbest
+        self.nbest_allow_duplication = allow_duplications
         self.collect_kd_data = collect_kd_data
         self.lm_fusion_kd = lm_fusion_kd
         if self.lm_fusion_kd:
@@ -144,6 +149,21 @@ class BeamSearchTransducer:
             hyps.sort(key=lambda x: x.score / len(x.yseq), reverse=True)
         else:
             hyps.sort(key=lambda x: x.score, reverse=True)
+
+        prev_yseq = []
+        new_hyps = []
+        if not self.nbest_allow_duplication:
+            for hyp in hyps:
+                if hyp.yseq in prev_yseq:
+                    continue
+                else:
+                    new_hyps.append(hyp)
+                    prev_yseq.append(hyp.yseq)
+
+            while len(new_hyps) < self.nbest:
+                new_hyps.append(new_hyps[-1])
+            
+            hyps = new_hyps
 
         return hyps[: self.nbest]
 
@@ -325,6 +345,101 @@ class BeamSearchTransducer:
                             yseq_with_blank_pr=(max_hyp.yseq_with_blank_pr + [(ytu+self.lm_weight*lm_scores[0]).cpu().numpy()]) if self.collect_kd_data else None,
                         )
                     )
+
+                hyps_max = float(max(hyps, key=lambda x: x.score).score)
+                kept_most_prob = sorted(
+                    [hyp for hyp in kept_hyps if hyp.score > hyps_max],
+                    key=lambda x: x.score,
+                )
+                if len(kept_most_prob) >= beam:
+                    kept_hyps = kept_most_prob
+                    break
+
+        return self.sort_nbest(kept_hyps)
+
+    def default_beam_search_non_duplicated(self, h: torch.Tensor): # -> List[Hypothesis]:
+        """Beam search implementation.
+
+        Args:
+            x: Encoded speech features (T_max, D_enc)
+
+        Returns:
+            nbest_hyps: N-best decoding results
+
+        """
+        beam = min(self.beam_size, self.vocab_size)
+        beam_k = min(beam, (self.vocab_size - 1))
+
+        dec_state = self.decoder.init_state(1)
+
+        kept_hyps = [Hypothesis(score=0.0, yseq=[self.blank], dec_state=dec_state, yseq_with_blank=[self.blank],yseq_with_blank_pr=[])] # B in the paper
+        cache = {}
+
+        for hi in h:
+            hyps = kept_hyps # hyps: A in the paper
+            kept_hyps = []
+
+            while True:
+                max_hyp = max(hyps, key=lambda x: x.score)
+                hyps.remove(max_hyp)
+
+                y, state, lm_tokens = self.decoder.score(max_hyp, cache)
+                if self.collect_kd_data:
+                    ytu_logit = self.joint_network(hi, y)#.cpu().numpy()
+                    if self.lm_fusion_kd:
+                        ytu_logit = self.joint_network(hi, y).softmax(0)#.cpu().numpy() # when using lm_fusion_kd, store the probability instead of logits
+                ytu = torch.log_softmax(self.joint_network(hi, y), dim=-1)
+                #top_k = ytu[1:].topk(beam_k, dim=-1)
+
+                kept_hyps.append(
+                    Hypothesis(
+                        score=(max_hyp.score + float(ytu[0:1])), # for blank symbol
+                        yseq=max_hyp.yseq[:],
+                        dec_state=max_hyp.dec_state,
+                        lm_state=max_hyp.lm_state,
+                        yseq_with_blank=(max_hyp.yseq_with_blank + [self.blank]) if self.collect_kd_data else None,
+                        yseq_with_blank_pr = (max_hyp.yseq_with_blank_pr + [ytu.cpu().numpy()]) if self.collect_kd_data else None,
+                    )
+                )
+
+                if self.use_lm:
+                    lm_state, lm_scores = self.lm.predict(max_hyp.lm_state, lm_tokens)
+                else:
+                    lm_state = max_hyp.lm_state
+                    lm_scores = [0.0]
+
+                count = 0
+                i = 0
+                values, ind = ytu[1:].sort(descending=True)
+                while count < beam_k:
+                    logp, k = values[i], ind[i]
+                    score = max_hyp.score + float(logp)
+                    if self.use_lm:
+                        score += self.lm_weight * lm_scores[0][k + 1] # lm scores are log probability!!
+
+                    new_yseq = max_hyp.yseq[:] + [int(k + 1)]
+                    duplicated = False
+                    for hyp in kept_hyps:
+                        if new_yseq == hyp.yseq:
+                            hyp.score = math.log(math.exp(hyp.score) + math.exp(score))
+                            duplicated = True
+                            break
+                    if duplicated:
+                        i += 1
+                        continue
+                    else:
+                        count += 1
+                        i += 1
+                        hyps.append(
+                            Hypothesis(
+                                score=score,
+                                yseq=max_hyp.yseq[:] + [int(k + 1)],
+                                dec_state=state,
+                                lm_state=lm_state,
+                                yseq_with_blank=(max_hyp.yseq_with_blank + [int(k + 1)]) if self.collect_kd_data else None,
+                                yseq_with_blank_pr=(max_hyp.yseq_with_blank_pr + [(ytu+self.lm_weight*lm_scores[0]).cpu().numpy()]) if self.collect_kd_data else None,
+                            )
+                        )
 
                 hyps_max = float(max(hyps, key=lambda x: x.score).score)
                 kept_most_prob = sorted(

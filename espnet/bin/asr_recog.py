@@ -148,7 +148,7 @@ def get_parser():
         "--search-type",
         type=str,
         default="default",
-        choices=["default", "nsc", "tsd", "alsd", "ILME"],
+        choices=["default", "nsc", "tsd", "alsd", "ILME", "non_duplicated"],
         help="""Type of beam search implementation to use during inference.
         Can be either: default beam search, n-step constrained beam search ("nsc"),
         time-synchronous decoding ("tsd") or alignment-length synchronous decoding
@@ -344,7 +344,12 @@ def get_parser():
         default=False,
         help="collect feature vectors before linear output layer"
     )
-    
+    parser.add_argument(
+        "--allow-duplications",
+        type=strtobool,
+        default=True,
+        help="allow duplications in beam search"
+    )
     return parser
 
 

@@ -382,6 +382,8 @@ class E2E(ASRInterface, torch.nn.Module):
 
         self.default_parameters(args)
 
+        self.trans_loss_reduction = args.trans_loss_reduction
+        self.criterion = TransLoss(args.trans_type, self.blank_id, reduction=self.trans_loss_reduction)
         if training:
             self.trans_loss_reduction = args.trans_loss_reduction
             self.criterion = TransLoss(args.trans_type, self.blank_id, reduction=self.trans_loss_reduction)
@@ -1010,7 +1012,7 @@ class E2E(ASRInterface, torch.nn.Module):
 
         return [asdict(n) for n in nbest_hyps]
 
-    def get_joint_network_output(self, xs_pad, ys_pad, ilens):
+    def get_joint_network_output(self, xs_pad, ys_pad, ilens, calculate_loss=False):
         xs_pad = xs_pad[:, : max(ilens)]
         if "custom" in self.etype:
             src_mask = make_non_pad_mask(ilens.tolist()).to(xs_pad.device).unsqueeze(-2)
@@ -1034,7 +1036,13 @@ class E2E(ASRInterface, torch.nn.Module):
         else:
             pred_pad = self.dec(hs_pad, ys_in_pad)
         z = self.joint_network(hs_pad.unsqueeze(2), pred_pad.unsqueeze(1))
-        return z
+
+        if calculate_loss:
+            loss_trans = self.criterion(z, target, pred_len, target_len)
+        else:
+            loss_trans = 0.0
+
+        return z, loss_trans
 
     def get_one_best_lm_logits(self, ys_pad, lm):
         prev_token = torch.full((1, ), self.blank, dtype=torch.long, device=ys_pad.device)
@@ -1060,7 +1068,7 @@ class E2E(ASRInterface, torch.nn.Module):
             use_lm = True
         else:
             use_lm = False
-        z = self.get_joint_network_output(xs_pad, ys_pad, ilens)
+        z, _ = self.get_joint_network_output(xs_pad, ys_pad, ilens)
         if use_lm:
             lm_score = self.get_one_best_lm_logits(ys_pad, lm)*lm_weight
             z = z + lm_score
@@ -1071,7 +1079,9 @@ class E2E(ASRInterface, torch.nn.Module):
             use_lm = True
         else:
             use_lm = False
-        z = self.get_joint_network_output(xs_pad, ys_pad, ilens)
+        z, loss_trans = self.get_joint_network_output(xs_pad, ys_pad, ilens, calculate_loss=True)
+        logp = -loss_trans
+        
         one_best_path = [0]
         one_best_path_pr = []
         u = 0
@@ -1120,7 +1130,7 @@ class E2E(ASRInterface, torch.nn.Module):
         one_best_path = torch.tensor(one_best_path)
         one_best_path_pr = torch.stack(one_best_path_pr)
         yseq = one_best_path[one_best_path > 0]
-        return [{'yseq': yseq.cpu().numpy(), 'yseq_with_blank': one_best_path.cpu().numpy(), 'yseq_with_blank_pr': one_best_path_pr.cpu().numpy(), 'score': score.cpu().numpy()}]
+        return [{'yseq': yseq.cpu().numpy(), 'yseq_with_blank': one_best_path.cpu().numpy(), 'yseq_with_blank_pr': one_best_path_pr.cpu().numpy(), 'score': logp}]
 
     def collect_soft_label_reduced_lattice(self, xs_pad, ilens, ys_pad):
         self.eval()

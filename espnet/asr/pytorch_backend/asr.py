@@ -1408,7 +1408,8 @@ def recog(args):
             score_norm=args.score_norm,
             collect_kd_data=args.collect_rnnt_kd_data,
             lm_fusion_kd=args.lm_fusion_kd,
-            internal_lm_weight=args.internal_lm_weight
+            internal_lm_weight=args.internal_lm_weight,
+            allow_duplications=args.allow_duplications,
         )
 
     if args.batchsize == 0:
