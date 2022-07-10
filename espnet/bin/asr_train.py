@@ -610,6 +610,12 @@ def get_parser(parser=None, required=True):
         help="do knowledge distillation?"
     )
     parser.add_argument(
+        "--nbest-training",
+        type=strtobool,
+        default=False,
+        help="do nbest KD?"
+    )
+    parser.add_argument(
         "--kd-mode",
         type=str,
         default="normal",

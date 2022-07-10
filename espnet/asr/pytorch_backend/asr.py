@@ -465,6 +465,9 @@ class CustomConverterKD(object):
         elif len(batch[0]) == 5: # 2-best kd
             xs, ys, ys_kd, ys_1, ys_kd_1 = batch[0]
             mode = "2-best"
+        elif len(batch[0]) == 6: # 2-best kd
+            xs, ys, ys_kd, ys_1, ys_kd_1, prob_list = batch[0]
+            mode = "2-best"
         if self.subsampling_factor > 1:
             xs = [x[:: self.subsampling_factor, :] for x in xs]
         ilens = np.array([x.shape[0] for x in xs])
@@ -550,7 +553,28 @@ class CustomConverterKD(object):
             
             return xs_pad, ilens, [(ys_pad, ys_kd_pad), (ys_1_pad, ys_kd_1_pad)]
         
-        
+        if len(batch[0]) == 6:
+            ys_1_pad = pad_list(
+            [
+                torch.from_numpy(
+                    np.array(y[0][:]) if isinstance(y, tuple) else y
+                ).long()
+                for y in ys_1
+            ],
+            self.ignore_id,
+            ).to(device)
+            
+            ys_kd_1_pad = pad_list(
+            [
+                torch.from_numpy(
+                    np.array(y[0][:]) if isinstance(y, tuple) else y
+                ).float()
+                for y in ys_kd_1
+            ],
+            self.ignore_id,
+            ).to(device)
+
+            return xs_pad, ilens, [(ys_pad, ys_kd_pad), (ys_1_pad, ys_kd_1_pad)], prob_list
 
 
 class CustomConverterMulEnc(object):
@@ -877,7 +901,10 @@ def train(args):
         oaxis=0,
     )
     if args.do_knowledge_distillation:
-        mode = "asr_kd"
+        if args.nbest_training:
+            mode = "asr_nbest_kd"
+        else:
+            mode = "asr_kd"
     else:
         mode = "asr"
 

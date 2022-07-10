@@ -943,6 +943,7 @@ def write_kd_json(js, name, nbest_hyps, char_list, collect_rnnt_kd_data=False, k
             new_js['output'][0]["score"] = score
         else:
             new_js['output'] = js['output']
+            new_js['output'][0]["score"] = score
 
         region = name.split('-')[0]
         spkr = '-'.join(name.split('-')[:-1])
@@ -955,7 +956,9 @@ def write_kd_json(js, name, nbest_hyps, char_list, collect_rnnt_kd_data=False, k
                             "feat": os.path.join(output_dir, name + ".npy"),
                             "shape": [kd_prob.shape[0], kd_prob.shape[1]],
                             "filetype": "npy",
+                            "score": score
                             })
+        logging.info(new_js)
     return new_js
 
 def plot_spectrogram(

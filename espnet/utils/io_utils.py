@@ -47,10 +47,10 @@ class LoadInputsAndTargets(object):
         use_second_target=False,
         preprocess_args=None,
         keep_all_data_on_mem=False,
-        do_knowledge_distillation=False
+        do_knowledge_distillation=False,
     ):
         self._loaders = {}
-        if mode not in ["asr", "tts", "mt", "vc", "asr_kd"]:
+        if mode not in ["asr", "tts", "mt", "vc", "asr_kd", "asr_nbest_kd"]:
             raise ValueError("Only asr or tts are allowed: mode={}".format(mode))
         if preprocess_conf is not None:
             self.preprocessing = Transformation(preprocess_conf)
@@ -169,6 +169,10 @@ class LoadInputsAndTargets(object):
             )
         elif self.mode == "asr_kd":
             return_batch, uttid_list = self._create_batch_asr_kd(
+                x_feats_dict, y_feats_dict, uttid_list
+            )
+        elif self.mode == "asr_nbest_kd":
+            return_batch, uttid_list = self._create_batch_asr_nbest_kd(
                 x_feats_dict, y_feats_dict, uttid_list
             )
         elif self.mode == "tts":
@@ -346,6 +350,58 @@ class LoadInputsAndTargets(object):
                 )
             else:
                 raise NotImplementedError()
+        else:
+            return_batch = OrderedDict([(x_name, x) for x_name, x in zip(x_names, xs)])
+        return return_batch, uttid_list
+
+    def _create_batch_asr_nbest_kd(self, x_feats_dict, y_feats_dict, uttid_list):
+        xs = list(x_feats_dict.values())
+
+        if self.load_output:
+            ys, ys_kd, ys_bm, ys_bm_kd, prob_list = list(y_feats_dict.values())
+            ys = [ys]
+            ys_kd = [ys_kd]
+            ys_bm = [ys_bm]
+            ys_bm_kd = [ys_bm_kd]
+            prob_list = [prob_list]
+
+            nonzero_idx = [i for i in range(len(ys[0]))]
+        
+        else:
+            nonzero_idx = list(range(len(xs[0])))
+        
+        if self.sort_in_input_length:
+            # sort in input lengths based on the first input
+            nonzero_sorted_idx = sorted(nonzero_idx, key=lambda i: -len(xs[0][i]))
+        else:
+            nonzero_sorted_idx = nonzero_idx
+
+        # remove zero-length samples
+        xs = [[x[i] for i in nonzero_sorted_idx] for x in xs]
+        uttid_list = [uttid_list[i] for i in nonzero_sorted_idx]
+
+        x_names = list(x_feats_dict.keys())
+
+        if self.load_output:
+            ys = [[y[i] for i in nonzero_sorted_idx] for y in ys]
+            y_names = list(y_feats_dict.keys())
+            #y_token_name, one_best_kd_name, ys_bm_names, ys_bm_kd_names, prob_list_names = y_names
+            y_token_name = [y_names[0]]
+            one_best_kd_name = [y_names[1]]
+            ys_bm_names = [y_names[2]]
+            ys_bm_kd_names = [y_names[3]]
+            prob_list_names = [y_names[4]]
+
+            return_batch = OrderedDict(
+                [
+                    *[(x_name, x) for x_name, x in zip(x_names, xs)],
+                    *[(y_name, y) for y_name, y in zip(y_token_name, ys)],
+                    *[(y_name, y) for y_name, y in zip(one_best_kd_name, ys_kd)],
+                    *[(y_name, y) for y_name, y in zip(ys_bm_names, ys_bm)],
+                    *[(y_name, y) for y_name, y in zip(ys_bm_kd_names, ys_bm_kd)],
+                    *[(prob_name, p) for prob_name, p in zip(prob_list_names, prob_list)],
+                ]
+            )
         else:
             return_batch = OrderedDict([(x_name, x) for x_name, x in zip(x_names, xs)])
         return return_batch, uttid_list
@@ -661,11 +717,9 @@ class LoadInputsAndTargets(object):
                 loader = kaldiio.load_scp(filepath)
                 self._loaders[filepath] = loader
             return loader[key]
-        elif filetype == "npz":
-            filepath, key = filepath.split(":", 1)
-            loader = self._loaders.get(filepath)
-            return loader[key]
-            
+        elif filetype == "npy_str":
+            prob_list = np.array(list(map(float, filepath.split(' '))))
+            return prob_list
         elif filetype == "pseudo":
             return np.zeros((1,))
         else:

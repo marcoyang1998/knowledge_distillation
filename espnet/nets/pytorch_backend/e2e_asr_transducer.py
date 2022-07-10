@@ -1412,13 +1412,13 @@ class E2E(ASRInterface, torch.nn.Module):
             
         return self.loss
         
-    def forward_nbest_KD(self, xs_pad: torch.Tensor, ilens: torch.Tensor, n_best_list: List):
+    def forward_nbest_KD(self, xs_pad: torch.Tensor, ilens: torch.Tensor, n_best_list: List, prob_list=None):
         """E2E n-best KD forward
 
         Args:
             xs_pad (torch.Tensor): batch of padded input 
             ilens (torch.Tensor): batch of lengths of input sequences
-            n_best_list (list): a list of tuples, each tuple consists of (transcription, kd_aligment)
+            n_best_list (list): a list of tuples, each tuple consists of (transcription, kd_aligment), total length = n
         """
         bs = xs_pad.shape[0]
         xs_pad = xs_pad[:, : max(ilens)]
@@ -1444,8 +1444,9 @@ class E2E(ASRInterface, torch.nn.Module):
         loss_trans = 0.0
         loss_trans_list = []
         loss_kd_list = []
+        hyp_probs = torch.from_numpy(numpy.array(prob_list)).float().to(xs_pad.device).softmax(1)
         
-        for (ys_pad, kd_pad) in n_best_list:
+        for i, (ys_pad, kd_pad) in enumerate(n_best_list):
             # prepare transducer loss
             ys_in_pad, ys_out_pad, target, pred_len, target_len = prepare_loss_inputs(ys_pad, hs_mask,ignore_id=self.ignore_id)
             
@@ -1459,25 +1460,15 @@ class E2E(ASRInterface, torch.nn.Module):
             z = self.joint_network(hs_pad.unsqueeze(2), pred_pad.unsqueeze(1))
             
             # loss computation
-            loss_trans_list += self.criterion(z, target, pred_len, target_len)
+            loss_trans += torch.sum(self.criterion(z, target, pred_len, target_len) * hyp_probs[:, i])
             
             if self.kd_mtl_factor > 0:
-                loss_kd_list += (self.kd_loss(z, pred_len, target_len, cal_enc_T(ilens), ys_pad, kd_pad, reduction='none'))
+                temp_loss = self.kd_loss(z, pred_len, target_len, cal_enc_T(ilens), ys_pad, kd_pad, reduction='none')
+                for j in range(len(temp_loss)):
+                    loss_kd += temp_loss[j] * hyp_probs[j, i]
+                #loss_kd_list += self.kd_loss(z, pred_len, target_len, cal_enc_T(ilens), ys_pad, kd_pad, reduction='none')
         
-        # loss_trans_list = numpy.array(loss_trans_list)
-        loss_trans_data = numpy.array([d.item() for d in loss_trans_list]).reshape(n_best_num, bs)
-
-        hyp_probs = numpy.exp(-loss_trans_data) + 1e-5
-        hyp_probs = torch.from_numpy(hyp_probs/numpy.sum(hyp_probs, axis=0).reshape(1,bs)).float().to(xs_pad.device)
-        hyp_probs = hyp_probs.view(-1)
-        
-        # loss_trans += loss_trans_list[i] for i in range(bs)  # the groundtruth or best sequence
-        for i in range(bs):
-            loss_trans += loss_trans_list[i]
         loss_trans = loss_trans / bs
-        
-        for i in range(n_best_num * bs):
-            loss_kd += hyp_probs[i] * loss_kd_list[i]
         loss_kd = loss_kd * self.kd_mtl_factor / bs
                 
         loss = (
