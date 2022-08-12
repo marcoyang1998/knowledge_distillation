@@ -31,6 +31,7 @@ def add_encoder_general_arguments(group):
             "vgggru",
             "vggbgru",
             "wav2vec",
+            'hubert',
         ],
         help="Type of encoder network architecture",
     )

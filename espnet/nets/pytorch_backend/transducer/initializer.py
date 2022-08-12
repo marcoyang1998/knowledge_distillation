@@ -17,7 +17,7 @@ def initializer(model, args, name_list=None):
 
     """
     if name_list is None:
-        if args.etype == 'wav2vec':
+        if args.etype in ['wav2vec', 'hubert']:
             components_list = ["dec.", "joint_network"]
         else:
             components_list = ["enc.", "dec.", "joint_network"]

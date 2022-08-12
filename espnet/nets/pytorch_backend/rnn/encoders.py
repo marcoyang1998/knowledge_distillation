@@ -313,7 +313,7 @@ class Wav2VecEncoder(torch.nn.Module):
                 self.subsample = torch.nn.Sequential(torch.nn.AvgPool1d(kernel_size=2, stride=2))
             else:
                 raise NotImplementedError('only support: concat, concat_relu, concat_tanh, avgpooling')
-            print(self.subsample)
+            logging.info(self.subsample)
         else:
             self.subsample = None
 
@@ -334,9 +334,9 @@ class Wav2VecEncoder(torch.nn.Module):
             self.num_updates += 1
         elif ft and self.num_updates == self.freeze_finetune_updates + 1:
             self.num_updates += 1
-            print("Start fine-tuning wav2vec parameters after {} updates!".format(self.num_updates))
+            logging.warning("Start fine-tuning wav2vec parameters after {} updates!".format(self.num_updates))
         if self.num_updates%10==0:
-            print("Actual batch size: {} at update: {}, finetuning transformer: {}".format(xs_pad.shape[0], self.num_updates.cpu().numpy(), ft.cpu().numpy()))
+            logging.info("Actual batch size: {} at update: {}, finetuning transformer: {}".format(xs_pad.shape[0], self.num_updates.cpu().numpy(), ft.cpu().numpy()))
         with torch.no_grad() if not ft else contextlib.nullcontext():
             enc_outputs = self.encoders(
                 xs_pad,

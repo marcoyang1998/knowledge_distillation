@@ -27,6 +27,7 @@ from espnet.nets.pytorch_backend.transducer.arguments import (
     add_auxiliary_task_arguments,  # noqa: H301
 )
 from espnet.nets.pytorch_backend.wav2vec2.argument import add_arguments_w2v2_common
+from espnet.nets.pytorch_backend.hubert.argument import add_arguments_hubert_common
 from espnet.nets.pytorch_backend.transducer.auxiliary_task import AuxiliaryTask
 from espnet.nets.pytorch_backend.transducer.custom_decoder import CustomDecoder
 from espnet.nets.pytorch_backend.transducer.custom_encoder import CustomEncoder
@@ -36,6 +37,7 @@ from espnet.nets.pytorch_backend.transducer.joint_network import JointNetwork
 from espnet.nets.pytorch_backend.transducer.loss import TransLoss
 from espnet.nets.pytorch_backend.transducer.rnn_decoder import DecoderRNNT
 from espnet.nets.pytorch_backend.transducer.rnn_encoder import encoder_for
+from espnet.nets.pytorch_backend.hubert.encoder import HubertEncoder
 from espnet.nets.pytorch_backend.transducer.utils import prepare_loss_inputs
 from espnet.nets.pytorch_backend.transducer.utils import valid_aux_task_layer_list
 from espnet.nets.pytorch_backend.transformer.attention import (
@@ -120,6 +122,8 @@ class E2E(ASRInterface, torch.nn.Module):
         E2E.encoder_add_rnn_arguments(parser)
         E2E.encoder_add_custom_arguments(parser)
         E2E.encoder_add_w2v2_arguments(parser)
+        E2E.encoder_add_hubert_arguments(parser)
+
 
         E2E.decoder_add_general_arguments(parser)
         E2E.decoder_add_rnn_arguments(parser)
@@ -151,6 +155,13 @@ class E2E(ASRInterface, torch.nn.Module):
     def encoder_add_w2v2_arguments(parser):
         group = parser.add_argument_group("W2V2 encoder arguments")
         group = add_arguments_w2v2_common(group)
+
+        return parser
+    
+    @staticmethod
+    def encoder_add_hubert_arguments(parser):
+        group = parser.add_argument_group("Hubert encoder arguments")
+        group = add_arguments_hubert_common(group)
 
         return parser
 
@@ -289,13 +300,24 @@ class E2E(ASRInterface, torch.nn.Module):
         else:
             self.subsample = get_subsample(args, mode="asr", arch="rnn-t")
 
-            self.enc = encoder_for(
-                args,
-                idim,
-                self.subsample,
-                aux_task_layer_list=aux_task_layer_list,
-            )
-            encoder_out = args.eprojs
+            if args.etype == "hubert":
+                self.enc = HubertEncoder(
+                    model_dir=args.hubert_model_dir,
+                    output_size=args.hubert_output_dim,
+                    freeze_finetune_updates=args.hubert_freeze_finetune_updates*args.accum_grad,
+                    subsample_output=args.hubert_subsample,
+                    subsample_mode=args.hubert_subsample_mode,
+                    training=training,
+                )
+                encoder_out = args.eprojs
+            else:
+                self.enc = encoder_for(
+                    args,
+                    idim,
+                    self.subsample,
+                    aux_task_layer_list=aux_task_layer_list,
+                )
+                encoder_out = args.eprojs
         if args.modify_first_block and args.streaming and args.first_block_future_context > 0: # modify the first encoder block to allow for furture context, only used when streaming
             n_head = args.enc_block_arch[0]['heads']
             n_feat = args.enc_block_arch[0]['d_hidden']
@@ -979,10 +1001,10 @@ class E2E(ASRInterface, torch.nn.Module):
             self.enc.encoders.mask_channel_prob = 0
             self.enc.encoders.mask_prob = 0
 
-        if len(x.shape) > 1:
+        if len(x.shape) > 1: # filter bank features
             ilens = [x.shape[0]]
             x = x[:: self.subsample[0], :]
-        else:
+        else: # waveform features
             ilens = [x.shape[0]]
             x = x[:: self.subsample[0]]
 
@@ -1089,7 +1111,7 @@ class E2E(ASRInterface, torch.nn.Module):
         score = 0.0
         lm_state = None
         i = 0
-        prev_token = torch.full((1, ), 0, dtype=torch.long, device=xs_pad.device)
+        prev_token = torch.full((1, ), self.blank_id, dtype=torch.long, device=xs_pad.device)
         if use_lm:
             lm_state, lm_scores = lm.predict(lm_state, prev_token)
         while True:
@@ -1413,6 +1435,99 @@ class E2E(ASRInterface, torch.nn.Module):
         return self.loss
         
     def forward_nbest_KD(self, xs_pad: torch.Tensor, ilens: torch.Tensor, n_best_list: List, prob_list=None):
+        """E2E n-best KD forward
+
+        Args:
+            xs_pad (torch.Tensor): batch of padded input 
+            ilens (torch.Tensor): batch of lengths of input sequences
+            n_best_list (list): a list of tuples, each tuple consists of (transcription, kd_aligment), total length = n
+        """
+        bs = xs_pad.shape[0]
+        xs_pad = xs_pad[:, : max(ilens)]
+        def cal_enc_T(ilens):
+            return [(((idim - 1) // 2 - 1) // 2) for idim in ilens]
+        if "custom" in self.etype:
+            src_mask = make_non_pad_mask(ilens.tolist()).to(xs_pad.device).unsqueeze(-2)
+
+            _hs_pad, hs_mask = self.encoder(xs_pad, src_mask)
+        else:
+            _hs_pad, hs_mask, _ = self.enc(xs_pad, ilens)
+
+        if self.use_aux_task:
+            hs_pad, aux_hs_pad = _hs_pad[0], _hs_pad[1]
+        else:
+            hs_pad, aux_hs_pad = _hs_pad, None
+            
+        n_best_num = len(n_best_list)
+        
+        loss_aux_trans, loss_aux_symm_kl = 0.0, 0.0
+        loss_ctc, loss_lm = 0.0, 0.0
+        loss_kd = 0.0
+        loss_trans = 0.0
+        loss_trans_list = []
+        loss_kd_list = []
+        hyp_probs = torch.from_numpy(numpy.array(prob_list)).float().to(xs_pad.device).softmax(1)
+        
+        for i, (ys_pad, kd_pad) in enumerate(n_best_list):
+            # prepare transducer loss
+            ys_in_pad, ys_out_pad, target, pred_len, target_len = prepare_loss_inputs(ys_pad, hs_mask,ignore_id=self.ignore_id)
+            
+            if "custom" in self.dtype:
+                ys_mask = target_mask(ys_in_pad, self.blank_id)
+                pred_pad, _ = self.decoder(ys_in_pad, ys_mask, hs_pad)
+            else:
+                pred_pad = self.dec(hs_pad, ys_in_pad)
+            
+            # lattice generation
+            z = self.joint_network(hs_pad.unsqueeze(2), pred_pad.unsqueeze(1))
+            
+            # loss computation
+            loss_trans += torch.sum(self.criterion(z, target, pred_len, target_len) * hyp_probs[:, i])
+            
+            if self.kd_mtl_factor > 0:
+                temp_loss = self.kd_loss(z, pred_len, target_len, cal_enc_T(ilens), ys_pad, kd_pad, reduction='none')
+                for j in range(len(temp_loss)):
+                    loss_kd += temp_loss[j] * hyp_probs[j, i]
+                #loss_kd_list += self.kd_loss(z, pred_len, target_len, cal_enc_T(ilens), ys_pad, kd_pad, reduction='none')
+        
+        loss_trans = loss_trans / bs
+        loss_kd = loss_kd * self.kd_mtl_factor / bs
+                
+        loss = (
+            loss_trans
+            + self.transducer_weight * (loss_aux_trans + loss_aux_symm_kl)
+            + loss_ctc
+            + loss_lm
+            + loss_kd
+        )
+
+        self.loss = loss
+        loss_data = float(loss)
+
+        # compute cer/wer
+        if self.training or self.error_calculator is None:
+            cer, wer = None, None
+        else:
+            cer, wer = self.error_calculator(hs_pad, ys_pad)
+        
+        if not math.isnan(loss_data):
+            self.reporter.report_kd(
+                    loss_data,
+                    float(loss_trans),
+                    float(loss_ctc),
+                    float(loss_lm),
+                    float(loss_aux_trans),
+                    float(loss_aux_symm_kl),
+                    float(loss_kd),
+                    cer,
+                    wer,
+                )   
+        else:
+            logging.warning("loss (=%f) is not correct", loss_data)    
+
+        return self.loss
+
+    def forward_nbest_KD_efficient(self, xs_pad: torch.Tensor, ilens: torch.Tensor, n_best_list: List, prob_list=None):
         """E2E n-best KD forward
 
         Args:
