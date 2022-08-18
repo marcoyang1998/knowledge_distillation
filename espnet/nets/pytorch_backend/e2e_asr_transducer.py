@@ -28,6 +28,7 @@ from espnet.nets.pytorch_backend.transducer.arguments import (
 )
 from espnet.nets.pytorch_backend.wav2vec2.argument import add_arguments_w2v2_common
 from espnet.nets.pytorch_backend.hubert.argument import add_arguments_hubert_common
+from espnet.nets.pytorch_backend.wavlm.argument import add_arguments_wavlm_common
 from espnet.nets.pytorch_backend.transducer.auxiliary_task import AuxiliaryTask
 from espnet.nets.pytorch_backend.transducer.custom_decoder import CustomDecoder
 from espnet.nets.pytorch_backend.transducer.custom_encoder import CustomEncoder
@@ -38,6 +39,7 @@ from espnet.nets.pytorch_backend.transducer.loss import TransLoss
 from espnet.nets.pytorch_backend.transducer.rnn_decoder import DecoderRNNT
 from espnet.nets.pytorch_backend.transducer.rnn_encoder import encoder_for
 from espnet.nets.pytorch_backend.hubert.encoder import HubertEncoder
+from espnet.nets.pytorch_backend.wavlm.encoders import WavlmEncoder
 from espnet.nets.pytorch_backend.transducer.utils import prepare_loss_inputs
 from espnet.nets.pytorch_backend.transducer.utils import valid_aux_task_layer_list
 from espnet.nets.pytorch_backend.transformer.attention import (
@@ -123,6 +125,7 @@ class E2E(ASRInterface, torch.nn.Module):
         E2E.encoder_add_custom_arguments(parser)
         E2E.encoder_add_w2v2_arguments(parser)
         E2E.encoder_add_hubert_arguments(parser)
+        E2E.encoder_add_wavlm_arguments(parser)
 
 
         E2E.decoder_add_general_arguments(parser)
@@ -162,6 +165,13 @@ class E2E(ASRInterface, torch.nn.Module):
     def encoder_add_hubert_arguments(parser):
         group = parser.add_argument_group("Hubert encoder arguments")
         group = add_arguments_hubert_common(group)
+
+        return parser
+
+    @staticmethod
+    def encoder_add_wavlm_arguments(parser):
+        group = parser.add_argument_group("WavLM encoder arguments")
+        group = add_arguments_wavlm_common(group)
 
         return parser
 
@@ -305,8 +315,24 @@ class E2E(ASRInterface, torch.nn.Module):
                     model_dir=args.hubert_model_dir,
                     output_size=args.hubert_output_dim,
                     freeze_finetune_updates=args.hubert_freeze_finetune_updates*args.accum_grad,
+                    mask_channel_prob=args.hubert_mask_channel_prob,
+                    mask_prob=args.hubert_mask_prob,
+                    mask_channel_length=args.hubert_mask_channel_length,
                     subsample_output=args.hubert_subsample,
                     subsample_mode=args.hubert_subsample_mode,
+                    training=training,
+                )
+                encoder_out = args.eprojs
+            elif args.etype == "wavlm":
+                self.enc = WavlmEncoder(
+                    model_dir=args.wavlm_model_dir,
+                    output_size=args.wavlm_output_dim,
+                    freeze_finetune_updates=args.wavlm_freeze_finetune_updates*args.accum_grad,
+                    mask_channel_prob=args.wavlm_mask_channel_prob,
+                    mask_prob=args.wavlm_mask_prob,
+                    mask_channel_length=args.wavlm_mask_channel_length,
+                    subsample_output=args.wavlm_subsample,
+                    subsample_mode=args.wavlm_subsample_mode,
                     training=training,
                 )
                 encoder_out = args.eprojs
