@@ -16,14 +16,14 @@ class WavlmEncoder(torch.nn.Module):
                  ):
         super().__init__()
 
-        model_dir=args.wavlm_model_dir,
-        output_size=args.wavlm_output_dim,
-        freeze_finetune_updates=args.wavlm_freeze_finetune_updates*args.accum_grad,
-        mask_channel_prob=args.wavlm_mask_channel_prob,
-        mask_prob=args.wavlm_mask_prob,
-        mask_channel_length=args.wavlm_mask_channel_length,
-        subsample_output=args.wavlm_subsample,
-        subsample_mode=args.wavlm_subsample_mode,
+        model_dir=args.wavlm_model_dir
+        output_size=args.wavlm_output_dim
+        freeze_finetune_updates=args.wavlm_freeze_finetune_updates*args.accum_grad
+        mask_channel_prob=args.wavlm_mask_channel_prob
+        mask_prob=args.wavlm_mask_prob
+        mask_channel_length=args.wavlm_mask_channel_length
+        subsample_output=args.wavlm_subsample
+        subsample_mode=args.wavlm_subsample_mode
         
         checkpoint = torch.load(model_dir)
         cfg = WavLMConfig(checkpoint['cfg'])
