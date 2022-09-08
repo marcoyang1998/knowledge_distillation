@@ -37,7 +37,7 @@ class MultiEncoder(torch.nn.Module):
                  args,
                  idim: int,
                  enc_types: List[str],
-                 combine_method: str,
+                 combine_method: str="average",
                  training: bool=True,
                  ):
         super().__init__()
