@@ -47,7 +47,7 @@ class MultiEncoder(torch.nn.Module):
         encoder_list = []
         
         for encoder_class in encoder_cls_list:
-            encoder = encoder_class(args)
+            encoder = encoder_class(args, training)
             encoder_list.append(encoder)
         
         encoder_dict = {f"encoder_{i}": encoder_list[i] for i in range(self.num_encoders)}

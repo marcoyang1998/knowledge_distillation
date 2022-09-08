@@ -325,27 +325,13 @@ class E2E(ASRInterface, torch.nn.Module):
 
             if args.etype == "hubert":
                 self.enc = HubertEncoder(
-                    model_dir=args.hubert_model_dir,
-                    output_size=args.hubert_output_dim,
-                    freeze_finetune_updates=args.hubert_freeze_finetune_updates*args.accum_grad,
-                    mask_channel_prob=args.hubert_mask_channel_prob,
-                    mask_prob=args.hubert_mask_prob,
-                    mask_channel_length=args.hubert_mask_channel_length,
-                    subsample_output=args.hubert_subsample,
-                    subsample_mode=args.hubert_subsample_mode,
+                    args,
                     training=training,
                 )
                 encoder_out = args.hubert_output_dim
             elif args.etype == "wavlm":
                 self.enc = WavlmEncoder(
-                    model_dir=args.wavlm_model_dir,
-                    output_size=args.wavlm_output_dim,
-                    freeze_finetune_updates=args.wavlm_freeze_finetune_updates*args.accum_grad,
-                    mask_channel_prob=args.wavlm_mask_channel_prob,
-                    mask_prob=args.wavlm_mask_prob,
-                    mask_channel_length=args.wavlm_mask_channel_length,
-                    subsample_output=args.wavlm_subsample,
-                    subsample_mode=args.wavlm_subsample_mode,
+                    args,
                     training=training,
                 )
                 encoder_out = args.wavlm_output_dim
