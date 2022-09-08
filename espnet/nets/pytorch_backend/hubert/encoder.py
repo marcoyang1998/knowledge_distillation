@@ -11,17 +11,20 @@ from espnet.nets.pytorch_backend.hubert.subsample import get_subsample_module
 
 class HubertEncoder(torch.nn.Module):
     def __init__(self,
-                 model_dir,
-                 output_size,
-                 freeze_finetune_updates,
-                 mask_prob=0.65,
-                 mask_channel_prob=0.5,
-                 mask_channel_length=64,
-                 subsample_output=False,
-                 subsample_mode=None,
+                 args,
                  training=True,
                  ):
         super().__init__()
+        
+        model_dir=args.hubert_model_dir,
+        output_size=args.hubert_output_dim,
+        freeze_finetune_updates=args.hubert_freeze_finetune_updates*args.accum_grad,
+        mask_channel_prob=args.hubert_mask_channel_prob,
+        mask_prob=args.hubert_mask_prob,
+        mask_channel_length=args.hubert_mask_channel_length,
+        subsample_output=args.hubert_subsample,
+        subsample_mode=args.hubert_subsample_mode,
+        
         models, cfg, task = fairseq.checkpoint_utils.load_model_ensemble_and_task([model_dir])
         model = models[0]
 
