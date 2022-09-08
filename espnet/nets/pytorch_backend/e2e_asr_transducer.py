@@ -42,6 +42,7 @@ from espnet.nets.pytorch_backend.hubert.encoder import HubertEncoder
 from espnet.nets.pytorch_backend.wavlm.encoders import WavlmEncoder
 from espnet.nets.pytorch_backend.transducer.utils import prepare_loss_inputs
 from espnet.nets.pytorch_backend.transducer.utils import valid_aux_task_layer_list
+from espnet.nets.pytorch_backend.transducer.multi_encoder import MultiEncoder
 from espnet.nets.pytorch_backend.transformer.attention import (
     MultiHeadedAttention,  # noqa: H301
     RelPositionMultiHeadedAttention,  # noqa: H301
@@ -307,6 +308,18 @@ class E2E(ASRInterface, torch.nn.Module):
             encoder_out = self.encoder.enc_out if args.encoder_projection == 0 else args.encoder_projection
 
             self.most_dom_list = args.enc_block_arch[:]
+        
+        elif args.etype == "multiencoder":
+            self.subsample = get_subsample(args, mode="asr", arch="rnn-t")
+            enc_types = args.enc_types.split('+')
+            self.enc = MultiEncoder(args,
+                idim=idim,
+                enc_types=enc_types,
+                combine_method=args.combine_method,
+                training=training
+            )
+            encoder_out = args.eprojs
+            
         else:
             self.subsample = get_subsample(args, mode="asr", arch="rnn-t")
 
@@ -524,6 +537,9 @@ class E2E(ASRInterface, torch.nn.Module):
         if args.streaming:
             logging.warning("This is a streaming transducer!")
         self.use_dproj = False
+        self.num_updates = 0
+        self.freeze_encoder_steps = args.freeze_encoder_steps * args.accum_grad
+        logging.info(f"freeze encoder steps: {self.freeze_encoder_steps}")
             
     def add_dproj_layer(self, args, device):
         
@@ -794,12 +810,21 @@ class E2E(ASRInterface, torch.nn.Module):
         # 1. encoder
         xs_pad = xs_pad[:, : max(ilens)]
 
-        if "custom" in self.etype:
-            src_mask = make_non_pad_mask(ilens.tolist()).to(xs_pad.device).unsqueeze(-2)
+        with torch.set_grad_enabled(self.num_updates >= self.freeze_encoder_steps):
+            if self.num_updates < self.freeze_encoder_steps and self.num_updates % 500 == 0:
+                logging.info(f"Current step: {self.num_updates}. Forwarding without grad")
+                print(f"Current step: {self.num_updates}. Forwarding without grad")
+            
+            if "custom" in self.etype:
+                src_mask = make_non_pad_mask(ilens.tolist()).to(xs_pad.device).unsqueeze(-2)
 
-            _hs_pad, hs_mask = self.encoder(xs_pad, src_mask)
-        else:
-            _hs_pad, hs_mask, _ = self.enc(xs_pad, ilens)
+                _hs_pad, hs_mask = self.encoder(xs_pad, src_mask)
+            else:
+                _hs_pad, hs_mask, _ = self.enc(xs_pad, ilens)
+        self.num_updates += 1
+        if self.num_updates % 500 == 0:
+            logging.info(f"Updates: {self.num_updates}")
+            print(self.num_updates)
 
         if self.use_aux_task:
             hs_pad, aux_hs_pad = _hs_pad[0], _hs_pad[1]
@@ -897,12 +922,13 @@ class E2E(ASRInterface, torch.nn.Module):
         xs_pad = xs_pad[:, : max(ilens)]
         def cal_enc_T(ilens):
             return [(((idim - 1) // 2 - 1) // 2) for idim in ilens]
-        if "custom" in self.etype:
-            src_mask = make_non_pad_mask(ilens.tolist()).to(xs_pad.device).unsqueeze(-2)
+        with torch.set_grad_enabled(self.num_updates > self.freeze_encoder_steps):
+            if "custom" in self.etype:
+                src_mask = make_non_pad_mask(ilens.tolist()).to(xs_pad.device).unsqueeze(-2)
 
-            _hs_pad, hs_mask = self.encoder(xs_pad, src_mask)
-        else:
-            _hs_pad, hs_mask, _ = self.enc(xs_pad, ilens)
+                _hs_pad, hs_mask = self.encoder(xs_pad, src_mask)
+            else:
+                _hs_pad, hs_mask, _ = self.enc(xs_pad, ilens)
 
         if self.use_aux_task:
             hs_pad, aux_hs_pad = _hs_pad[0], _hs_pad[1]
