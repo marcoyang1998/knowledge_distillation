@@ -31,8 +31,9 @@ def add_encoder_general_arguments(group):
             "vgggru",
             "vggbgru",
             "wav2vec",
-            'hubert',
-            'wavlm',
+            "hubert",
+            "wavlm",
+            "multiencoder",
         ],
         help="Type of encoder network architecture",
     )
@@ -132,11 +133,20 @@ def add_custom_encoder_arguments(group):
         default=0,
         help="Add a projection layer after the encoder. If 0, no projection layer will be added"
     )
-    
     group.add_argument(
         "--freeze-encoder-steps",
         type=int,
         default=0,
+    )
+    group.add_argument(
+        "--combine-method",
+        type=str,
+        default="average"
+    )
+    group.add_argument(
+        "--multi-enc-types",
+        type=str,
+        default="hubert+wavlm"
     )
     return group
 
