@@ -717,6 +717,14 @@ class LoadInputsAndTargets(object):
                 loader = kaldiio.load_scp(filepath)
                 self._loaders[filepath] = loader
             return loader[key]
+        elif filetype == "random_numpy": # random selection from numpy array
+            id = np.random.randint(len(filepath))
+            filepath = filepath[id]
+            if not self.keep_all_data_on_mem:
+                return np.load(filepath, mmap_mode='r')
+            if filepath not in self._loaders:
+                self._npy_loaders[filepath] = np.load(filepath, mmap_mode='r') # accelerate by setting mmap_mode='r'
+            return self._npy_loaders[filepath]
         elif filetype == "npy_str":
             prob_list = np.array(list(map(float, filepath.split(' '))))
             return prob_list

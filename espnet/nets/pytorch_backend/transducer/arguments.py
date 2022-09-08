@@ -132,7 +132,12 @@ def add_custom_encoder_arguments(group):
         default=0,
         help="Add a projection layer after the encoder. If 0, no projection layer will be added"
     )
-
+    
+    group.add_argument(
+        "--freeze-encoder-steps",
+        type=int,
+        default=0,
+    )
     return group
 
 
