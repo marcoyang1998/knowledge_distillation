@@ -322,7 +322,7 @@ class E2E(ASRInterface, torch.nn.Module):
                     subsample_mode=args.hubert_subsample_mode,
                     training=training,
                 )
-                encoder_out = args.eprojs
+                encoder_out = args.hubert_output_dim
             elif args.etype == "wavlm":
                 self.enc = WavlmEncoder(
                     model_dir=args.wavlm_model_dir,
@@ -335,7 +335,7 @@ class E2E(ASRInterface, torch.nn.Module):
                     subsample_mode=args.wavlm_subsample_mode,
                     training=training,
                 )
-                encoder_out = args.eprojs
+                encoder_out = args.wavlm_output_dim
             else:
                 self.enc = encoder_for(
                     args,
