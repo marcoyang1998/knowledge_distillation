@@ -650,6 +650,16 @@ def get_parser(parser=None, required=True):
         default=False,
         help="load data on disk"
     )
+    parser.add_argument(
+        "--combine-method",
+        type=str,
+        default="average"
+    )
+    parser.add_argument(
+        "--multi-enc-types",
+        type=str,
+        default="hubert+wavlm"
+    )
     return parser
 
 

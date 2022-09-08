@@ -311,7 +311,7 @@ class E2E(ASRInterface, torch.nn.Module):
         
         elif args.etype == "multiencoder":
             self.subsample = get_subsample(args, mode="asr", arch="rnn-t")
-            enc_types = args.enc_types.split('+')
+            enc_types = args.multi_enc_types.split('+')
             self.enc = MultiEncoder(args,
                 idim=idim,
                 enc_types=enc_types,
