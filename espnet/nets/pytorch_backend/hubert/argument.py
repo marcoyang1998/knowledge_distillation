@@ -7,7 +7,7 @@ def add_arguments_hubert_common(group):
     group.add_argument(
         "--hubert-model-dir",
         type=str,
-        help="The "
+        help="The hubert model dir"
     )
     group.add_argument(
         "--hubert-output-dim",

@@ -16,14 +16,14 @@ class WavlmEncoder(torch.nn.Module):
                  ):
         super().__init__()
 
-        model_dir=args.wavlm_model_dir,
-        output_size=args.wavlm_output_dim,
-        freeze_finetune_updates=args.wavlm_freeze_finetune_updates*args.accum_grad,
-        mask_channel_prob=args.wavlm_mask_channel_prob,
-        mask_prob=args.wavlm_mask_prob,
-        mask_channel_length=args.wavlm_mask_channel_length,
-        subsample_output=args.wavlm_subsample,
-        subsample_mode=args.wavlm_subsample_mode,
+        model_dir=args.wavlm_model_dir
+        output_size=args.wavlm_output_dim
+        freeze_finetune_updates=args.wavlm_freeze_finetune_updates*args.accum_grad
+        mask_channel_prob=args.wavlm_mask_channel_prob
+        mask_prob=args.wavlm_mask_prob
+        mask_channel_length=args.wavlm_mask_channel_length
+        subsample_output=args.wavlm_subsample
+        subsample_mode=args.wavlm_subsample_mode
         
         checkpoint = torch.load(model_dir)
         cfg = WavLMConfig(checkpoint['cfg'])
@@ -73,19 +73,17 @@ class WavlmEncoder(torch.nn.Module):
             self.num_updates += 1
         elif ft and self.num_updates == self.freeze_finetune_updates + 1:
             self.num_updates += 1
-            logging.warning("Start fine-tuning Hubert parameters after {} updates!".format(self.num_updates))
+            logging.warning("Start fine-tuning WavLM parameters after {} updates!".format(self.num_updates))
         if self.num_updates%100==0:
             logging.warning("Actual batch size: {} at update: {}, finetuning transformer: {}".format(xs_pad.shape[0], self.num_updates.cpu().numpy(), ft.cpu().numpy()))
         
         apply_mask = self.training
-        with torch.no_grad() if not ft else contextlib.nullcontext():
+        with torch.set_grad_enabled(bool(ft)):
             enc_outputs = self.encoders.extract_features(
                 xs_pad,
                 padding_mask=mask,
                 mask=apply_mask,
             )
-        #xs_pad = enc_outputs["x"]
-        #masks = enc_outputs["padding_mask"]
         xs_pad, masks = enc_outputs
         olens = torch.logical_not(masks).sum(dim=1)
 

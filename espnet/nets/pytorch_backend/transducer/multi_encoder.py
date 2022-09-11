@@ -67,7 +67,7 @@ class MultiEncoder(torch.nn.Module):
         xs_list = []
         olens_list = []
         for key in self.encoder_dict:
-            xs, olens = self.encoder_dict[key](xs_pad, ilens)
+            xs, olens, _ = self.encoder_dict[key](xs_pad, ilens)
             xs_list.append(xs)
             olens_list.append(olens)
         
@@ -77,7 +77,7 @@ class MultiEncoder(torch.nn.Module):
         else:
             raise NotImplementedError()
         
-        return xs_out, olens_list[0] 
+        return xs_out, olens_list[0], None
     
     def forward(self, xs_pad, ilens, prev_states=None):
         
