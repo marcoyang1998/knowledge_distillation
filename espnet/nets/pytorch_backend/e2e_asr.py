@@ -35,6 +35,8 @@ from espnet.nets.pytorch_backend.rnn.argument import (
     add_arguments_rnn_attention_common,  # noqa: H301
 )
 from espnet.nets.pytorch_backend.wav2vec2.argument import add_arguments_w2v2_common
+from espnet.nets.pytorch_backend.hubert.encoder import HubertEncoder
+from espnet.nets.pytorch_backend.wavlm.encoders import WavlmEncoder
 from espnet.nets.pytorch_backend.rnn.attentions import att_for
 from espnet.nets.pytorch_backend.rnn.decoders import decoder_for
 from espnet.nets.pytorch_backend.rnn.encoders import encoder_for, Wav2VecEncoder
@@ -179,15 +181,15 @@ class E2E(ASRInterface, torch.nn.Module):
             self.frontend = None
 
         # encoder
-        if args.etype == 'wav2vec' and args.w2v2_is_finetuned == True:
-            self.enc = encoder_for(args, idim, self.subsample)
-            fc_layer = self.enc.final_proj
-            self.ctc = ctc_for(args, odim) # ctc
-            with torch.no_grad():
-                self.ctc.ctc_lo.weight.copy_(fc_layer.weight)
-                self.ctc.ctc_lo.bias.copy_(fc_layer.bias)
-        else:
-            self.enc = encoder_for(args, idim, self.subsample)
+        if args.etype == 'hubert':
+            self.enc = HubertEncoder(
+                    args,
+                )
+            self.ctc = ctc_for(args, odim)  # ctc
+        elif args.etype == "wavlm":
+            self.enc = WavlmEncoder(
+                args,
+            )
             self.ctc = ctc_for(args, odim)  # ctc
         # memory efficient
         if args.mtlalpha == 1.0:
@@ -197,14 +199,13 @@ class E2E(ASRInterface, torch.nn.Module):
             self.att = att_for(args)  # attention
             self.dec = decoder_for(args, odim, self.sos, self.eos, self.att, labeldist)  # decoder
         # weight initialization
-        if args.etype == 'wav2vec':
-            if args.w2v2_is_finetuned == False:    # only initialise if w2v2 model is not finetuned
-                if args.mtlalpha != 1.0:        # if not full ctc
-                    module_list = [self.ctc, self.att, self.dec]
-                    self.init_modules_like_chainer(module_list, decoder=True)
-                else:
-                    module_list = [self.ctc]
-                    self.init_modules_like_chainer(module_list, decoder=False)
+        if args.etype in ["wav2vec", "hubert", "wavlm"]: # using pretrained models
+            if args.mtlalpha != 1.0:        # if not full ctc
+                module_list = [self.ctc, self.att, self.dec]
+                self.init_modules_like_chainer(module_list, decoder=True)
+            else: # only init linear layer
+                module_list = [self.ctc]
+                self.init_modules_like_chainer(module_list, decoder=False)
         else:
             self.init_like_chainer()
         # options for beam search
