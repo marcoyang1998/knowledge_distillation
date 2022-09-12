@@ -1,0 +1,51 @@
+# minibatch related
+batch-size: 4
+maxlen-in: 250000
+maxlen-out: 150
+#maxioratio: 300
+#minioratio: 6
+
+# optimization related
+#criterion: loss
+#early-stop-criterion: "validation/main/loss"
+save-interval-iters: 0
+sortagrad: 0
+opt: tri-state-adam
+init-lr: 5e-7
+warmup-lr: 3e-5
+end-lr: 2.5e-06
+optim-phase: 0.1 0.4 0.5
+optim-total-steps: 80000
+epochs: 250
+patience: 0
+accum-grad: 8
+grad-clip: 5.0
+# options for resuming prev trainer & optim
+resume-with-previous-opt: false
+resume-with-previous-trainer: false
+
+# network architecture
+etype: wavlm
+wavlm-model-dir: /home/seekingeta/marcoyang/pretrained_models/WavLM-Base.pt # path to your own wavlm model
+wavlm-mask-prob: 0.65
+wavlm-mask-channel-length: 64
+wavlm-mask-channel-prob: 0.5
+wavlm-freeze-finetune-updates: 10000
+wavlm-output-dim: 768 # should match the given model's dimension
+# reduce wavlm output rate. Set wavlm-subsample=false if no need to subsample
+wavlm-subsample: true
+wavlm-subsample-mode: concat_tanh
+eprojs: 768 # encoder output dimension, usually set to equal wavlm-output-dim
+
+# full CTC mode
+mtlalpha: 1.0 
+
+# model save options
+save-best: false
+report-cer: true
+save-interval-iters: 100
+report-interval-iters: 100
+
+# dirty hack
+num-save-attention: 0
+num-save-ctc: 0

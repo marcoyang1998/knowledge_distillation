@@ -1,0 +1,2604 @@
+{
+    "utts": {
+        "116-288045-0000": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288045/116-288045-0000.flac",
+                    "name": "input1",
+                    "shape": [
+                        170400,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        84,
+                        258
+                    ],
+                    "text": "AS I APPROACHED THE CITY I HEARD BELLS RINGING AND A LITTLE LATER I FOUND THE STREETS ASTIR WITH THRONGS OF WELL DRESSED PEOPLE IN FAMILY GROUPS WENDING THEIR WAY HITHER AND THITHER",
+                    "token": "▁AS ▁I ▁A PP R O A CH ED ▁THE ▁C ITY ▁I ▁HE ARD ▁BE LL S ▁ R ING ING ▁AND ▁A ▁LITTLE ▁LA TER ▁I ▁F O UND ▁THE ▁ST RE ET S ▁A ST IR ▁WITH ▁TH R O NG S ▁OF ▁WE LL ▁D RESS ED ▁P E O P LE ▁IN ▁FA M I LY ▁G R O U P S ▁WE N D ING ▁THEIR ▁WA Y ▁ H I TH ER ▁AND ▁TH I TH ER",
+                    "tokenid": "117 167 108 76 79 69 4 21 26 231 128 49 167 161 13 121 57 84 107 79 44 44 114 108 180 176 89 167 148 69 95 231 225 81 33 84 108 87 46 254 228 79 69 68 84 198 246 57 136 82 26 206 25 69 75 55 169 149 60 39 59 153 79 69 92 75 84 246 64 24 44 232 244 104 107 38 39 90 31 114 228 39 90 31"
+                }
+            ],
+            "utt2spk": "116-288045"
+        },
+        "116-288045-0001": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288045/116-288045-0001.flac",
+                    "name": "input1",
+                    "shape": [
+                        138160,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        44,
+                        258
+                    ],
+                    "text": "LOOKING ABOUT ME I SAW A GENTLEMAN IN A NEAT BLACK DRESS SMILING AND HIS HAND EXTENDED TO ME WITH GREAT CORDIALITY",
+                    "token": "▁LOOK ING ▁ABOUT ▁ME ▁I ▁SA W ▁A ▁G ENT LE M AN ▁IN ▁A ▁NE AT ▁B LA CK ▁D RESS ▁S M IL ING ▁AND ▁HIS ▁HAND ▁EX T EN D ED ▁TO ▁ME ▁WITH ▁GREAT ▁CO R D I AL ITY",
+                    "tokenid": "182 44 109 186 167 216 102 108 153 30 55 60 9 169 108 193 15 119 54 22 136 82 215 60 42 44 114 164 159 147 88 28 24 26 237 186 254 156 132 79 24 39 8 49"
+                }
+            ],
+            "utt2spk": "116-288045"
+        },
+        "116-288045-0002": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288045/116-288045-0002.flac",
+                    "name": "input1",
+                    "shape": [
+                        154000,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        63,
+                        258
+                    ],
+                    "text": "HE MUST HAVE REALIZED I WAS A STRANGER AND WISHED TO TENDER HIS HOSPITALITY TO ME I ACCEPTED IT GRATEFULLY I CLASPED HIS HAND HE PRESSED MINE",
+                    "token": "▁HE ▁ M US T ▁HAVE ▁RE AL I Z ED ▁I ▁WAS ▁A ▁ST RA NG ER ▁AND ▁W ISH ED ▁TO ▁T EN D ER ▁HIS ▁HO S P IT AL ITY ▁TO ▁ME ▁I ▁A C CE P T ED ▁IT ▁G R ATE FUL LY ▁I ▁C LA S P ED ▁HIS ▁HAND ▁HE ▁P RESS ED ▁MI NE",
+                    "tokenid": "161 107 60 97 88 160 212 8 39 105 26 167 245 108 225 80 68 31 114 243 47 26 237 227 28 24 31 164 165 84 75 48 8 49 237 186 167 108 19 20 75 88 26 172 153 79 16 36 59 167 128 54 84 75 26 164 159 161 206 82 26 187 66"
+                }
+            ],
+            "utt2spk": "116-288045"
+        },
+        "116-288045-0003": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288045/116-288045-0003.flac",
+                    "name": "input1",
+                    "shape": [
+                        58560,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        22,
+                        258
+                    ],
+                    "text": "WE GAZED FOR A MOMENT SILENTLY INTO EACH OTHER'S EYES",
+                    "token": "▁WE ▁G A Z ED ▁FOR ▁A ▁MO MENT ▁S IL ENT LY ▁INTO ▁E A CH ▁OTHER 'S ▁E Y ES",
+                    "tokenid": "246 153 4 105 26 151 108 189 62 215 42 30 59 170 143 4 21 203 3 143 104 32"
+                }
+            ],
+            "utt2spk": "116-288045"
+        },
+        "116-288045-0004": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288045/116-288045-0004.flac",
+                    "name": "input1",
+                    "shape": [
+                        59520,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        25,
+                        258
+                    ],
+                    "text": "OF COURSE YOU ARE GOING THERE TOO I SAID TO MY FRIENDLY GUIDE",
+                    "token": "▁OF ▁CO UR SE ▁YOU ▁ARE ▁GO ING ▁THERE ▁TO O ▁I ▁SAID ▁TO ▁MY ▁F RI EN D LY ▁G U I D E",
+                    "tokenid": "198 132 96 85 256 116 154 44 233 237 69 167 217 237 191 148 83 28 24 59 153 92 39 24 25"
+                }
+            ],
+            "utt2spk": "116-288045"
+        },
+        "116-288045-0005": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288045/116-288045-0005.flac",
+                    "name": "input1",
+                    "shape": [
+                        79920,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        29,
+                        258
+                    ],
+                    "text": "YES HE ANSWERED I CONDUCT THE WORSHIP I AM A PRIEST",
+                    "token": "▁ Y ES ▁HE ▁AN S W ER ED ▁I ▁CON D U CT ▁THE ▁W OR S H I P ▁I ▁A M ▁A ▁P RI E ST",
+                    "tokenid": "107 104 32 161 113 84 102 31 26 167 134 24 92 23 231 243 72 84 38 39 75 167 108 60 108 206 83 25 87"
+                }
+            ],
+            "utt2spk": "116-288045"
+        },
+        "116-288045-0006": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288045/116-288045-0006.flac",
+                    "name": "input1",
+                    "shape": [
+                        56400,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        21,
+                        258
+                    ],
+                    "text": "AN IDOL I WHISPERED TAKEN BY SURPRISE",
+                    "token": "▁AN ▁I D O L ▁I ▁WHI S P ER ED ▁T A K EN ▁BY ▁S UR P RI SE",
+                    "tokenid": "113 167 24 69 53 167 250 84 75 31 26 227 4 52 28 127 215 96 75 83 85"
+                }
+            ],
+            "utt2spk": "116-288045"
+        },
+        "116-288045-0007": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288045/116-288045-0007.flac",
+                    "name": "input1",
+                    "shape": [
+                        42720,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        17,
+                        258
+                    ],
+                    "text": "THEY WORSHIPPED GODS THAT DID NOT EXIST",
+                    "token": "▁THEY ▁W OR S H I PP ED ▁GO D S ▁THAT ▁DID ▁NOT ▁EX I ST",
+                    "tokenid": "234 243 72 84 38 39 76 26 154 24 84 230 139 195 147 39 87"
+                }
+            ],
+            "utt2spk": "116-288045"
+        },
+        "116-288045-0008": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288045/116-288045-0008.flac",
+                    "name": "input1",
+                    "shape": [
+                        82640,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        35,
+                        258
+                    ],
+                    "text": "BUT THE GREEKS LOVED THEIR GODS I PROTESTED MY HEART CLAMORING IN MY BREAST",
+                    "token": "▁BUT ▁THE ▁G RE E K S ▁LO V ED ▁THEIR ▁GO D S ▁I ▁PRO T E ST ED ▁MY ▁HE AR T ▁C LA M OR ING ▁IN ▁MY ▁BR E A ST",
+                    "tokenid": "126 231 153 81 25 52 84 181 99 26 232 154 24 84 167 210 88 25 87 26 191 161 12 88 128 54 60 72 44 169 191 125 25 4 87"
+                }
+            ],
+            "utt2spk": "116-288045"
+        },
+        "116-288045-0009": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288045/116-288045-0009.flac",
+                    "name": "input1",
+                    "shape": [
+                        49120,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        12,
+                        258
+                    ],
+                    "text": "NO I SAID IN A LOW VOICE",
+                    "token": "▁NO ▁I ▁SAID ▁IN ▁A ▁LO W ▁ V O IC E",
+                    "tokenid": "194 167 217 169 108 181 102 107 99 69 40 25"
+                }
+            ],
+            "utt2spk": "116-288045"
+        },
+        "116-288045-0010": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288045/116-288045-0010.flac",
+                    "name": "input1",
+                    "shape": [
+                        53840,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        14,
+                        258
+                    ],
+                    "text": "HE WAS AN IDOL THEN AND NOT A GOD",
+                    "token": "▁HE ▁WAS ▁AN ▁I D O L ▁THE N ▁AND ▁NOT ▁A ▁GO D",
+                    "tokenid": "161 245 113 167 24 69 53 231 64 114 195 108 154 24"
+                }
+            ],
+            "utt2spk": "116-288045"
+        },
+        "116-288045-0011": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288045/116-288045-0011.flac",
+                    "name": "input1",
+                    "shape": [
+                        145760,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        46,
+                        258
+                    ],
+                    "text": "IT MADE ATHENS A CITY OF LIGHT IT CREATED THE BEAUTIFUL THE TRUE THE GOOD YES OUR RELIGION WAS DIVINE",
+                    "token": "▁IT ▁MADE ▁A TH EN S ▁A ▁C ITY ▁OF ▁ L IGHT ▁IT ▁C RE AT ED ▁THE ▁BE A UT I FUL ▁THE ▁T R U E ▁THE ▁GOOD ▁ Y ES ▁O UR ▁RE LI G ION ▁WAS ▁D I V IN E",
+                    "tokenid": "172 184 108 90 28 84 108 128 49 198 107 53 41 172 128 81 15 26 231 121 4 98 39 36 231 227 79 92 25 231 155 107 104 32 197 96 212 56 37 45 245 136 39 99 43 25"
+                }
+            ],
+            "utt2spk": "116-288045"
+        },
+        "116-288045-0012": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288045/116-288045-0012.flac",
+                    "name": "input1",
+                    "shape": [
+                        78320,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        24,
+                        258
+                    ],
+                    "text": "IT HAD ONLY ONE FAULT INTERRUPTED MY GUIDE WHAT WAS THAT",
+                    "token": "▁IT ▁HAD ▁ON LY ▁ONE ▁FA UL T ▁IN TER R U P T ED ▁MY ▁G U I D E ▁WHAT ▁WAS ▁THAT",
+                    "tokenid": "172 158 200 59 201 149 93 88 169 89 79 92 75 88 26 191 153 92 39 24 25 248 245 230"
+                }
+            ],
+            "utt2spk": "116-288045"
+        },
+        "116-288045-0013": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288045/116-288045-0013.flac",
+                    "name": "input1",
+                    "shape": [
+                        78320,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        25,
+                        258
+                    ],
+                    "text": "I INQUIRED WITHOUT KNOWING WHAT HIS ANSWER WOULD BE IT WAS NOT TRUE",
+                    "token": "▁I ▁IN QUI R ED ▁WITH O UT ▁KNOW ING ▁WHAT ▁HIS ▁AN S W ER ▁WOULD ▁BE ▁IT ▁WAS ▁NOT ▁T R U E",
+                    "tokenid": "167 169 78 79 26 254 69 98 175 44 248 164 113 84 102 31 255 121 172 245 195 227 79 92 25"
+                }
+            ],
+            "utt2spk": "116-288045"
+        },
+        "116-288045-0014": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288045/116-288045-0014.flac",
+                    "name": "input1",
+                    "shape": [
+                        21760,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        5,
+                        258
+                    ],
+                    "text": "PRODUCE HIM",
+                    "token": "▁PRO D U CE ▁HIM",
+                    "tokenid": "210 24 92 20 163"
+                }
+            ],
+            "utt2spk": "116-288045"
+        },
+        "116-288045-0015": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288045/116-288045-0015.flac",
+                    "name": "input1",
+                    "shape": [
+                        48160,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        20,
+                        258
+                    ],
+                    "text": "I WHISPERED TO MYSELF WHAT BLASPHEMY",
+                    "token": "▁I ▁WHI S P ER ED ▁TO ▁MY S EL F ▁WHAT ▁B LA S P H E M Y",
+                    "tokenid": "167 250 84 75 31 26 237 191 84 27 34 248 119 54 84 75 38 25 60 104"
+                }
+            ],
+            "utt2spk": "116-288045"
+        },
+        "116-288045-0016": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288045/116-288045-0016.flac",
+                    "name": "input1",
+                    "shape": [
+                        190400,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        84,
+                        258
+                    ],
+                    "text": "THEN TAKING HEART I TOLD MY GUIDE HOW MORE THAN ONCE I HAD FELT APOLLO'S RADIANT PRESENCE IN MY HEART AND TOLD HIM OF THE IMMORTAL LINES OF HOMER CONCERNING THE DIVINE APOLLO",
+                    "token": "▁THE N ▁T A K ING ▁HE AR T ▁I ▁TO L D ▁MY ▁G U I D E ▁HO W ▁MORE ▁THAN ▁ON CE ▁I ▁HAD ▁FE L T ▁A P O LL O 'S ▁RA D I ANT ▁PRE S ENCE ▁IN ▁MY ▁HE AR T ▁AND ▁TO L D ▁HIM ▁OF ▁THE ▁I M M OR T AL ▁LI NE S ▁OF ▁HO M ER ▁CON C ER N ING ▁THE ▁D I V IN E ▁A P O LL O",
+                    "tokenid": "231 64 227 4 52 44 161 12 88 167 237 53 24 191 153 92 39 24 25 165 102 190 229 200 20 167 158 150 53 88 108 75 69 57 69 3 211 24 39 11 209 84 29 169 191 161 12 88 114 237 53 24 163 198 231 167 60 60 72 88 8 178 66 84 198 165 60 31 134 19 31 64 44 231 136 39 99 43 25 108 75 69 57 69"
+                }
+            ],
+            "utt2spk": "116-288045"
+        },
+        "116-288045-0017": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288045/116-288045-0017.flac",
+                    "name": "input1",
+                    "shape": [
+                        29200,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        9,
+                        258
+                    ],
+                    "text": "DO YOU DOUBT HOMER",
+                    "token": "▁DO ▁YOU ▁DO U B T ▁HO M ER",
+                    "tokenid": "141 256 141 92 18 88 165 60 31"
+                }
+            ],
+            "utt2spk": "116-288045"
+        },
+        "116-288045-0018": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288045/116-288045-0018.flac",
+                    "name": "input1",
+                    "shape": [
+                        67360,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        15,
+                        258
+                    ],
+                    "text": "I SAID TO HIM HOMER THE INSPIRED BARD",
+                    "token": "▁I ▁SAID ▁TO ▁HIM ▁HO M ER ▁THE ▁IN S P IR ED ▁B ARD",
+                    "tokenid": "167 217 237 163 165 60 31 231 169 84 75 46 26 119 13"
+                }
+            ],
+            "utt2spk": "116-288045"
+        },
+        "116-288045-0019": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288045/116-288045-0019.flac",
+                    "name": "input1",
+                    "shape": [
+                        56080,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        14,
+                        258
+                    ],
+                    "text": "NO NO APOLLO IS NOT AN IDOL",
+                    "token": "▁NO ▁NO ▁A P O LL O ▁IS ▁NOT ▁AN ▁I D O L",
+                    "tokenid": "194 194 108 75 69 57 69 171 195 113 167 24 69 53"
+                }
+            ],
+            "utt2spk": "116-288045"
+        },
+        "116-288045-0020": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288045/116-288045-0020.flac",
+                    "name": "input1",
+                    "shape": [
+                        41200,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        13,
+                        258
+                    ],
+                    "text": "HE IS A GOD AND THE SON OF A GOD",
+                    "token": "▁HE ▁IS ▁A ▁GO D ▁AND ▁THE ▁SO N ▁OF ▁A ▁GO D",
+                    "tokenid": "161 171 108 154 24 114 231 222 64 198 108 154 24"
+                }
+            ],
+            "utt2spk": "116-288045"
+        },
+        "116-288045-0021": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288045/116-288045-0021.flac",
+                    "name": "input1",
+                    "shape": [
+                        159840,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        70,
+                        258
+                    ],
+                    "text": "THE AIR WAS HEAVY WITH INCENSE A NUMBER OF MEN IN GORGEOUS VESTMENTS WERE PASSING TO AND FRO BOWING AND KNEELING BEFORE THE VARIOUS LIGHTS AND IMAGES",
+                    "token": "▁THE ▁A IR ▁WAS ▁HE A V Y ▁WITH ▁IN C EN SE ▁A ▁ N U M B ER ▁OF ▁ME N ▁IN ▁G OR G E O US ▁ VE ST MENT S ▁WERE ▁PA S S ING ▁TO ▁AND ▁F R O ▁BO W ING ▁AND ▁K NE EL ING ▁BEFORE ▁THE ▁ V AR I O US ▁ L IGHT S ▁AND ▁I M AGE S",
+                    "tokenid": "231 108 46 245 161 4 99 104 254 169 19 28 85 108 107 64 92 60 18 31 198 186 64 169 153 72 37 25 69 97 107 100 87 62 84 247 207 84 84 44 237 114 148 79 69 124 102 44 114 174 66 27 44 123 231 107 99 12 39 69 97 107 53 41 84 114 167 60 7 84"
+                }
+            ],
+            "utt2spk": "116-288045"
+        },
+        "116-288045-0022": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288045/116-288045-0022.flac",
+                    "name": "input1",
+                    "shape": [
+                        210080,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        101,
+                        258
+                    ],
+                    "text": "OBSERVING MY ANXIETY TO UNDERSTAND THE MEANING OF ALL THIS MY GUIDE TOOK ME ASIDE AND IN A WHISPER TOLD ME THAT THE PEOPLE WERE CELEBRATING THE ANNIVERSARY OF THE BIRTHDAY OF THEIR BEAUTIFUL SAVIOR JESUS THE SON OF GOD",
+                    "token": "▁O B S ER V ING ▁MY ▁AN X I ET Y ▁TO ▁ UND ER ST AN D ▁THE ▁ME AN ING ▁OF ▁ALL ▁THIS ▁MY ▁G U I D E ▁TO O K ▁ME ▁A SIDE ▁AND ▁IN ▁A ▁WHI S P ER ▁TO L D ▁ME ▁THAT ▁THE ▁P E O P LE ▁WERE ▁C E LE B RA T ING ▁THE ▁AN N I VER S AR Y ▁OF ▁THE ▁B IR TH D A Y ▁OF ▁THEIR ▁BE A UT I FUL ▁SA V I OR ▁ J ES US ▁THE ▁SO N ▁OF ▁GO D",
+                    "tokenid": "197 18 84 31 99 44 191 113 103 39 33 104 237 107 95 31 87 9 24 231 186 9 44 198 112 235 191 153 92 39 24 25 237 69 52 186 108 86 114 169 108 250 84 75 31 237 53 24 186 230 231 206 25 69 75 55 247 128 25 55 18 80 88 44 231 113 64 39 101 84 12 104 198 231 119 46 90 24 4 104 198 232 121 4 98 39 36 216 99 39 72 107 51 32 97 231 222 64 198 154 24"
+                }
+            ],
+            "utt2spk": "116-288045"
+        },
+        "116-288045-0023": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288045/116-288045-0023.flac",
+                    "name": "input1",
+                    "shape": [
+                        74160,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        29,
+                        258
+                    ],
+                    "text": "FORGET APOLLO HE SAID WITH A SUGGESTION OF SEVERITY IN HIS VOICE",
+                    "token": "▁FOR G ET ▁A P O LL O ▁HE ▁SAID ▁WITH ▁A ▁SU G G ES TION ▁OF ▁S E VER ITY ▁IN ▁HIS ▁ V O IC E",
+                    "tokenid": "151 37 33 108 75 69 57 69 161 217 254 108 226 37 37 32 91 198 215 25 101 49 169 164 107 99 69 40 25"
+                }
+            ],
+            "utt2spk": "116-288045"
+        },
+        "116-288045-0024": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288045/116-288045-0024.flac",
+                    "name": "input1",
+                    "shape": [
+                        55279,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        18,
+                        258
+                    ],
+                    "text": "THERE IS NO SUCH PERSON HE WAS ONLY AN IDOL",
+                    "token": "▁THERE ▁IS ▁NO ▁SU CH ▁P ER S ON ▁HE ▁WAS ▁ON LY ▁AN ▁I D O L",
+                    "tokenid": "233 171 194 226 21 206 31 84 71 161 245 200 59 113 167 24 69 53"
+                }
+            ],
+            "utt2spk": "116-288045"
+        },
+        "116-288045-0025": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288045/116-288045-0025.flac",
+                    "name": "input1",
+                    "shape": [
+                        102481,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        46,
+                        258
+                    ],
+                    "text": "IF YOU WERE TO SEARCH FOR APOLLO IN ALL THE UNIVERSE YOU WOULD NEVER FIND ANY ONE ANSWERING TO HIS NAME OR DESCRIPTION",
+                    "token": "▁IF ▁YOU ▁WERE ▁TO ▁S E AR CH ▁FOR ▁A P O LL O ▁IN ▁ALL ▁THE ▁UN I VER SE ▁YOU ▁WOULD ▁NE VER ▁F IN D ▁ANY ▁ONE ▁AN S W ER ING ▁TO ▁HIS ▁NA ME ▁OR ▁DE S C RI P TION",
+                    "tokenid": "168 256 247 237 215 25 12 21 151 108 75 69 57 69 169 112 231 239 39 101 85 256 255 193 101 148 43 24 115 201 113 84 102 31 44 237 164 192 61 202 138 84 19 83 75 91"
+                }
+            ],
+            "utt2spk": "116-288045"
+        },
+        "116-288045-0026": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288045/116-288045-0026.flac",
+                    "name": "input1",
+                    "shape": [
+                        59840,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        22,
+                        258
+                    ],
+                    "text": "I WANT TO SEE JESUS I HASTENED TURNING TOWARD HIM",
+                    "token": "▁I ▁W ANT ▁TO ▁SEE ▁ J ES US ▁I ▁HA ST EN ED ▁T UR N ING ▁TO W ARD ▁HIM",
+                    "tokenid": "167 243 11 237 218 107 51 32 97 167 157 87 28 26 227 96 64 44 237 102 13 163"
+                }
+            ],
+            "utt2spk": "116-288045"
+        },
+        "116-288045-0027": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288045/116-288045-0027.flac",
+                    "name": "input1",
+                    "shape": [
+                        31600,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        11,
+                        258
+                    ],
+                    "text": "WILL HE NOT BE HERE THIS MORNING",
+                    "token": "▁WILL ▁HE ▁NOT ▁BE ▁HER E ▁THIS ▁MO R N ING",
+                    "tokenid": "253 161 195 121 162 25 235 189 79 64 44"
+                }
+            ],
+            "utt2spk": "116-288045"
+        },
+        "116-288045-0028": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288045/116-288045-0028.flac",
+                    "name": "input1",
+                    "shape": [
+                        55200,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        22,
+                        258
+                    ],
+                    "text": "WILL HE NOT SPEAK TO HIS WORSHIPPERS I ASKED AGAIN",
+                    "token": "▁WILL ▁HE ▁NOT ▁SP E A K ▁TO ▁HIS ▁W OR S H I PP ER S ▁I ▁AS K ED ▁AGAIN",
+                    "tokenid": "253 161 195 224 25 4 52 237 164 243 72 84 38 39 76 31 84 167 117 52 26 111"
+                }
+            ],
+            "utt2spk": "116-288045"
+        },
+        "116-288045-0029": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288045/116-288045-0029.flac",
+                    "name": "input1",
+                    "shape": [
+                        219680,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        97,
+                        258
+                    ],
+                    "text": "WILL HE NOT PERMIT THEM TO TOUCH HIM TO CARESS HIS HAND TO CLASP HIS DIVINE FEET TO INHALE THE AMBROSIAL FRAGRANCE OF HIS BREATH TO BASK IN THE GOLDEN LIGHT OF HIS EYES TO HEAR THE MUSIC OF HIS IMMACULATE ACCENTS",
+                    "token": "▁WILL ▁HE ▁NOT ▁P ER M IT ▁THE M ▁TO ▁TO U CH ▁HIM ▁TO ▁CA RESS ▁HIS ▁HAND ▁TO ▁C LA S P ▁HIS ▁D I V IN E ▁FE ET ▁TO ▁IN H AL E ▁THE ▁A M B R O S I AL ▁F RA G R ANCE ▁OF ▁HIS ▁BR E A TH ▁TO ▁BA S K ▁IN ▁THE ▁GO L D EN ▁ L IGHT ▁OF ▁HIS ▁E Y ES ▁TO ▁HE AR ▁THE ▁ M US IC ▁OF ▁HIS ▁I M M A C UL ATE ▁A C C ENT S",
+                    "tokenid": "253 161 195 206 31 60 48 231 60 237 237 92 21 163 237 129 82 164 159 237 128 54 84 75 164 136 39 99 43 25 150 33 237 169 38 8 25 231 108 60 18 79 69 84 39 8 148 80 37 79 10 198 164 125 25 4 90 237 120 84 52 169 231 154 53 24 28 107 53 41 198 164 143 104 32 237 161 12 231 107 60 97 40 198 164 167 60 60 4 19 93 16 108 19 19 30 84"
+                }
+            ],
+            "utt2spk": "116-288045"
+        },
+        "116-288045-0030": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288045/116-288045-0030.flac",
+                    "name": "input1",
+                    "shape": [
+                        76880,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        34,
+                        258
+                    ],
+                    "text": "I ASKED MY EYES FILLED WITH WONDER AND MY VOICE QUIVERING WITH EXCITEMENT",
+                    "token": "▁I ▁AS K ED ▁MY ▁E Y ES ▁F I LL ED ▁WITH ▁W ON D ER ▁AND ▁MY ▁ V O IC E ▁ QUI VER ING ▁WITH ▁EX C IT E MENT",
+                    "tokenid": "167 117 52 26 191 143 104 32 148 39 57 26 254 243 71 24 31 114 191 107 99 69 40 25 107 78 101 44 254 147 19 48 25 62"
+                }
+            ],
+            "utt2spk": "116-288045"
+        },
+        "116-288045-0031": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288045/116-288045-0031.flac",
+                    "name": "input1",
+                    "shape": [
+                        117600,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        44,
+                        258
+                    ],
+                    "text": "WOULD NOT THAT THEN I VENTURED TO ASK IMPATIENTLY MAKE JESUS AS MUCH OF AN IDOL AS APOLLO",
+                    "token": "▁WOULD ▁NOT ▁THAT ▁THE N ▁I ▁ V ENT UR ED ▁TO ▁AS K ▁I MP AT I ENT LY ▁MA K E ▁ J ES US ▁AS ▁ M U CH ▁OF ▁AN ▁I D O L ▁AS ▁A P O LL O",
+                    "tokenid": "255 195 230 231 64 167 107 99 30 96 26 237 117 52 167 63 15 39 30 59 183 52 25 107 51 32 97 117 107 60 92 21 198 113 167 24 69 53 117 108 75 69 57 69"
+                }
+            ],
+            "utt2spk": "116-288045"
+        },
+        "116-288045-0032": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288045/116-288045-0032.flac",
+                    "name": "input1",
+                    "shape": [
+                        108000,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        42,
+                        258
+                    ],
+                    "text": "AND IF FAITH THAT JESUS IS A GOD PROVES HIM A GOD WHY WILL NOT FAITH IN APOLLO MAKE HIM A GOD",
+                    "token": "▁AND ▁IF ▁FA I TH ▁THAT ▁ J ES US ▁IS ▁A ▁GO D ▁PRO VE S ▁HIM ▁A ▁GO D ▁W H Y ▁WILL ▁NOT ▁FA I TH ▁IN ▁A P O LL O ▁MA K E ▁HIM ▁A ▁GO D",
+                    "tokenid": "114 168 149 39 90 230 107 51 32 97 171 108 154 24 210 100 84 163 108 154 24 243 38 104 253 195 149 39 90 169 108 75 69 57 69 183 52 25 163 108 154 24"
+                }
+            ],
+            "utt2spk": "116-288045"
+        },
+        "116-288046-0000": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288046/116-288046-0000.flac",
+                    "name": "input1",
+                    "shape": [
+                        126800,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        54,
+                        258
+                    ],
+                    "text": "BUT I AM DETERMINED NOT ONLY TO KNOW IF IT IS POSSIBLE THE WHOLE TRUTH ABOUT JESUS BUT ALSO TO COMMUNICATE THAT TRUTH TO OTHERS",
+                    "token": "▁BUT ▁I ▁A M ▁DE TER M IN ED ▁NOT ▁ON LY ▁TO ▁KNOW ▁IF ▁IT ▁IS ▁PO S S I B LE ▁THE ▁WHO LE ▁T R U TH ▁ABOUT ▁ J ES US ▁BUT ▁A L S O ▁TO ▁COM M UN IC ATE ▁THAT ▁T R U TH ▁TO ▁OTHER S",
+                    "tokenid": "126 167 108 60 138 89 60 43 26 195 200 59 237 175 168 172 171 208 84 84 39 18 55 231 252 55 227 79 92 90 109 107 51 32 97 126 108 53 84 69 237 133 60 94 40 16 230 227 79 92 90 237 203 84"
+                }
+            ],
+            "utt2spk": "116-288046"
+        },
+        "116-288046-0001": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288046/116-288046-0001.flac",
+                    "name": "input1",
+                    "shape": [
+                        129120,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        59,
+                        258
+                    ],
+                    "text": "BUT THERE IS MORE OF A MORAL TONIC IN THE OPEN AND CANDID DISCUSSION OF A SUBJECT LIKE THE ONE IN HAND THAN IN A MULTITUDE OF PLATITUDES",
+                    "token": "▁BUT ▁THERE ▁IS ▁MORE ▁OF ▁A ▁MO R AL ▁TO N IC ▁IN ▁THE ▁O P EN ▁AND ▁CA N D I D ▁DIS C US S ION ▁OF ▁A ▁SU B J E CT ▁LIKE ▁THE ▁ONE ▁IN ▁HAND ▁THAN ▁IN ▁A ▁ M UL T IT U D E ▁OF ▁P LA T IT U D ES",
+                    "tokenid": "126 233 171 190 198 108 189 79 8 237 64 40 169 231 197 75 28 114 129 64 24 39 24 140 19 97 84 45 198 108 226 18 51 25 23 179 231 201 169 159 229 169 108 107 60 93 88 48 92 24 25 198 206 54 88 48 92 24 32"
+                }
+            ],
+            "utt2spk": "116-288046"
+        },
+        "116-288046-0002": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288046/116-288046-0002.flac",
+                    "name": "input1",
+                    "shape": [
+                        150480,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        64,
+                        258
+                    ],
+                    "text": "I NEVER DELIVER A LECTURE IN WHICH I DO NOT EITHER DIRECTLY OR INDIRECTLY GIVE FULL AND FREE EXPRESSION TO MY FAITH IN EVERYTHING THAT IS WORTHY OF FAITH",
+                    "token": "▁I ▁NE VER ▁DE LI VER ▁A ▁LE CT UR E ▁IN ▁WHICH ▁I ▁DO ▁NOT ▁E I TH ER ▁D I RE CT LY ▁OR ▁IN D I RE CT LY ▁G IVE ▁F U LL ▁AND ▁F RE E ▁EX P RESS ION ▁TO ▁MY ▁FA I TH ▁IN ▁EVERY TH ING ▁THAT ▁IS ▁W OR TH Y ▁OF ▁FA I TH",
+                    "tokenid": "167 193 101 138 56 101 108 177 23 96 25 169 251 167 141 195 143 39 90 31 136 39 81 23 59 202 169 24 39 81 23 59 153 50 148 92 57 114 148 81 25 147 75 82 45 237 191 149 39 90 169 146 90 44 230 171 243 72 90 104 198 149 39 90"
+                }
+            ],
+            "utt2spk": "116-288046"
+        },
+        "116-288046-0003": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288046/116-288046-0003.flac",
+                    "name": "input1",
+                    "shape": [
+                        62800,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        30,
+                        258
+                    ],
+                    "text": "IF I DO NOT BELIEVE IN DOGMA IT IS BECAUSE I BELIEVE IN FREEDOM",
+                    "token": "▁IF ▁I ▁DO ▁NOT ▁BE LI E VE ▁IN ▁DO G M A ▁IT ▁IS ▁BE C A US E ▁I ▁BE LI E VE ▁IN ▁F RE ED OM",
+                    "tokenid": "168 167 141 195 121 56 25 100 169 141 37 60 4 172 171 121 19 4 97 25 167 121 56 25 100 169 148 81 26 70"
+                }
+            ],
+            "utt2spk": "116-288046"
+        },
+        "116-288046-0004": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288046/116-288046-0004.flac",
+                    "name": "input1",
+                    "shape": [
+                        112720,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        41,
+                        258
+                    ],
+                    "text": "OH HE TEARS DOWN BUT DOES NOT BUILD UP IS ANOTHER CRITICISM ABOUT MY WORK IT IS NOT TRUE",
+                    "token": "▁O H ▁HE ▁T E AR S ▁DOWN ▁BUT ▁DO ES ▁NOT ▁B U IL D ▁UP ▁IS ▁AN O TH ER ▁C RI T IC I S M ▁ABOUT ▁MY ▁W OR K ▁IT ▁IS ▁NOT ▁T R U E",
+                    "tokenid": "197 38 161 227 25 12 84 142 126 141 32 195 119 92 42 24 240 171 113 69 90 31 128 83 88 40 39 84 60 109 191 243 72 52 172 171 195 227 79 92 25"
+                }
+            ],
+            "utt2spk": "116-288046"
+        },
+        "116-288046-0005": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288046/116-288046-0005.flac",
+                    "name": "input1",
+                    "shape": [
+                        47760,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        18,
+                        258
+                    ],
+                    "text": "NO PREACHER OR PRIEST IS MORE CONSTRUCTIVE",
+                    "token": "▁NO ▁PRE A CH ER ▁OR ▁P RI E ST ▁IS ▁MORE ▁CON ST R U CT IVE",
+                    "tokenid": "194 209 4 21 31 202 206 83 25 87 171 190 134 87 79 92 23 50"
+                }
+            ],
+            "utt2spk": "116-288046"
+        },
+        "116-288046-0006": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288046/116-288046-0006.flac",
+                    "name": "input1",
+                    "shape": [
+                        107040,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        42,
+                        258
+                    ],
+                    "text": "CLAPPING TRUTH INTO JAIL GAGGING THE MOUTH OF THE STUDENT IS THAT BUILDING UP OR TEARING DOWN",
+                    "token": "▁C LA PP ING ▁T R U TH ▁INTO ▁ J A IL ▁G A G G ING ▁THE ▁MO U TH ▁OF ▁THE ▁ST U D ENT ▁IS ▁THAT ▁B U IL D ING ▁UP ▁OR ▁T E AR ING ▁DOWN",
+                    "tokenid": "128 54 76 44 227 79 92 90 170 107 51 4 42 153 4 37 37 44 231 189 92 90 198 231 225 92 24 30 171 230 119 92 42 24 44 240 202 227 25 12 44 142"
+                }
+            ],
+            "utt2spk": "116-288046"
+        },
+        "116-288046-0007": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288046/116-288046-0007.flac",
+                    "name": "input1",
+                    "shape": [
+                        108480,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        41,
+                        258
+                    ],
+                    "text": "WHEN BRUNO LIGHTED A NEW TORCH TO INCREASE THE LIGHT OF THE WORLD WHAT WAS HIS REWARD THE STAKE",
+                    "token": "▁WHEN ▁BR UN O ▁ L IGHT ED ▁A ▁NE W ▁TO R CH ▁TO ▁IN C RE A SE ▁THE ▁ L IGHT ▁OF ▁THE ▁W OR L D ▁WHAT ▁WAS ▁HIS ▁RE W ARD ▁THE ▁ST A K E",
+                    "tokenid": "249 125 94 69 107 53 41 26 108 193 102 237 79 21 237 169 19 81 4 85 231 107 53 41 198 231 243 72 53 24 248 245 164 212 102 13 231 225 4 52 25"
+                }
+            ],
+            "utt2spk": "116-288046"
+        },
+        "116-288046-0008": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288046/116-288046-0008.flac",
+                    "name": "input1",
+                    "shape": [
+                        141440,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        54,
+                        258
+                    ],
+                    "text": "COUNT YOUR RIGHTS POLITICAL RELIGIOUS SOCIAL INTELLECTUAL AND TELL ME WHICH OF THEM WAS CONQUERED FOR YOU BY THE PRIEST",
+                    "token": "▁CO UN T ▁YOU R ▁ R IGHT S ▁PO LI T IC AL ▁RE LI G I O US ▁SO C I AL ▁IN T EL LE CT U AL ▁AND ▁T E LL ▁ME ▁WHICH ▁OF ▁THE M ▁WAS ▁CON Q U ER ED ▁FOR ▁YOU ▁BY ▁THE ▁P RI E ST",
+                    "tokenid": "132 94 88 256 79 107 79 41 84 208 56 88 40 8 212 56 37 39 69 97 222 19 39 8 169 88 27 55 23 92 8 114 227 25 57 186 251 198 231 60 245 134 77 92 31 26 151 256 127 231 206 83 25 87"
+                }
+            ],
+            "utt2spk": "116-288046"
+        },
+        "116-288046-0009": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288046/116-288046-0009.flac",
+                    "name": "input1",
+                    "shape": [
+                        30080,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        11,
+                        258
+                    ],
+                    "text": "I WISH TO TELL YOU SOMETHING",
+                    "token": "▁I ▁W ISH ▁TO ▁T E LL ▁YOU ▁SOME TH ING",
+                    "tokenid": "167 243 47 237 227 25 57 256 223 90 44"
+                }
+            ],
+            "utt2spk": "116-288046"
+        },
+        "116-288046-0010": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288046/116-288046-0010.flac",
+                    "name": "input1",
+                    "shape": [
+                        164080,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        63,
+                        258
+                    ],
+                    "text": "BUT FIRST LET US BE IMPERSONAL THE EPITHETS IRREVERENT BLASPHEMER ATHEIST AND INFIDEL ARE FLUNG AT A MAN NOT FROM PITY BUT FROM ENVY",
+                    "token": "▁BUT ▁F IR ST ▁LE T ▁ US ▁BE ▁I MP ER S ON AL ▁THE ▁E P I TH ET S ▁I R RE VER ENT ▁B LA S P H E M ER ▁A TH E I ST ▁AND ▁IN F I D EL ▁ARE ▁F L U NG ▁AT ▁A ▁MAN ▁NOT ▁FROM ▁P ITY ▁BUT ▁FROM ▁EN V Y",
+                    "tokenid": "126 148 46 87 177 88 107 97 121 167 63 31 84 71 8 231 143 75 39 90 33 84 167 79 81 101 30 119 54 84 75 38 25 60 31 108 90 25 39 87 114 169 34 39 24 27 116 148 53 92 68 118 108 185 195 152 206 49 126 152 144 99 104"
+                }
+            ],
+            "utt2spk": "116-288046"
+        },
+        "116-288046-0011": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288046/116-288046-0011.flac",
+                    "name": "input1",
+                    "shape": [
+                        393920,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        168,
+                        258
+                    ],
+                    "text": "NOT HAVING THE COURAGE OR THE INDUSTRY OF OUR NEIGHBOR WHO WORKS LIKE A BUSY BEE IN THE WORLD OF MEN AND BOOKS SEARCHING WITH THE SWEAT OF HIS BROW FOR THE REAL BREAD OF LIFE WETTING THE OPEN PAGE BEFORE HIM WITH HIS TEARS PUSHING INTO THE WEE HOURS OF THE NIGHT HIS QUEST ANIMATED BY THE FAIREST OF ALL LOVES THE LOVE OF TRUTH WE EASE OUR OWN INDOLENT CONSCIENCE BY CALLING HIM NAMES",
+                    "token": "▁NOT ▁HA V ING ▁THE ▁CO UR AGE ▁OR ▁THE ▁IN D US T R Y ▁OF ▁O UR ▁NE I G H B OR ▁WHO ▁W OR K S ▁LIKE ▁A ▁B US Y ▁BE E ▁IN ▁THE ▁W OR L D ▁OF ▁ME N ▁AND ▁BO O K S ▁S E AR CH ING ▁WITH ▁THE ▁S W E AT ▁OF ▁HIS ▁BR OW ▁FOR ▁THE ▁RE AL ▁BR E AD ▁OF ▁LI F E ▁WE T T ING ▁THE ▁O P EN ▁P AGE ▁BEFORE ▁HIM ▁WITH ▁HIS ▁T E AR S ▁P US H ING ▁INTO ▁THE ▁WE E ▁HO UR S ▁OF ▁THE ▁ N IGHT ▁HIS ▁ Q U E ST ▁AN I M AT ED ▁BY ▁THE ▁FA I RE ST ▁OF ▁ALL ▁LO VE S ▁THE ▁LO VE ▁OF ▁T R U TH ▁WE ▁E A SE ▁O UR ▁ OW N ▁IN D O L ENT ▁CON S C I ENCE ▁BY ▁CA LL ING ▁HIM ▁NA ME S",
+                    "tokenid": "195 157 99 44 231 132 96 7 202 231 169 24 97 88 79 104 198 197 96 193 39 37 38 18 72 252 243 72 52 84 179 108 119 97 104 121 25 169 231 243 72 53 24 198 186 64 114 124 69 52 84 215 25 12 21 44 254 231 215 102 25 15 198 164 125 74 151 231 212 8 125 25 6 198 178 34 25 246 88 88 44 231 197 75 28 206 7 123 163 254 164 227 25 12 84 206 97 38 44 170 231 246 25 165 96 84 198 231 107 64 41 164 107 77 92 25 87 113 39 60 15 26 127 231 149 39 81 87 198 112 181 100 84 231 181 100 198 227 79 92 90 246 143 4 85 197 96 107 74 64 169 24 69 53 30 134 84 19 39 29 127 129 57 44 163 192 61 84"
+                }
+            ],
+            "utt2spk": "116-288046"
+        },
+        "116-288047-0000": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288047/116-288047-0000.flac",
+                    "name": "input1",
+                    "shape": [
+                        53520,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        26,
+                        258
+                    ],
+                    "text": "A MYTH IS A FANCIFUL EXPLANATION OF A GIVEN PHENOMENON",
+                    "token": "▁A ▁MY TH ▁IS ▁A ▁FA N C I FUL ▁EX P L AN ATION ▁OF ▁A ▁G IVE N ▁P H EN OM EN ON",
+                    "tokenid": "108 191 90 171 108 149 64 19 39 36 147 75 53 9 17 198 108 153 50 64 206 38 28 70 28 71"
+                }
+            ],
+            "utt2spk": "116-288047"
+        },
+        "116-288047-0001": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288047/116-288047-0001.flac",
+                    "name": "input1",
+                    "shape": [
+                        86960,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        44,
+                        258
+                    ],
+                    "text": "THE MIND CRAVES FOR KNOWLEDGE THE CHILD ASKS QUESTIONS BECAUSE OF AN INBORN DESIRE TO KNOW",
+                    "token": "▁THE ▁MI N D ▁C RA VE S ▁FOR ▁KNOW L ED G E ▁THE ▁CH IL D ▁AS K S ▁ Q U ES TION S ▁BE C A US E ▁OF ▁AN ▁IN B OR N ▁DE S I RE ▁TO ▁KNOW",
+                    "tokenid": "231 187 64 24 128 80 100 84 151 175 53 26 37 25 231 130 42 24 117 52 84 107 77 92 32 91 84 121 19 4 97 25 198 113 169 18 72 64 138 84 39 81 237 175"
+                }
+            ],
+            "utt2spk": "116-288047"
+        },
+        "116-288047-0002": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288047/116-288047-0002.flac",
+                    "name": "input1",
+                    "shape": [
+                        50640,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        22,
+                        258
+                    ],
+                    "text": "NOW AND THEN THEY CAME CLOSE ENOUGH TO SNAP AT EACH OTHER",
+                    "token": "▁NOW ▁AND ▁THE N ▁THEY ▁CA ME ▁C LO SE ▁EN OUGH ▁TO ▁S N A P ▁AT ▁E A CH ▁OTHER",
+                    "tokenid": "196 114 231 64 234 129 61 128 58 85 144 73 237 215 64 4 75 118 143 4 21 203"
+                }
+            ],
+            "utt2spk": "116-288047"
+        },
+        "116-288047-0003": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288047/116-288047-0003.flac",
+                    "name": "input1",
+                    "shape": [
+                        151840,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        65,
+                        258
+                    ],
+                    "text": "WITH THIS MYTHUS THE PRIMITIVE MAN WAS SATISFIED UNTIL HIS DEVELOPING INTELLIGENCE REALIZED ITS INADEQUACY SCIENCE WAS BORN OF THAT REALIZATION",
+                    "token": "▁WITH ▁THIS ▁MY TH US ▁THE ▁P RI M IT IVE ▁MAN ▁WAS ▁SA T I S F I ED ▁UN T IL ▁HIS ▁DE VE LO P ING ▁IN T EL LI G ENCE ▁RE AL I Z ED ▁IT S ▁IN AD E Q U A C Y ▁S C I ENCE ▁WAS ▁BO R N ▁OF ▁THAT ▁RE AL I Z ATION",
+                    "tokenid": "254 235 191 90 97 231 206 83 60 48 50 185 245 216 88 39 84 34 39 26 239 88 42 164 138 100 58 75 44 169 88 27 56 37 29 212 8 39 105 26 172 84 169 6 25 77 92 4 19 104 215 19 39 29 245 124 79 64 198 230 212 8 39 105 17"
+                }
+            ],
+            "utt2spk": "116-288047"
+        },
+        "116-288047-0004": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288047/116-288047-0004.flac",
+                    "name": "input1",
+                    "shape": [
+                        93120,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        54,
+                        258
+                    ],
+                    "text": "THE MYTH OF A ONE EYED PEOPLE LIVING IN INDIA HAS BEEN REPLACED BY ACCURATE INFORMATION CONCERNING THE HINDOOS",
+                    "token": "▁THE ▁MY TH ▁OF ▁A ▁ONE ▁E Y ED ▁P E O P LE ▁LI V ING ▁IN ▁IN D I A ▁HA S ▁BEEN ▁RE P LA C ED ▁BY ▁A C C UR ATE ▁IN F OR M ATION ▁CON C ER N ING ▁THE ▁ H IN D O O S",
+                    "tokenid": "231 191 90 198 108 201 143 104 26 206 25 69 75 55 178 99 44 169 169 24 39 4 157 84 122 212 75 54 19 26 127 108 19 19 96 16 169 34 72 60 17 134 19 31 64 44 231 107 38 43 24 69 69 84"
+                }
+            ],
+            "utt2spk": "116-288047"
+        },
+        "116-288047-0005": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288047/116-288047-0005.flac",
+                    "name": "input1",
+                    "shape": [
+                        54720,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        21,
+                        258
+                    ],
+                    "text": "AND THIS IS PRECISELY THE USE TO WHICH MYTHS HAVE BEEN PUT",
+                    "token": "▁AND ▁THIS ▁IS ▁PRE C I SE LY ▁THE ▁ US E ▁TO ▁WHICH ▁MY TH S ▁HAVE ▁BEEN ▁P UT",
+                    "tokenid": "114 235 171 209 19 39 85 59 231 107 97 25 237 251 191 90 84 160 122 206 98"
+                }
+            ],
+            "utt2spk": "116-288047"
+        },
+        "116-288047-0006": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288047/116-288047-0006.flac",
+                    "name": "input1",
+                    "shape": [
+                        26800,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        8,
+                        258
+                    ],
+                    "text": "IS JESUS A MYTH",
+                    "token": "▁IS ▁ J ES US ▁A ▁MY TH",
+                    "tokenid": "171 107 51 32 97 108 191 90"
+                }
+            ],
+            "utt2spk": "116-288047"
+        },
+        "116-288047-0007": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288047/116-288047-0007.flac",
+                    "name": "input1",
+                    "shape": [
+                        38800,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        14,
+                        258
+                    ],
+                    "text": "THERE IS IN MAN A FACULTY FOR FICTION",
+                    "token": "▁THERE ▁IS ▁IN ▁MAN ▁A ▁FA C UL T Y ▁FOR ▁F IC TION",
+                    "tokenid": "233 171 169 185 108 149 19 93 88 104 151 148 40 91"
+                }
+            ],
+            "utt2spk": "116-288047"
+        },
+        "116-288047-0008": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288047/116-288047-0008.flac",
+                    "name": "input1",
+                    "shape": [
+                        35680,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        15,
+                        258
+                    ],
+                    "text": "IT THINKS LESS THAN IT GUESSES",
+                    "token": "▁IT ▁TH IN K S ▁LE S S ▁THAN ▁IT ▁G U ES S ES",
+                    "tokenid": "172 228 43 52 84 177 84 84 229 172 153 92 32 84 32"
+                }
+            ],
+            "utt2spk": "116-288047"
+        },
+        "116-288047-0009": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288047/116-288047-0009.flac",
+                    "name": "input1",
+                    "shape": [
+                        117760,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        55,
+                        258
+                    ],
+                    "text": "IT IS REFLECTION WHICH INTRODUCES A BIT INTO THE MOUTH OF IMAGINATION CURBING ITS PACE AND SUBDUING ITS RESTLESS SPIRIT",
+                    "token": "▁IT ▁IS ▁RE F LE C TION ▁WHICH ▁IN T R O D U CE S ▁A ▁B IT ▁INTO ▁THE ▁MO U TH ▁OF ▁I M A G IN ATION ▁C UR B ING ▁IT S ▁PA CE ▁AND ▁SU B D U ING ▁IT S ▁RE ST LE S S ▁SP IR IT",
+                    "tokenid": "172 171 212 34 55 19 91 251 169 88 79 69 24 92 20 84 108 119 48 170 231 189 92 90 198 167 60 4 37 43 17 128 96 18 44 172 84 207 20 114 226 18 24 92 44 172 84 212 87 55 84 84 224 46 48"
+                }
+            ],
+            "utt2spk": "116-288047"
+        },
+        "116-288047-0010": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288047/116-288047-0010.flac",
+                    "name": "input1",
+                    "shape": [
+                        113120,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        41,
+                        258
+                    ],
+                    "text": "WE FILL THE SPACE ABOUT AND OVER US WITH SPIRITS FAIRIES GODS AND OTHER INVISIBLE AND AIRY BEINGS",
+                    "token": "▁WE ▁F I LL ▁THE ▁SP A CE ▁ABOUT ▁AND ▁OVER ▁ US ▁WITH ▁SP IR IT S ▁FA I RI ES ▁GO D S ▁AND ▁OTHER ▁IN V I S I B LE ▁AND ▁A IR Y ▁BE ING S",
+                    "tokenid": "246 148 39 57 231 224 4 20 109 114 205 107 97 254 224 46 48 84 149 39 83 32 154 24 84 114 203 169 99 39 84 39 18 55 114 108 46 104 121 44 84"
+                }
+            ],
+            "utt2spk": "116-288047"
+        },
+        "116-288047-0011": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288047/116-288047-0011.flac",
+                    "name": "input1",
+                    "shape": [
+                        54800,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        18,
+                        258
+                    ],
+                    "text": "WE COVET THE RAINBOW WE REACH OUT FOR THE MOON",
+                    "token": "▁WE ▁CO VE T ▁THE ▁RA IN B OW ▁WE ▁RE A CH ▁OUT ▁FOR ▁THE ▁MO ON",
+                    "tokenid": "246 132 100 88 231 211 43 18 74 246 212 4 21 204 151 231 189 71"
+                }
+            ],
+            "utt2spk": "116-288047"
+        },
+        "116-288047-0012": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288047/116-288047-0012.flac",
+                    "name": "input1",
+                    "shape": [
+                        87040,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        44,
+                        258
+                    ],
+                    "text": "OUR FEET DO NOT REALLY BEGIN TO TOUCH THE FIRM GROUND UNTIL WE HAVE REACHED THE YEARS OF DISCRETION",
+                    "token": "▁O UR ▁FE ET ▁DO ▁NOT ▁RE AL LY ▁BE G IN ▁TO ▁TO U CH ▁THE ▁F IR M ▁G R O UND ▁UN T IL ▁WE ▁HAVE ▁RE A CH ED ▁THE ▁ Y E AR S ▁OF ▁DIS C RE TION",
+                    "tokenid": "197 96 150 33 141 195 212 8 59 121 37 43 237 237 92 21 231 148 46 60 153 79 69 95 239 88 42 246 160 212 4 21 26 231 107 104 25 12 84 198 140 19 81 91"
+                }
+            ],
+            "utt2spk": "116-288047"
+        },
+        "116-288047-0013": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288047/116-288047-0013.flac",
+                    "name": "input1",
+                    "shape": [
+                        45120,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        18,
+                        258
+                    ],
+                    "text": "SCIENCE WAS NOT BORN UNTIL MAN HAD MATURED",
+                    "token": "▁S C I ENCE ▁WAS ▁NOT ▁BO R N ▁UN T IL ▁MAN ▁HAD ▁MA T UR ED",
+                    "tokenid": "215 19 39 29 245 195 124 79 64 239 88 42 185 158 183 88 96 26"
+                }
+            ],
+            "utt2spk": "116-288047"
+        },
+        "116-288047-0014": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288047/116-288047-0014.flac",
+                    "name": "input1",
+                    "shape": [
+                        40080,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        17,
+                        258
+                    ],
+                    "text": "GROWN UP PEOPLE CREATE SCIENCE",
+                    "token": "▁G R OW N ▁UP ▁P E O P LE ▁C RE ATE ▁S C I ENCE",
+                    "tokenid": "153 79 74 64 240 206 25 69 75 55 128 81 16 215 19 39 29"
+                }
+            ],
+            "utt2spk": "116-288047"
+        },
+        "116-288047-0015": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288047/116-288047-0015.flac",
+                    "name": "input1",
+                    "shape": [
+                        62320,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        27,
+                        258
+                    ],
+                    "text": "THE CRADLE IS THE WOMB OF ALL THE FAIRIES AND FAITHS OF MANKIND",
+                    "token": "▁THE ▁C RA D LE ▁IS ▁THE ▁W OM B ▁OF ▁ALL ▁THE ▁FA I RI ES ▁AND ▁FA I TH S ▁OF ▁MAN K IN D",
+                    "tokenid": "231 128 80 24 55 171 231 243 70 18 198 112 231 149 39 83 32 114 149 39 90 84 198 185 52 43 24"
+                }
+            ],
+            "utt2spk": "116-288047"
+        },
+        "116-288047-0016": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288047/116-288047-0016.flac",
+                    "name": "input1",
+                    "shape": [
+                        41440,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        19,
+                        258
+                    ],
+                    "text": "THE SCHOOL IS THE BIRTHPLACE OF SCIENCE",
+                    "token": "▁THE ▁S CH O O L ▁IS ▁THE ▁B IR TH P LA CE ▁OF ▁S C I ENCE",
+                    "tokenid": "231 215 21 69 69 53 171 231 119 46 90 75 54 20 198 215 19 39 29"
+                }
+            ],
+            "utt2spk": "116-288047"
+        },
+        "116-288047-0017": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288047/116-288047-0017.flac",
+                    "name": "input1",
+                    "shape": [
+                        34880,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        15,
+                        258
+                    ],
+                    "text": "RELIGION IS THE SCIENCE OF THE CHILD",
+                    "token": "▁RE LI G ION ▁IS ▁THE ▁S C I ENCE ▁OF ▁THE ▁CH IL D",
+                    "tokenid": "212 56 37 45 171 231 215 19 39 29 198 231 130 42 24"
+                }
+            ],
+            "utt2spk": "116-288047"
+        },
+        "116-288047-0018": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288047/116-288047-0018.flac",
+                    "name": "input1",
+                    "shape": [
+                        82320,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        34,
+                        258
+                    ],
+                    "text": "IN THE DISCUSSION OF THIS SUBJECT I APPEAL TO THE MATURE NOT TO THE CHILD MIND",
+                    "token": "▁IN ▁THE ▁DIS C US S ION ▁OF ▁THIS ▁SU B J E CT ▁I ▁A PP E AL ▁TO ▁THE ▁MA T UR E ▁NOT ▁TO ▁THE ▁CH IL D ▁MI N D",
+                    "tokenid": "169 231 140 19 97 84 45 198 235 226 18 51 25 23 167 108 76 25 8 237 231 183 88 96 25 195 237 231 130 42 24 187 64 24"
+                }
+            ],
+            "utt2spk": "116-288047"
+        },
+        "116-288047-0019": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288047/116-288047-0019.flac",
+                    "name": "input1",
+                    "shape": [
+                        59040,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        24,
+                        258
+                    ],
+                    "text": "HE IS GOD'S MOUTHPIECE AND NO ONE MAY DISAGREE WITH HIM",
+                    "token": "▁HE ▁IS ▁GO D 'S ▁MO U TH P I E CE ▁AND ▁NO ▁ONE ▁MA Y ▁DIS A G RE E ▁WITH ▁HIM",
+                    "tokenid": "161 171 154 24 3 189 92 90 75 39 25 20 114 194 201 183 104 140 4 37 81 25 254 163"
+                }
+            ],
+            "utt2spk": "116-288047"
+        },
+        "116-288047-0020": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288047/116-288047-0020.flac",
+                    "name": "input1",
+                    "shape": [
+                        57120,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        26,
+                        258
+                    ],
+                    "text": "THE ONLY WAY I MAY COMMAND YOUR RESPECT IS TO BE REASONABLE",
+                    "token": "▁THE ▁ON LY ▁WA Y ▁I ▁MA Y ▁COM M AN D ▁YOU R ▁RE S P E CT ▁IS ▁TO ▁BE ▁RE AS ON ABLE",
+                    "tokenid": "231 200 59 244 104 167 183 104 133 60 9 24 256 79 212 84 75 25 23 171 237 121 212 14 71 5"
+                }
+            ],
+            "utt2spk": "116-288047"
+        },
+        "116-288047-0021": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288047/116-288047-0021.flac",
+                    "name": "input1",
+                    "shape": [
+                        61360,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        29,
+                        258
+                    ],
+                    "text": "LET US PLACE OURSELVES ENTIRELY IN THE HANDS OF THE EVIDENCE",
+                    "token": "▁LE T ▁ US ▁P LA CE ▁O UR S EL VE S ▁ ENT I RE LY ▁IN ▁THE ▁HAND S ▁OF ▁THE ▁E V I D ENCE",
+                    "tokenid": "177 88 107 97 206 54 20 197 96 84 27 100 84 107 30 39 81 59 169 231 159 84 198 231 143 99 39 24 29"
+                }
+            ],
+            "utt2spk": "116-288047"
+        },
+        "116-288047-0022": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288047/116-288047-0022.flac",
+                    "name": "input1",
+                    "shape": [
+                        258000,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        118,
+                        258
+                    ],
+                    "text": "AS INTELLIGENT BEINGS WE DESIRE TO KNOW WHETHER THIS JESUS WHOSE WORSHIP IS NOT ONLY COSTING THE WORLD MILLIONS OF THE PEOPLE'S MONEY BUT WHICH IS ALSO DRAWING TO HIS SERVICE THE TIME THE ENERGIES THE AFFECTION THE DEVOTION AND THE LABOR OF HUMANITY IS A MYTH OR A REALITY",
+                    "token": "▁AS ▁IN T EL LI G ENT ▁BE ING S ▁WE ▁DE S I RE ▁TO ▁KNOW ▁W H E TH ER ▁THIS ▁ J ES US ▁WHO SE ▁W OR S H I P ▁IS ▁NOT ▁ON LY ▁CO ST ING ▁THE ▁W OR L D ▁MI LL ION S ▁OF ▁THE ▁P E O P LE 'S ▁MO NE Y ▁BUT ▁WHICH ▁IS ▁A L S O ▁D RA W ING ▁TO ▁HIS ▁S ER V IC E ▁THE ▁TIME ▁THE ▁EN ER G I ES ▁THE ▁A FF E C TION ▁THE ▁DE V O TION ▁AND ▁THE ▁LA B OR ▁OF ▁HU M AN ITY ▁IS ▁A ▁MY TH ▁OR ▁A ▁RE AL ITY",
+                    "tokenid": "117 169 88 27 56 37 30 121 44 84 246 138 84 39 81 237 175 243 38 25 90 31 235 107 51 32 97 252 85 243 72 84 38 39 75 171 195 200 59 132 87 44 231 243 72 53 24 187 57 45 84 198 231 206 25 69 75 55 3 189 66 104 126 251 171 108 53 84 69 136 80 102 44 237 164 215 31 99 40 25 231 236 231 144 31 37 39 32 231 108 35 25 19 91 231 138 99 69 91 114 231 176 18 72 198 166 60 9 49 171 108 191 90 202 108 212 8 49"
+                }
+            ],
+            "utt2spk": "116-288047"
+        },
+        "116-288048-0000": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288048/116-288048-0000.flac",
+                    "name": "input1",
+                    "shape": [
+                        189040,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        89,
+                        258
+                    ],
+                    "text": "A NUMBER OF OTHER DATES WERE OBSERVED BY THE CHRISTIAN CHURCH AT VARIOUS TIMES AS THE BIRTHDAY OF JESUS THE GOSPELS GIVE NO DATE AND APPEAR TO BE QUITE UNCERTAIN REALLY IGNORANT ABOUT IT",
+                    "token": "▁A ▁ N U M B ER ▁OF ▁OTHER ▁D ATE S ▁WERE ▁O B S ER V ED ▁BY ▁THE ▁CH RI ST I AN ▁CH UR CH ▁AT ▁ V AR I O US ▁TIME S ▁AS ▁THE ▁B IR TH D A Y ▁OF ▁ J ES US ▁THE ▁GO S P EL S ▁G IVE ▁NO ▁D ATE ▁AND ▁A PP E AR ▁TO ▁BE ▁ QUI T E ▁UN C ER T A IN ▁RE AL LY ▁I G N OR ANT ▁ABOUT ▁IT",
+                    "tokenid": "108 107 64 92 60 18 31 198 203 136 16 84 247 197 18 84 31 99 26 127 231 130 83 87 39 9 130 96 21 118 107 99 12 39 69 97 236 84 117 231 119 46 90 24 4 104 198 107 51 32 97 231 154 84 75 27 84 153 50 194 136 16 114 108 76 25 12 237 121 107 78 88 25 239 19 31 88 4 43 212 8 59 167 37 64 72 11 109 172"
+                }
+            ],
+            "utt2spk": "116-288048"
+        },
+        "116-288048-0001": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288048/116-288048-0001.flac",
+                    "name": "input1",
+                    "shape": [
+                        48321,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        20,
+                        258
+                    ],
+                    "text": "YET THERE IS NO EVIDENCE THAT HE WAS BORN ON THAT DAY",
+                    "token": "▁ Y ET ▁THERE ▁IS ▁NO ▁E V I D ENCE ▁THAT ▁HE ▁WAS ▁BO R N ▁ON ▁THAT ▁DAY",
+                    "tokenid": "107 104 33 233 171 194 143 99 39 24 29 230 161 245 124 79 64 200 230 137"
+                }
+            ],
+            "utt2spk": "116-288048"
+        },
+        "116-288048-0002": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288048/116-288048-0002.flac",
+                    "name": "input1",
+                    "shape": [
+                        80400,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        34,
+                        258
+                    ],
+                    "text": "WHY THIS DISCREPANCY IN A HISTORICAL DOCUMENT TO SAY NOTHING ABOUT INSPIRATION",
+                    "token": "▁W H Y ▁THIS ▁DIS C RE P AN C Y ▁IN ▁A ▁HIS T OR IC AL ▁DO C U MENT ▁TO ▁SA Y ▁NOT H ING ▁ABOUT ▁IN S P IR ATION",
+                    "tokenid": "243 38 104 235 140 19 81 75 9 19 104 169 108 164 88 72 40 8 141 19 92 62 237 216 104 195 38 44 109 169 84 75 46 17"
+                }
+            ],
+            "utt2spk": "116-288048"
+        },
+        "116-288048-0003": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288048/116-288048-0003.flac",
+                    "name": "input1",
+                    "shape": [
+                        217920,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        102,
+                        258
+                    ],
+                    "text": "AGAIN MATTHEW SAYS THAT TO ESCAPE THE EVIL DESIGNS OF HEROD MARY AND JOSEPH WITH THE INFANT JESUS FLED INTO EGYPT LUKE SAYS NOTHING ABOUT THIS HURRIED FLIGHT NOR OF HEROD'S INTENTION TO KILL THE INFANT MESSIAH",
+                    "token": "▁AGAIN ▁MA T TH E W ▁SA Y S ▁THAT ▁TO ▁E S C A P E ▁THE ▁E V IL ▁DE S I G N S ▁OF ▁HER O D ▁MA R Y ▁AND ▁JO SE P H ▁WITH ▁THE ▁IN F ANT ▁ J ES US ▁F L ED ▁INTO ▁E G Y P T ▁ L U K E ▁SA Y S ▁NOT H ING ▁ABOUT ▁THIS ▁HU R RI ED ▁F L IGHT ▁NO R ▁OF ▁HER O D 'S ▁IN T EN TION ▁TO ▁K I LL ▁THE ▁IN F ANT ▁ME S S I A H",
+                    "tokenid": "111 183 88 90 25 102 216 104 84 230 237 143 84 19 4 75 25 231 143 99 42 138 84 39 37 64 84 198 162 69 24 183 79 104 114 173 85 75 38 254 231 169 34 11 107 51 32 97 148 53 26 170 143 37 104 75 88 107 53 92 52 25 216 104 84 195 38 44 109 235 166 79 83 26 148 53 41 194 79 198 162 69 24 3 169 88 28 91 237 174 39 57 231 169 34 11 186 84 84 39 4 38"
+                }
+            ],
+            "utt2spk": "116-288048"
+        },
+        "116-288048-0004": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288048/116-288048-0004.flac",
+                    "name": "input1",
+                    "shape": [
+                        74640,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        35,
+                        258
+                    ],
+                    "text": "WHEN WE COME TO THE MORE IMPORTANT CHAPTERS ABOUT JESUS WE MEET WITH GREATER DIFFICULTIES",
+                    "token": "▁WHEN ▁WE ▁COM E ▁TO ▁THE ▁MORE ▁I MP OR T ANT ▁CHA P TER S ▁ABOUT ▁ J ES US ▁WE ▁ME ET ▁WITH ▁GREAT ER ▁D I FF IC UL T I ES",
+                    "tokenid": "249 246 133 25 237 231 190 167 63 72 88 11 131 75 89 84 109 107 51 32 97 246 186 33 254 156 31 136 39 35 40 93 88 39 32"
+                }
+            ],
+            "utt2spk": "116-288048"
+        },
+        "116-288048-0005": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288048/116-288048-0005.flac",
+                    "name": "input1",
+                    "shape": [
+                        114000,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        63,
+                        258
+                    ],
+                    "text": "WHILE IT IS ALWAYS ON A FRIDAY THAT THE CRUCIFIXION IS COMMEMORATED THE WEEK IN WHICH THE DAY OCCURS VARIES FROM YEAR TO YEAR",
+                    "token": "▁WHI LE ▁IT ▁IS ▁A L W A Y S ▁ON ▁A ▁F RI D A Y ▁THAT ▁THE ▁C R U C I F I X ION ▁IS ▁COM ME M OR AT ED ▁THE ▁WE E K ▁IN ▁WHICH ▁THE ▁DAY ▁O C C UR S ▁ V AR I ES ▁FROM ▁ Y E AR ▁TO ▁ Y E AR",
+                    "tokenid": "250 55 172 171 108 53 102 4 104 84 200 108 148 83 24 4 104 230 231 128 79 92 19 39 34 39 103 45 171 133 61 60 72 15 26 231 246 25 52 169 251 231 137 197 19 19 96 84 107 99 12 39 32 152 107 104 25 12 237 107 104 25 12"
+                }
+            ],
+            "utt2spk": "116-288048"
+        },
+        "116-288048-0006": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288048/116-288048-0006.flac",
+                    "name": "input1",
+                    "shape": [
+                        215840,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        90,
+                        258
+                    ],
+                    "text": "GOOD FRIDAY FALLS NOT BEFORE THE SPRING EQUINOX BUT AS SOON AFTER THE SPRING EQUINOX AS THE FULL MOON ALLOWS THUS MAKING THE CALCULATION TO DEPEND UPON THE POSITION OF THE SUN IN THE ZODIAC AND THE PHASES OF THE MOON",
+                    "token": "▁GOOD ▁F RI D A Y ▁FA LL S ▁NOT ▁BEFORE ▁THE ▁SP R ING ▁E QUI N O X ▁BUT ▁AS ▁SO ON ▁AFTER ▁THE ▁SP R ING ▁E QUI N O X ▁AS ▁THE ▁F U LL ▁MO ON ▁ALL OW S ▁TH US ▁MA K ING ▁THE ▁CA L C UL ATION ▁TO ▁DE P EN D ▁UP ON ▁THE ▁PO S I TION ▁OF ▁THE ▁SU N ▁IN ▁THE ▁ Z O D I A C ▁AND ▁THE ▁P H AS ES ▁OF ▁THE ▁MO ON",
+                    "tokenid": "155 148 83 24 4 104 149 57 84 195 123 231 224 79 44 143 78 64 69 103 126 117 222 71 110 231 224 79 44 143 78 64 69 103 117 231 148 92 57 189 71 112 74 84 228 97 183 52 44 231 129 53 19 93 17 237 138 75 28 24 240 71 231 208 84 39 91 198 231 226 64 169 231 107 105 69 24 39 4 19 114 231 206 38 14 32 198 231 189 71"
+                }
+            ],
+            "utt2spk": "116-288048"
+        },
+        "116-288048-0007": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288048/116-288048-0007.flac",
+                    "name": "input1",
+                    "shape": [
+                        51920,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        23,
+                        258
+                    ],
+                    "text": "THE PAGAN OESTERA HAS BECOME THE CHRISTIAN EASTER",
+                    "token": "▁THE ▁PA G AN ▁O ES TER A ▁HA S ▁BE C O ME ▁THE ▁CH RI ST I AN ▁E AS TER",
+                    "tokenid": "231 207 37 9 197 32 89 4 157 84 121 19 69 61 231 130 83 87 39 9 143 14 89"
+                }
+            ],
+            "utt2spk": "116-288048"
+        },
+        "116-288048-0008": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288048/116-288048-0008.flac",
+                    "name": "input1",
+                    "shape": [
+                        120160,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        56,
+                        258
+                    ],
+                    "text": "BUT IN THE ABSENCE OF EVIDENCE ORIGIN OFFERS THE FOLLOWING METAPHYSICAL ARGUMENTS AGAINST THE SCEPTICAL CELSUS ONE",
+                    "token": "▁BUT ▁IN ▁THE ▁A B S ENCE ▁OF ▁E V I D ENCE ▁OR I G IN ▁OF F ER S ▁THE ▁F O LL OW ING ▁ME T A P H Y S IC AL ▁A R G U MENT S ▁AGAIN ST ▁THE ▁S CE P T IC AL ▁C EL S US ▁ONE",
+                    "tokenid": "126 169 231 108 18 84 29 198 143 99 39 24 29 202 39 37 43 198 34 31 84 231 148 69 57 74 44 186 88 4 75 38 104 84 40 8 108 79 37 92 62 84 111 87 231 215 20 75 88 40 8 128 27 84 97 201"
+                }
+            ],
+            "utt2spk": "116-288048"
+        },
+        "116-288048-0009": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288048/116-288048-0009.flac",
+                    "name": "input1",
+                    "shape": [
+                        111760,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        48,
+                        258
+                    ],
+                    "text": "IF WE ARE TO HAVE ANY MYTHOLOGY AT ALL HE SEEMS TO ARGUE WHY OBJECT TO ADDING TO IT THE MYTHUS OF JESUS",
+                    "token": "▁IF ▁WE ▁ARE ▁TO ▁HAVE ▁ANY ▁MY TH O LO G Y ▁AT ▁ALL ▁HE ▁SEE M S ▁TO ▁A R G U E ▁W H Y ▁O B J E CT ▁TO ▁A D D ING ▁TO ▁IT ▁THE ▁MY TH US ▁OF ▁ J ES US",
+                    "tokenid": "168 246 116 237 160 115 191 90 69 58 37 104 118 112 161 218 60 84 237 108 79 37 92 25 243 38 104 197 18 51 25 23 237 108 24 24 44 237 172 231 191 90 97 198 107 51 32 97"
+                }
+            ],
+            "utt2spk": "116-288048"
+        },
+        "116-288048-0010": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288048/116-288048-0010.flac",
+                    "name": "input1",
+                    "shape": [
+                        87600,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        39,
+                        258
+                    ],
+                    "text": "THE IMMEDIATE COMPANIONS OF JESUS APPEAR TO BE ON THE OTHER HAND AS MYTHICAL AS HE IS HIMSELF",
+                    "token": "▁THE ▁I M M ED I ATE ▁COM P AN ION S ▁OF ▁ J ES US ▁A PP E AR ▁TO ▁BE ▁ON ▁THE ▁OTHER ▁HAND ▁AS ▁MY TH IC AL ▁AS ▁HE ▁IS ▁HIM S EL F",
+                    "tokenid": "231 167 60 60 26 39 16 133 75 9 45 84 198 107 51 32 97 108 76 25 12 237 121 200 231 203 159 117 191 90 40 8 117 161 171 163 84 27 34"
+                }
+            ],
+            "utt2spk": "116-288048"
+        },
+        "116-288048-0011": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288048/116-288048-0011.flac",
+                    "name": "input1",
+                    "shape": [
+                        44320,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        12,
+                        258
+                    ],
+                    "text": "WHO WAS MATTHEW WHO WAS MARK",
+                    "token": "▁WHO ▁WAS ▁MA T TH E W ▁WHO ▁WAS ▁MA R K",
+                    "tokenid": "252 245 183 88 90 25 102 252 245 183 79 52"
+                }
+            ],
+            "utt2spk": "116-288048"
+        },
+        "116-288048-0012": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288048/116-288048-0012.flac",
+                    "name": "input1",
+                    "shape": [
+                        69360,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        17,
+                        258
+                    ],
+                    "text": "WHO WERE JOHN PETER JUDAS AND MARY",
+                    "token": "▁WHO ▁WERE ▁JO H N ▁P E TER ▁ J U D AS ▁AND ▁MA R Y",
+                    "tokenid": "252 247 173 38 64 206 25 89 107 51 92 24 14 114 183 79 104"
+                }
+            ],
+            "utt2spk": "116-288048"
+        },
+        "116-288048-0013": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288048/116-288048-0013.flac",
+                    "name": "input1",
+                    "shape": [
+                        57440,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        24,
+                        258
+                    ],
+                    "text": "THERE IS ABSOLUTELY NO EVIDENCE THAT THEY EVER EXISTED",
+                    "token": "▁THERE ▁IS ▁A B S O L UT E LY ▁NO ▁E V I D ENCE ▁THAT ▁THEY ▁E VER ▁EX I ST ED",
+                    "tokenid": "233 171 108 18 84 69 53 98 25 59 194 143 99 39 24 29 230 234 143 101 147 39 87 26"
+                }
+            ],
+            "utt2spk": "116-288048"
+        },
+        "116-288048-0014": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288048/116-288048-0014.flac",
+                    "name": "input1",
+                    "shape": [
+                        88000,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        40,
+                        258
+                    ],
+                    "text": "IF PETER EVER WENT TO ROME WITH A NEW DOCTRINE HOW IS IT THAT NO HISTORIAN HAS TAKEN NOTE OF HIM",
+                    "token": "▁IF ▁P E TER ▁E VER ▁W ENT ▁TO ▁RO ME ▁WITH ▁A ▁NE W ▁DO CT RI NE ▁HO W ▁IS ▁IT ▁THAT ▁NO ▁HIS T OR I AN ▁HA S ▁T A K EN ▁NOT E ▁OF ▁HIM",
+                    "tokenid": "168 206 25 89 143 101 243 30 237 213 61 254 108 193 102 141 23 83 66 165 102 171 172 230 194 164 88 72 39 9 157 84 227 4 52 28 195 25 198 163"
+                }
+            ],
+            "utt2spk": "116-288048"
+        },
+        "116-288048-0015": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288048/116-288048-0015.flac",
+                    "name": "input1",
+                    "shape": [
+                        38959,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        13,
+                        258
+                    ],
+                    "text": "HERE AGAIN WE SEE THE PRESENCE OF A MYTH",
+                    "token": "▁HER E ▁AGAIN ▁WE ▁SEE ▁THE ▁PRE S ENCE ▁OF ▁A ▁MY TH",
+                    "tokenid": "162 25 111 246 218 231 209 84 29 198 108 191 90"
+                }
+            ],
+            "utt2spk": "116-288048"
+        },
+        "116-288048-0016": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288048/116-288048-0016.flac",
+                    "name": "input1",
+                    "shape": [
+                        34800,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        11,
+                        258
+                    ],
+                    "text": "HE WAS THE ONLY ONE WHO SAW THEM",
+                    "token": "▁HE ▁WAS ▁THE ▁ON LY ▁ONE ▁WHO ▁SA W ▁THE M",
+                    "tokenid": "161 245 231 200 59 201 252 216 102 231 60"
+                }
+            ],
+            "utt2spk": "116-288048"
+        },
+        "116-288048-0017": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288048/116-288048-0017.flac",
+                    "name": "input1",
+                    "shape": [
+                        113440,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        38,
+                        258
+                    ],
+                    "text": "PETER PAUL JOHN JAMES JUDAS OCCUPY THE STAGE ALMOST EXCLUSIVELY",
+                    "token": "▁P E TER ▁PA UL ▁JO H N ▁ J A ME S ▁ J U D AS ▁O C C U P Y ▁THE ▁ST AGE ▁A L M O ST ▁EX C L US IVE LY",
+                    "tokenid": "206 25 89 207 93 173 38 64 107 51 4 61 84 107 51 92 24 14 197 19 19 92 75 104 231 225 7 108 53 60 69 87 147 19 53 97 50 59"
+                }
+            ],
+            "utt2spk": "116-288048"
+        },
+        "116-288048-0018": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288048/116-288048-0018.flac",
+                    "name": "input1",
+                    "shape": [
+                        132560,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        59,
+                        258
+                    ],
+                    "text": "IT IS IMPOSSIBLE TO EXPLAIN WHY THE CONTEMPORARIES OF JESUS THE AUTHORS AND HISTORIANS OF HIS TIME DO NOT TAKE NOTICE OF HIM",
+                    "token": "▁IT ▁IS ▁I MP O S S I B LE ▁TO ▁EX P LA IN ▁W H Y ▁THE ▁CON T E MP OR AR I ES ▁OF ▁ J ES US ▁THE ▁A U TH OR S ▁AND ▁HIS T OR I AN S ▁OF ▁HIS ▁TIME ▁DO ▁NOT ▁T A K E ▁NOT IC E ▁OF ▁HIM",
+                    "tokenid": "172 171 167 63 69 84 84 39 18 55 237 147 75 54 43 243 38 104 231 134 88 25 63 72 12 39 32 198 107 51 32 97 231 108 92 90 72 84 114 164 88 72 39 9 84 198 164 236 141 195 227 4 52 25 195 40 25 198 163"
+                }
+            ],
+            "utt2spk": "116-288048"
+        },
+        "116-288048-0019": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288048/116-288048-0019.flac",
+                    "name": "input1",
+                    "shape": [
+                        46320,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        16,
+                        258
+                    ],
+                    "text": "COULD THEY HAVE BEEN IN A CONSPIRACY AGAINST HIM",
+                    "token": "▁COULD ▁THEY ▁HAVE ▁BEEN ▁IN ▁A ▁CON S P I RA C Y ▁AGAIN ST ▁HIM",
+                    "tokenid": "135 234 160 122 169 108 134 84 75 39 80 19 104 111 87 163"
+                }
+            ],
+            "utt2spk": "116-288048"
+        },
+        "116-288048-0020": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288048/116-288048-0020.flac",
+                    "name": "input1",
+                    "shape": [
+                        60880,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        26,
+                        258
+                    ],
+                    "text": "HOW ELSE IS THIS UNANIMOUS SILENCE TO BE ACCOUNTED FOR",
+                    "token": "▁HO W ▁ EL SE ▁IS ▁THIS ▁UN AN I M O US ▁S IL ENCE ▁TO ▁BE ▁A C C O UN T ED ▁FOR",
+                    "tokenid": "165 102 107 27 85 171 235 239 9 39 60 69 97 215 42 29 237 121 108 19 19 69 94 88 26 151"
+                }
+            ],
+            "utt2spk": "116-288048"
+        },
+        "116-288048-0021": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288048/116-288048-0021.flac",
+                    "name": "input1",
+                    "shape": [
+                        109200,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        51,
+                        258
+                    ],
+                    "text": "HOW THEN ARE WE TO DECIDE WHICH OF THE NUMEROUS CANDIDATES FOR DIVINE HONORS SHOULD BE GIVEN OUR VOTES",
+                    "token": "▁HO W ▁THE N ▁ARE ▁WE ▁TO ▁DE C I D E ▁WHICH ▁OF ▁THE ▁ N U M ER O US ▁CA N D I D ATE S ▁FOR ▁D I V IN E ▁HO N OR S ▁SHOULD ▁BE ▁G IVE N ▁O UR ▁ V O T ES",
+                    "tokenid": "165 102 231 64 116 246 237 138 19 39 24 25 251 198 231 107 64 92 60 31 69 97 129 64 24 39 24 16 84 151 136 39 99 43 25 165 64 72 84 221 121 153 50 64 197 96 107 99 69 88 32"
+                }
+            ],
+            "utt2spk": "116-288048"
+        },
+        "116-288048-0022": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288048/116-288048-0022.flac",
+                    "name": "input1",
+                    "shape": [
+                        113760,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        46,
+                        258
+                    ],
+                    "text": "AND SUCH A FAITH IS NEVER FREE IT IS ALWAYS MAINTAINED BY THE SWORD NOW AND BY HELL FIRE HEREAFTER",
+                    "token": "▁AND ▁SU CH ▁A ▁FA I TH ▁IS ▁NE VER ▁F RE E ▁IT ▁IS ▁A L W A Y S ▁MA IN T A IN ED ▁BY ▁THE ▁S W OR D ▁NOW ▁AND ▁BY ▁HE LL ▁F I RE ▁HER E A F TER",
+                    "tokenid": "114 226 21 108 149 39 90 171 193 101 148 81 25 172 171 108 53 102 4 104 84 183 43 88 4 43 26 127 231 215 102 72 24 196 114 127 161 57 148 39 81 162 25 4 34 89"
+                }
+            ],
+            "utt2spk": "116-288048"
+        },
+        "116-288048-0023": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288048/116-288048-0023.flac",
+                    "name": "input1",
+                    "shape": [
+                        52400,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        30,
+                        258
+                    ],
+                    "text": "YET THE MOST IMPOSSIBLE UTTERANCES ARE PUT IN JESUS MOUTH",
+                    "token": "▁ Y ET ▁THE ▁MO ST ▁I MP O S S I B LE ▁ UT TER ANCE S ▁ARE ▁P UT ▁IN ▁ J ES US ▁MO U TH",
+                    "tokenid": "107 104 33 231 189 87 167 63 69 84 84 39 18 55 107 98 89 10 84 116 206 98 169 107 51 32 97 189 92 90"
+                }
+            ],
+            "utt2spk": "116-288048"
+        },
+        "116-288048-0024": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288048/116-288048-0024.flac",
+                    "name": "input1",
+                    "shape": [
+                        126480,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        55,
+                        258
+                    ],
+                    "text": "ONLY A MYTHICAL JESUS COULD VIRTUALLY HAND OVER THE GOVERNMENT OF THE UNIVERSE TO COURTIERS WHO HAVE PETITIONS TO PRESS UPON HIS ATTENTION",
+                    "token": "▁ON LY ▁A ▁MY TH IC AL ▁ J ES US ▁COULD ▁VI R T U AL LY ▁HAND ▁OVER ▁THE ▁GO VER N MENT ▁OF ▁THE ▁UN I VER SE ▁TO ▁CO UR T I ER S ▁WHO ▁HAVE ▁P ET I TION S ▁TO ▁P RESS ▁UP ON ▁HIS ▁AT T EN TION",
+                    "tokenid": "200 59 108 191 90 40 8 107 51 32 97 135 242 79 88 92 8 59 159 205 231 154 101 64 62 198 231 239 39 101 85 237 132 96 88 39 31 84 252 160 206 33 39 91 84 237 206 82 240 71 164 118 88 28 91"
+                }
+            ],
+            "utt2spk": "116-288048"
+        },
+        "116-288048-0025": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288048/116-288048-0025.flac",
+                    "name": "input1",
+                    "shape": [
+                        317760,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        106,
+                        258
+                    ],
+                    "text": "MOREOVER IF JESUS COULD KEEP HIS PROMISE THERE WOULD BE TODAY NO MISERY IN THE WORLD NO ORPHANS NO CHILDLESS MOTHERS NO SHIPWRECKS NO FLOODS NO FAMINES NO DISEASE NO CRIPPLED CHILDREN NO INSANITY NO WARS NO CRIME NO WRONG",
+                    "token": "▁MORE O VER ▁IF ▁ J ES US ▁COULD ▁K E E P ▁HIS ▁PRO M I SE ▁THERE ▁WOULD ▁BE ▁TO D A Y ▁NO ▁MI S ER Y ▁IN ▁THE ▁W OR L D ▁NO ▁OR P H AN S ▁NO ▁CH IL D LE S S ▁MO TH ER S ▁NO ▁SH I P W RE CK S ▁NO ▁F LO O D S ▁NO ▁FA M IN ES ▁NO ▁DIS E A SE ▁NO ▁C RI PP L ED ▁CH IL D R EN ▁NO ▁IN S AN ITY ▁NO ▁W AR S ▁NO ▁C RI ME ▁NO ▁W R O NG",
+                    "tokenid": "190 69 101 168 107 51 32 97 135 174 25 25 75 164 210 60 39 85 233 255 121 237 24 4 104 194 187 84 31 104 169 231 243 72 53 24 194 202 75 38 9 84 194 130 42 24 55 84 84 189 90 31 84 194 219 39 75 102 81 22 84 194 148 58 69 24 84 194 149 60 43 32 194 140 25 4 85 194 128 83 76 53 26 130 42 24 79 28 194 169 84 9 49 194 243 12 84 194 128 83 61 194 243 79 69 68"
+                }
+            ],
+            "utt2spk": "116-288048"
+        },
+        "116-288048-0026": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288048/116-288048-0026.flac",
+                    "name": "input1",
+                    "shape": [
+                        32800,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        14,
+                        258
+                    ],
+                    "text": "HAVE THESE PRAYERS BEEN ANSWERED",
+                    "token": "▁HAVE ▁THE SE ▁P RA Y ER S ▁BEEN ▁AN S W ER ED",
+                    "tokenid": "160 231 85 206 80 104 31 84 122 113 84 102 31 26"
+                }
+            ],
+            "utt2spk": "116-288048"
+        },
+        "116-288048-0027": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288048/116-288048-0027.flac",
+                    "name": "input1",
+                    "shape": [
+                        66240,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        37,
+                        258
+                    ],
+                    "text": "HOW MANY SELF DELUDED PROPHETS THESE EXTRAVAGANT CLAIMS HAVE PRODUCED",
+                    "token": "▁HO W ▁MAN Y ▁S EL F ▁DE L U D ED ▁PRO P H ET S ▁THE SE ▁EX T RA V A G ANT ▁C LA I M S ▁HAVE ▁PRO D U C ED",
+                    "tokenid": "165 102 185 104 215 27 34 138 53 92 24 26 210 75 38 33 84 231 85 147 88 80 99 4 37 11 128 54 39 60 84 160 210 24 92 19 26"
+                }
+            ],
+            "utt2spk": "116-288048"
+        },
+        "116-288048-0028": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288048/116-288048-0028.flac",
+                    "name": "input1",
+                    "shape": [
+                        75360,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        41,
+                        258
+                    ],
+                    "text": "AND WHO CAN NUMBER THE BITTER DISAPPOINTMENTS CAUSED BY SUCH IMPOSSIBLE PROMISES",
+                    "token": "▁AND ▁WHO ▁CA N ▁ N U M B ER ▁THE ▁B IT TER ▁DIS A PP O IN T MENT S ▁CA US ED ▁BY ▁SU CH ▁I MP O S S I B LE ▁PRO M I S ES",
+                    "tokenid": "114 252 129 64 107 64 92 60 18 31 231 119 48 89 140 4 76 69 43 88 62 84 129 97 26 127 226 21 167 63 69 84 84 39 18 55 210 60 39 84 32"
+                }
+            ],
+            "utt2spk": "116-288048"
+        },
+        "116-288048-0029": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288048/116-288048-0029.flac",
+                    "name": "input1",
+                    "shape": [
+                        199280,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        83,
+                        258
+                    ],
+                    "text": "THE SAME WHICH THE PREACHERS OF TODAY GIVE HE PARRIED HIS ANSWER WITH MANY WORDS AND AT LENGTH SAID THAT THE PROMISE WAS TO BE TAKEN WITH THE PROVISION THAT WHAT WE ASKED FOR WOULD BE GIVEN IF GOD THOUGHT IT FOR OUR GOOD",
+                    "token": "▁THE ▁SA ME ▁WHICH ▁THE ▁PRE A CH ER S ▁OF ▁TO D A Y ▁G IVE ▁HE ▁P AR RI ED ▁HIS ▁AN S W ER ▁WITH ▁MAN Y ▁W OR D S ▁AND ▁AT ▁LE NG TH ▁SAID ▁THAT ▁THE ▁PRO M I SE ▁WAS ▁TO ▁BE ▁T A K EN ▁WITH ▁THE ▁PRO V I S ION ▁THAT ▁WHAT ▁WE ▁AS K ED ▁FOR ▁WOULD ▁BE ▁G IVE N ▁IF ▁GO D ▁TH OUGH T ▁IT ▁FOR ▁O UR ▁GOOD",
+                    "tokenid": "231 216 61 251 231 209 4 21 31 84 198 237 24 4 104 153 50 161 206 12 83 26 164 113 84 102 31 254 185 104 243 72 24 84 114 118 177 68 90 217 230 231 210 60 39 85 245 237 121 227 4 52 28 254 231 210 99 39 84 45 230 248 246 117 52 26 151 255 121 153 50 64 168 154 24 228 73 88 172 151 197 96 155"
+                }
+            ],
+            "utt2spk": "116-288048"
+        },
+        "116-288048-0030": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288048/116-288048-0030.flac",
+                    "name": "input1",
+                    "shape": [
+                        123200,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        33,
+                        258
+                    ],
+                    "text": "BUT HE SAID IF YE ASK ANYTHING IN MY NAME I WILL DO IT AND IF IT WERE NOT SO I WOULD HAVE TOLD YOU",
+                    "token": "▁BUT ▁HE ▁SAID ▁IF ▁ Y E ▁AS K ▁ANY TH ING ▁IN ▁MY ▁NA ME ▁I ▁WILL ▁DO ▁IT ▁AND ▁IF ▁IT ▁WERE ▁NOT ▁SO ▁I ▁WOULD ▁HAVE ▁TO L D ▁YOU",
+                    "tokenid": "126 161 217 168 107 104 25 117 52 115 90 44 169 191 192 61 167 253 141 172 114 168 172 247 195 222 167 255 160 237 53 24 256"
+                }
+            ],
+            "utt2spk": "116-288048"
+        },
+        "116-288048-0031": {
+            "input": [
+                {
+                    "feat": "/home/seekingeta/marcoyang/espnet/egs/librispeech/asr1/downloads/LibriSpeech/dev-other/116/288048/116-288048-0031.flac",
+                    "name": "input1",
+                    "shape": [
+                        35760,
+                        1
+                    ],
+                    "filetype": "flac"
+                }
+            ],
+            "output": [
+                {
+                    "name": "target1",
+                    "shape": [
+                        12,
+                        258
+                    ],
+                    "text": "DID HE NOT MEAN JUST WHAT HE SAID",
+                    "token": "▁DID ▁HE ▁NOT ▁ME AN ▁ J US T ▁WHAT ▁HE ▁SAID",
+                    "tokenid": "139 161 195 186 9 107 51 97 88 248 161 217"
+                }
+            ],
+            "utt2spk": "116-288048"
+        }
+    }
+}
