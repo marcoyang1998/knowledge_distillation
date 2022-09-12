@@ -27,7 +27,9 @@ def add_arguments_rnn_encoder_common(group):
             "vggbgrup",
             "vgggru",
             "vggbgru",
-            "wav2vec"
+            "wav2vec",
+            "wavlm",
+            "hubert",
         ],
         help="Type of encoder network architecture",
     )
